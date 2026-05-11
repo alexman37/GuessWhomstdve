@@ -1,0 +1,677 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+
+/// <summary>
+/// The database of characters.
+/// How it works at a high level: We don't actually store data for any characters, besides the ones we are showing.
+/// We can load a character exactly as they should be by unpacking their "simulated ID"...more on that below.
+/// </summary>
+public class Roster
+{
+    const int TOTAL_ROSTER_PERMUTATIONS = 999999; // How many different rosters can there be?
+    private int rosterSeedOffset;                 // offset every random seed by this amount. It makes each new game unique.
+
+    public int simulatedTotalRosterSize = 1; // total number of "characters" we're working with
+    private int simulatedCurrentRosterSize = 1; // total number of characters given constraints
+
+    public List<Character> shownRoster; // all characters currently being displayed on the screen.
+    public List<Sprite> shownRosterSprites; // the sprites of the currently shown characters (for fast access).
+    public HashSet<int> currentRosterIDs; // the simulated IDs of all characters we are currently showing.
+
+    private HashSet<int> charactersGuessedAsTarget;  // all characters the player has guessed as the target (never show them again)
+
+    // Each agent has their own set of roster constraints they will apply to the general roster.
+
+    public static List<CPD> cpdInstances;      // All CPD singletons
+    public static List<CPD> cpdConstrainables; // Only the constrainable CPDs (packaged in sim ID, in this order)
+    public static Dictionary<CPD_Type, CPD> cpdByType; // get CPD singleton by type
+    protected static List<int> cpdCounts; // optimization for simulated ID unpacking
+    protected static List<int> simIDtourGuide; // the first CPD should be multiplied by index 0...the second by index 1...etc. to get sim ID.
+
+    public int targetId; // the ID of the person everyone wants to find
+    private Character targetAsChar;
+
+    // You can sort the roster by common constraints that all players have, or just your own.
+    public RosterConstraints commonConstraints = new RosterConstraints();
+    public bool withCommonConstraints = true;
+
+    // Actions
+    public static event Action rosterReady;
+    public static event Action<int> constrainedResult;
+    public static event Action clearAllConstraints;
+    public static event Action<int> guessedWrongCharacter;
+
+
+    // Optimization for "get Random simulated ID":
+    // In that function, if we fail to get a random ID by lucky chance several times, we do an exhaustive search through all possible sim IDs
+    // Since it has to be done in order, we save our position in the search here...so if we need more sim IDs we can pick up where we left off.
+    protected static bool lastResortSearch = false;
+    protected static int savedCPD = 0;
+    protected static int savedMod = 0;
+    protected static List<int> newSimIdModifiers;
+    protected static List<int> allSimIdModifiers;
+
+    // Most of this is first-time setup only
+    public Roster()
+    {
+        if (constrainedResult == null) constrainedResult += (_) => { };
+        if (rosterReady == null) rosterReady += () => { };
+        if (clearAllConstraints == null) clearAllConstraints += () => { };
+        if (guessedWrongCharacter == null) guessedWrongCharacter += (_) => { };
+
+        ClueCard.clueCardDeclassified += onClueCardDeclassified;
+        CharacterCard.charCardClicked += GuessedCharacterAsTarget;
+
+        // No need to recreate CPDs on each load
+        if(cpdInstances == null)
+        {
+            cpdInstances = new List<CPD>
+            {
+                new CPD_FilePath(CPD_Type.HairStyle, true, "properties/hairStyles", "CharSprites64/Hair/"),
+                new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones"),
+                new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones"),
+                new CPD_FilePath(CPD_Type.BodyType, true, "properties/bodyTypes", "CharSprites64/Body/"),
+                new CPD_FilePath(CPD_Type.Face, false, "properties/faceTypes", "CharSprites64/Face/"),
+                new CPD_FilePath(CPD_Type.HeadType, false, "properties/headTypes", "CharSprites64/Head/"),
+                new CPD_FilePath(CPD_Type.Test1, true, "properties/testType", null),
+                new CPD_FilePath(CPD_Type.Test2, true, "properties/testType", null),
+                new CPD_FilePath(CPD_Type.Test3, true, "properties/testType", null),
+                new CPD_FilePath(CPD_Type.Test4, true, "properties/testType", null),
+                new CPD_FilePath(CPD_Type.Test5, true, "properties/testType", null),
+                new CPD_FilePath(CPD_Type.Test6, true, "properties/testType", null),
+            };
+            cpdConstrainables = new List<CPD>();
+            cpdCounts = new List<int>();
+            cpdByType = new Dictionary<CPD_Type, CPD>();
+            simIDtourGuide = new List<int>();
+            currentRosterIDs = new HashSet<int>();
+            charactersGuessedAsTarget = new HashSet<int>();
+
+            // Set constrainables list
+            for (int c = 0; c < cpdInstances.Count; c++)
+            {
+                if (cpdInstances[c].constrainable)
+                {
+                    cpdConstrainables.Add(cpdInstances[c]);
+                }
+                cpdByType.Add(cpdInstances[c].cpdType, cpdInstances[c]);
+            }
+            // Set helpers for constrainables list
+            for(int c = 0; c < cpdConstrainables.Count; c++)
+            {
+                int nextOffset = 1;
+                cpdCounts.Add(cpdConstrainables[c].categories.Count);
+                simulatedTotalRosterSize *= cpdConstrainables[c].categories.Count;
+
+                for (int x = c + 1; x < cpdConstrainables.Count; x++)
+                {
+                    nextOffset *= cpdConstrainables[x].categories.Count;
+                }
+                simIDtourGuide.Add(nextOffset);
+            }
+        }
+
+        // Build common constraints
+        commonConstraints.clearAllConstraints(true);
+        RosterConstraints.NO_CONSTRAINTS.clearAllConstraints(true);
+
+        simulatedCurrentRosterSize = simulatedTotalRosterSize;
+
+        createRoster();
+    }
+
+    ~Roster()
+    {
+        ClueCard.clueCardDeclassified -= onClueCardDeclassified;
+        CharacterCard.charCardClicked -= GuessedCharacterAsTarget;
+    }
+
+    /// <summary>
+    /// Called each time you start a new game.
+    /// </summary>
+    public void createRoster()
+    {
+        rosterSeedOffset = UnityEngine.Random.Range(0, TOTAL_ROSTER_PERMUTATIONS);
+        if (shownRoster != null)
+        {
+            shownRoster.Clear();
+            shownRosterSprites.Clear();
+        } else
+        {
+            shownRoster = new List<Character>();
+            shownRosterSprites = new List<Sprite>();
+        }
+
+        clearAllConstraints.Invoke();
+        applyConstraints(RosterConstraints.NO_CONSTRAINTS);
+
+        // First list generation
+        for (int i = 0; i <= UI_Roster.CHARACTERS_TO_SHOW; i++)
+        {
+            int simId = SimulatedID.getRandomSimulatedID(RosterConstraints.NO_CONSTRAINTS, currentRosterIDs, simulatedCurrentRosterSize);
+
+            shownRoster.Add(new Character(i, simId));
+
+            //Debug.Log("roster gen " + roster[i]);
+            shownRosterSprites.Add(CharSpriteGen.genSpriteFromLayers(shownRoster[i]));
+            currentRosterIDs.Add(simId);
+        }
+
+        lastResortSearch = false;
+        savedCPD = 0;
+        savedMod = 0;
+
+        targetId = UnityEngine.Random.Range(0, simulatedTotalRosterSize - 1);
+        targetAsChar = new Character(-1, targetId);
+
+        rosterReady.Invoke();
+    }
+
+    public void setCommonConstraints(bool withCommon)
+    {
+        withCommonConstraints = withCommon;
+        if(withCommon)
+        {
+            applyConstraints(commonConstraints);
+        } else
+        {
+            applyConstraints(PlayerAgent.instance.rosterConstraints);
+        }
+        redrawRosterVis();
+    }
+
+    public void onClueCardDeclassified(ClueCard cc)
+    {
+        commonConstraints.addConstraint(cc.cpdType, cc.category, false);
+        if(withCommonConstraints)
+        {
+            redrawRosterVis();
+        }
+    }
+
+    /// <summary>
+    /// Return a list of all the target's CPD stuff
+    /// </summary>
+    /// <returns></returns>
+    public List<CPD_Variant> getTargetAsCPDs()
+    {
+        return SimulatedID.unpackSimulatedID(targetId);
+    }
+
+    /// <summary>
+    /// Return a list of the target as a Character instance
+    /// </summary>
+    public Character getTargetAsCharacter()
+    {
+        return targetAsChar;
+    }
+
+    public bool targetHasProperty(CPD_Type cpdType, string cat)
+    {
+        return targetAsChar.getCategoryofCharacteristic(cpdType) == cat;
+    }
+
+
+    /// <summary>
+    /// Redraw the roster with new characters meeting constraints
+    /// </summary>
+    public void redrawRosterVis()
+    {
+        RosterConstraints currConstraints;
+        if (withCommonConstraints)
+        {
+            currConstraints = commonConstraints;
+        } else
+        {
+            currConstraints = PlayerAgent.instance.rosterConstraints;
+        }
+
+        applyConstraints(currConstraints);
+        
+        List<Character> newShownRoster = new List<Character>();
+        int size = Mathf.Min(UI_Roster.CHARACTERS_TO_SHOW, simulatedCurrentRosterSize);
+
+        // Characters to show: first, choose any from the currently shown roster we'd like to keep.
+        int count = 0;
+        currentRosterIDs.Clear();
+        currentRosterIDs = new HashSet<int>(charactersGuessedAsTarget);
+        for (int i = 0; i < Mathf.Min(UI_Roster.CHARACTERS_TO_SHOW, shownRoster.Count) && count < size; i++)
+        {
+            // If we already guessed this character, do not allow it to be added to the roster view again
+            if (charactersGuessedAsTarget.Contains(shownRoster[i].simulatedId))
+            {
+                // pass
+            }
+            // If the character is unguessed and still meets constraints, keep it around
+            else if (SimulatedID.idMeetsConstraints(shownRoster[i].simulatedId, currConstraints))
+            {
+                currentRosterIDs.Add(shownRoster[i].simulatedId);
+                newShownRoster.Add(shownRoster[i]);
+                shownRosterSprites[count] = shownRosterSprites[i];
+                count++;
+            } 
+            // If the character no longer meets constraints, remove it
+            else
+            {
+                currentRosterIDs.Remove(shownRoster[i].simulatedId);
+            }
+        }
+
+        shownRoster = newShownRoster;
+        for (int i = count; i < size; i++)
+        {
+            int simId = SimulatedID.getRandomSimulatedID(currConstraints, currentRosterIDs, simulatedCurrentRosterSize);
+
+
+            // When targets have been manually guessed, we don't show them anymore
+            // If a guessed target still meets all constraints, it will pass all checks but we don't want to show it.
+            // This leads to getRandomSimulatedID failing to find the final characters and returning -1
+            // It always short circuits when all other possibilities are exhausted - so we know just how many failed.
+            if (simId == -1)
+            {
+                simulatedCurrentRosterSize = i;
+                Debug.LogWarning("Shortened size is now " + simulatedCurrentRosterSize);
+                constrainedResult.Invoke(simulatedCurrentRosterSize);
+                break;
+            }
+            shownRoster.Add(new Character(i, simId));
+
+            shownRosterSprites[i] = CharSpriteGen.genSpriteFromLayers(shownRoster[i]);
+            currentRosterIDs.Add(simId);
+        }
+
+        lastResortSearch = false;
+        savedCPD = 0;
+        savedMod = 0;
+
+        UI_Roster.instance.regenerateCharCards(simulatedCurrentRosterSize);
+    }
+
+    /// <summary>
+    /// Apply new constraints to the constraints list
+    /// </summary>
+    public void applyConstraints(RosterConstraints constraints)
+    {
+        simulatedCurrentRosterSize = getNewRosterSizeFromConstraints(constraints);
+
+        constrainedResult.Invoke(simulatedCurrentRosterSize);
+    }
+
+    /// <summary>
+    /// Get the new size of a roster with constraints applied to it
+    /// </summary>
+    public int getNewRosterSizeFromConstraints(RosterConstraints constraints)
+    {
+        // The roster size will decrease when applying a new constraint (and vice versa)
+        int newRosterSize = simulatedTotalRosterSize;
+
+        List<CPD_Type> types = new List<CPD_Type>(constraints.allCurrentConstraints.Keys);
+
+        foreach (CPD_Type tp in types)
+        {
+            // Assuming all probabilities are equal.
+            newRosterSize = Mathf.RoundToInt(cpdByType[tp].getProportionOfCategories(constraints.allCurrentConstraints[tp]) * (float)newRosterSize);
+        }
+
+        // is there any way to optimize this? Hopefully the set of guessed chars never gets too big.
+        foreach (int guessedChar in charactersGuessedAsTarget)
+        {
+            if(SimulatedID.idMeetsConstraints(guessedChar, constraints))
+            {
+                newRosterSize--;
+            }
+        }
+        
+        return newRosterSize;
+    }
+
+    /// <summary>
+    /// When a FormButton unconfirms, clear all constraints (quick optimization)
+    /// </summary>
+    public void reInitializeVariants(CPD_Type onType, List<string> buttonsAreOff)
+    {
+        CPD cpd = cpdByType[onType];
+        PlayerAgent.instance.rosterConstraints.clearConstraints(cpd, false);
+        foreach(string exclude in buttonsAreOff)
+        {
+            PlayerAgent.instance.rosterConstraints.addConstraint(cpd.cpdType, exclude, false);
+        }
+    }
+
+    /// <summary>
+    /// What to do when the player guesses a character as the target
+    /// </summary>
+    public void GuessedCharacterAsTarget(int guessId)
+    {
+        // TODO if wrong
+        charactersGuessedAsTarget.Add(guessId);
+        redrawRosterVis();
+        guessedWrongCharacter.Invoke(guessId);
+    }
+
+    public void DebugLogRoster()
+    {
+        for (int i = 0; i < shownRoster.Count; i++)
+        {
+            Debug.Log(shownRoster[i]);
+        }
+    }
+
+
+    /// Everything to do with the simulated ID
+    public static class SimulatedID
+    {
+        /// <summary>
+        /// Given a "simulated ID" in [0, rosterSize), return all CPD variants this character would generate with.
+        ///     The ID itself contains what category each field will be. Every character is guaranteed a unique set of categories,
+        ///     and the specific variants within those categories are chosen by random seed.
+        /// For variants and all other non-constrainable, "cosmetic" CPD's, the simulated ID also acts as a random seed.
+        /// Setting the random seed before getting those values ensures we always "randomly generate" the same output for the character.
+        /// There's just one catch: We have to offset every random seed by a constant amount, so we do not get the exact same roster every time.
+        /// </summary>
+        /// <param name="simulatedId">Simulated id in [0, rosterSize)</param>
+        /// <returns>All variants of the character with this simulated ID</returns>
+        public static List<CPD_Variant> unpackSimulatedID(int simulatedId)
+        {
+            UnityEngine.Random.InitState(simulatedId); // TODO: Add by rosterOffset to make every game random.
+
+            // We gotta get all the categories associated with each sim ID - one at a time.
+            List<CPD_Variant> vars = new List<CPD_Variant>();
+            int c = 0;
+            for (int iter = 0; iter < cpdInstances.Count; iter++)
+            {
+                // Two distinct cases. If the CPD is constrainable it directly affects simulated ID. Otherwise it's just "random".
+                if(cpdInstances[iter].constrainable)
+                {
+                    int currCPDcategory = 0;
+
+                    CPD currCpd = cpdConstrainables[c];
+                    currCPDcategory = Mathf.FloorToInt(simulatedId / simIDtourGuide[c]);
+                    List<CPD_Variant> possibles = currCpd.getPossibleVariantsFromCategory(currCpd.categories[currCPDcategory]);
+                    vars.Add(possibles[UnityEngine.Random.Range(0, possibles.Count)]);
+
+                    simulatedId -= simIDtourGuide[c] * currCPDcategory;
+                    c++;
+                } else
+                {
+                    vars.Add(cpdInstances[iter].getRandom());
+                }
+                
+            }
+
+            return vars;
+        }
+
+
+        /// <summary>
+        /// Given some roster constraints, generate a random simulated ID for this character.
+        /// For any CPDs with constraints, we must choose a value allowed by them.
+        /// For any other CPDs without constraints, we can randomize them.
+        /// </summary>
+        /// <param name="constraints"></param>
+        /// <returns></returns>
+        public static int getRandomSimulatedID(RosterConstraints constraints, HashSet<int> takenIDs, int currentRosterSize)
+        {
+            // How this works on a technical level:
+            //   - We will attempt to generate a random ID, see if it's already taken (for big current rosters, this is unlikely.)
+            //   - If it is taken, we'll try the same process again a few more times.
+            //   - If we have failed multiple times, we assume the constrained list is too crowded,
+            //          so we resort to iterating through all possible constrained IDs; in order, until finding one that works.
+            //   - Optimization: if the roster size is below a certain threshold, automatically resort to iterating through all IDs.
+            if(currentRosterSize > 20)
+            {
+                for (int attempt = 0; attempt < 5; attempt++)
+                {
+                    int workingID = 0;
+                    for (int c = 0; c < cpdConstrainables.Count; c++)
+                    {
+                        CPD currCpd = cpdConstrainables[c];
+
+                        // If being constrained, carefully consider which values are allowed...
+                        if (constraints.allCurrentConstraints.ContainsKey(currCpd.cpdType))
+                        {
+                            (int catId, int varId) = currCpd.getRandomConstrainedIndex(constraints.allCurrentConstraints[currCpd.cpdType]);
+                            workingID += simIDtourGuide[c] * catId;
+                        }
+                        // Otherwise you can just pick anything...
+                        else
+                        {
+                            workingID += simIDtourGuide[c] * currCpd.getRandomIndex();
+                        }
+                    }
+                    if (takenIDs == null || !takenIDs.Contains(workingID))
+                    {
+                        return workingID;
+                    }
+                }
+            }
+
+            // Worst case scenario: Resort to iteration through all possible IDs. Return the first success.
+            for(int cpdIndex = savedCPD; cpdIndex < cpdConstrainables.Count; cpdIndex++)
+            {
+                CPD currCpd = cpdConstrainables[cpdIndex];
+
+                int magicNumber = simIDtourGuide[cpdIndex];
+                List<int> currSimIdModifiers = currCpd.getAllConstrainedIndicies(constraints.allCurrentConstraints[currCpd.cpdType]);
+                for(int i = 0; i < currSimIdModifiers.Count; i++)
+                {
+                    currSimIdModifiers[i] = magicNumber * currSimIdModifiers[i];
+                }
+                int catZeroes = 0;
+                for(int i = cpdIndex + 1; i < cpdConstrainables.Count; i++)
+                {
+                    // There must be at least one category or there's a problem...
+                    catZeroes += simIDtourGuide[i] * cpdConstrainables[i].getAllConstrainedIndicies(constraints.allCurrentConstraints[cpdConstrainables[i].cpdType])[0];
+                }
+
+                if (savedCPD == 0)
+                {
+                    allSimIdModifiers = new List<int>();
+                }
+                if (savedMod == 0)
+                {
+                    newSimIdModifiers = new List<int>();
+                }
+                // First pass
+                if (allSimIdModifiers.Count == 0)
+                {
+                    for (int l = 0; l < currSimIdModifiers.Count; l++)
+                    {
+                        int aNewModifier = currSimIdModifiers[l];
+                        int aNewIndex = aNewModifier + catZeroes;
+                        newSimIdModifiers.Add(aNewModifier);
+                        if (takenIDs == null || !takenIDs.Contains(aNewIndex))
+                        {
+                            return aNewIndex;
+                        }
+                    }
+                } 
+                // Every subsequent pass
+                else
+                {
+                    for (int i = savedMod; i < allSimIdModifiers.Count; i++)
+                    {
+                        for (int l = 0; l < currSimIdModifiers.Count; l++)
+                        {
+                            int mod = allSimIdModifiers[i];
+                            int aNewModifier = mod + currSimIdModifiers[l];
+                            int aNewIndex = aNewModifier + catZeroes;
+                            newSimIdModifiers.Add(aNewModifier);
+                            if (takenIDs == null || !takenIDs.Contains(aNewIndex))
+                            {
+                                return aNewIndex;
+                            }
+                        }
+                        savedMod++;
+                    }
+                }
+
+                allSimIdModifiers = newSimIdModifiers;
+                savedCPD++;
+                savedMod = 0;
+            }
+
+            // Should be impossible
+            Debug.LogError("Could not find any valid simulated ID");
+            return -1;
+        }
+
+        /// <summary>
+        /// Returns whether or not this ID is valid given a set of constraints
+        /// </summary>
+        /// <param name="simulatedId"></param>
+        /// <param name="constraints"></param>
+        /// <returns></returns>
+        public static bool idMeetsConstraints(int simulatedId, RosterConstraints constraints)
+        {
+            for (int iter = 0; iter < cpdConstrainables.Count; iter++)
+            {
+                int currCPDcategory = 0;
+
+                CPD currCpd = cpdConstrainables[iter];
+                currCPDcategory = Mathf.FloorToInt(simulatedId / simIDtourGuide[iter]);
+                if(constraints.allCurrentConstraints[currCpd.cpdType].Contains(currCpd.categories[currCPDcategory]))
+                {
+                    return false;
+                } else
+                {
+                    simulatedId -= simIDtourGuide[iter] * currCPDcategory;
+                }
+            }
+
+            return true;
+        }
+    }
+}
+
+
+
+
+
+/// <summary>
+/// List of roster constraints - what categories of what CPD's to sort by
+/// The Player uses this
+/// </summary>
+public class RosterConstraints
+{
+    public static RosterConstraints NO_CONSTRAINTS = new RosterConstraints();
+
+    // What CPD type are you restricting, and, what categories in that CPD are you allowing?
+    public Dictionary<CPD_Type, HashSet<string>> allCurrentConstraints;
+    private HashSet<(CPD_Type, string)> inflexibles;
+
+    private object lockObj = new object();
+
+    public RosterConstraints()
+    {
+        this.allCurrentConstraints = new Dictionary<CPD_Type, HashSet<string>>();
+        this.inflexibles = new HashSet<(CPD_Type, string)>();
+    }
+
+    /// <summary>
+    /// Adds a category to the constrained list for a particular CPD (do not accept this category.)
+    /// Set inflexible to true if this is 100% confirmed and should never be changed the rest of the round.
+    /// </summary>
+    /// <param name="cpd">CPD to constrain (EG HairStyle, HairColor...)</param>
+    /// <param name="constraint">This category will no longer be accepted</param>
+    public void addConstraint(CPD_Type onType, string constraint, bool inflexible)
+    {
+        lock(lockObj)
+        {
+            if(!inflexibles.Contains((onType, constraint))) {
+                allCurrentConstraints[onType].Add(constraint);
+                if (inflexible) inflexibles.Add((onType, constraint));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Removes a category from the constrained list for a particular CPD (the category will be allowed again.)
+    /// </summary>
+    /// <param name="cpd">CPD to constrain (EG HairStyle, HairColor...)</param>
+    /// <param name="constraint">This category will once again be allowed</param>
+    public void removeConstraint(CPD_Type onType, string constraint)
+    {
+        lock(lockObj)
+        {
+            if(!inflexibles.Contains((onType, constraint)))
+            {
+                allCurrentConstraints[onType].Remove(constraint);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Makes the given value the only acceptable value for a particular field's constraints
+    /// </summary>
+    /// <param name="cpd">CPD to constrain (EG HairStyle, HairColor...)</param>
+    /// <param name="constraint">Restricts everything but this category</param>
+    public void onlyConstraint(CPD_Type onType, string constraint)
+    {
+        lock (lockObj)
+        {
+            allCurrentConstraints[onType].Clear();
+            Roster.cpdByType[onType].categories.ForEach(cat =>
+            {
+
+                allCurrentConstraints[onType].Add(cat);
+            });
+            allCurrentConstraints[onType].Remove(constraint);
+        }
+    }
+
+    private void smartClear(CPD_Type onType)
+    {
+        // can't modify the hashset while it is being used, so have to make a temporary new one.
+        foreach (string cat in new HashSet<string>(allCurrentConstraints[onType]))
+        {
+            if (!inflexibles.Contains((onType, cat)))
+            {
+                allCurrentConstraints[onType].Remove(cat);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Removes all constraints from a CPD (all categories will be allowed again)
+    /// </summary>
+    /// <param name="cpd">Clear all constraints from this CPD</param>
+    public void clearConstraints(CPD cpd, bool cleanSweep)
+    {
+        lock(lockObj)
+        {
+            CPD_Type onType = cpd.cpdType;
+            if (allCurrentConstraints.ContainsKey(onType))
+            {
+                if (cleanSweep)
+                    allCurrentConstraints[onType].Clear();
+                else
+                    smartClear(onType);
+            }
+
+            else
+            {
+                //Debug.LogWarning($"Setting up constraints for {onType}");
+                allCurrentConstraints.Add(onType, new HashSet<string>());
+            }
+        }
+    }
+
+    public void clearAllConstraints(bool cleanSweep)
+    {
+        lock(lockObj)
+        {
+            foreach (CPD cpd in Roster.cpdConstrainables)
+            {
+                clearConstraints(cpd, cleanSweep);
+            }
+        }
+    }
+}
+
+
+// ----------------------------------------------------------
+// For CPU's version of RosterConstraints, see the file CPURosterLogic
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
