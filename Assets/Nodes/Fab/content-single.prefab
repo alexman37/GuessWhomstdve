@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   coreContent: {fileID: 4132110477404291989}
   mainText: {fileID: 4132110478063905404}
+  id: 0
 --- !u!61 &5355780721470728795
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -110,7 +111,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 3, y: -0.5}
@@ -146,7 +147,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 7
+  m_Constraints: 4
 --- !u!1 &4132110478063905394
 GameObject:
   m_ObjectHideFlags: 0

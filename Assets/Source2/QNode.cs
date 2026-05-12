@@ -5,19 +5,36 @@ using TMPro;
 
 public class QNode : MonoBehaviour
 {
-    [SerializeField] GameObject coreContent;
+    GameObject rootObject;                    // basic container for everything
+    [SerializeField] GameObject coreContent;  // topmost content sprite, container for other content sprites
     [SerializeField] TextMeshProUGUI mainText;
+
+    // keep track of which QNode we're currently interacting with
+    // so when we do connections / lock-ons, we know which not to move
+    public static QNode lastMoved;
 
     public int id;
     int verticalSize = 1;
-    private string displayTxt;
+    private string displayTxt = "DEFAULT_NODE";
+    // TODO replace with NodeNub
     private QNodeType[] inputTypes;
     private QNodeType[] outputTypes;
     private QNode[] inputNodes;
     private QNode[] outputNodes;
 
+    float contentWidth = 4;
+    float nubWidth = 1;
+
     Vector2 gridPosition;
+
+    bool isDragging = false;   // can also drag if locked to the selected node
+    Vector3 offsetToMainDrag;
+    bool draggingLocked;
     bool connectionLocked;
+
+    // TODO! be smarter about when we actually have to recalculate this
+    // all roots of all objects currently locked together with this node
+    HashSet<GameObject> lockedRoots;
 
     // Non-usable
     Vector3 mouseDragPivot;
@@ -27,6 +44,8 @@ public class QNode : MonoBehaviour
         verticalSize = creator.verticalSize;
         inputTypes = creator.inTypes;
         outputTypes = creator.outTypes;
+        inputNodes = new QNode[verticalSize];
+        outputNodes = new QNode[verticalSize];
     }
 
     private void setSortingOrder(GameObject go)
@@ -34,9 +53,45 @@ public class QNode : MonoBehaviour
         go.GetComponent<SpriteRenderer>().sortingOrder = id * 2;
     }
 
+    /// <summary>
+    /// Move this node into position so it aligns with another node
+    /// </summary>
+    public void LockOnto(QNode stationaryTarget, bool draggingInput, int inputIndex, int outputIndex)
+    {
+        // Dragging no longer effects position until object is let go of
+        // TODO: It should instead drag if moved sufficiently far away enough
+        draggingLocked = true;
+        // Change position
+        rootObject.transform.position = new Vector3(
+            stationaryTarget.rootObject.transform.position.x - (contentWidth + nubWidth) * (draggingInput ? -1 : 1),
+            stationaryTarget.rootObject.transform.position.y,
+            0
+        );
+        // Set input / output nodes
+        if(draggingInput)
+        {
+            inputNodes[inputIndex] = stationaryTarget;
+            stationaryTarget.outputNodes[outputIndex] = this;
+        } else
+        {
+            stationaryTarget.inputNodes[inputIndex] = this;
+            outputNodes[outputIndex] = stationaryTarget;
+        }
+    }
+
+    public void BreakLock(bool input, int index)
+    {
+        if(input)
+        {
+            inputNodes[index] = null;
+        } else
+        {
+            outputNodes[index] = null;
+        }
+    }
+
     public GameObject generateVisual()
     {
-        float nodeLength = 6;
         float nodeHeight = 1;
         float nodeSpacing = 0.23f;
 
@@ -44,8 +99,11 @@ public class QNode : MonoBehaviour
         // We can move the sprites together by a teeny tiny amount to avoid this
         float epsilon = 0.00f;
 
-        GameObject root = gameObject;
-        setSortingOrder(root);
+        GameObject root = new GameObject(displayTxt);
+        root.transform.position = gameObject.transform.position;
+
+        GameObject rootContent = gameObject;
+        setSortingOrder(rootContent);
 
         // multi core
         if (verticalSize > 1)
@@ -53,12 +111,12 @@ public class QNode : MonoBehaviour
             mainText.GetComponent<RectTransform>().parent.GetComponent<Canvas>().sortingOrder = id * 2 + 1;
             for (int i = 1; i < verticalSize - 1; i++)
             {
-                GameObject nextCore = GameObject.Instantiate(NodeManager.instance.fragment_multi_mid, root.transform);
+                GameObject nextCore = GameObject.Instantiate(NodeManager.instance.fragment_multi_mid, rootContent.transform);
                 nextCore.transform.localPosition = new Vector3(epsilon, -1 * (nodeHeight + nodeSpacing - epsilon) * i, 0);
                 setSortingOrder(nextCore);
             }
 
-            GameObject lastCore = GameObject.Instantiate(NodeManager.instance.fragment_multi_bottom, root.transform);
+            GameObject lastCore = GameObject.Instantiate(NodeManager.instance.fragment_multi_bottom, rootContent.transform);
             lastCore.transform.localPosition = new Vector3(epsilon, -1 * (nodeHeight + nodeSpacing - epsilon) * (verticalSize - 1), 0);
             setSortingOrder(lastCore);
 
@@ -66,6 +124,7 @@ public class QNode : MonoBehaviour
             {
                 QNodeType inputType = inputTypes[i];
                 GameObject inNub = NodeManager.instance.NubFromNodeType(inputType);
+                inNub.GetComponent<NodeNub>().Init(this, inputType, i);
                 inNub.transform.SetParent(root.transform);
                 inNub.transform.localPosition = new Vector3(epsilon, -1 * (nodeHeight + nodeSpacing - epsilon) * i, 0);
                 setSortingOrder(inNub);
@@ -75,8 +134,9 @@ public class QNode : MonoBehaviour
             {
                 QNodeType outputType = outputTypes[i];
                 GameObject outNub = NodeManager.instance.NubFromNodeType(outputType);
+                outNub.GetComponent<NodeNub>().Init(this, outputType, i);
                 outNub.transform.SetParent(root.transform);
-                outNub.transform.localPosition = new Vector3(nodeLength - 1 - epsilon, -1 * (nodeHeight + nodeSpacing - epsilon) * i, 0);
+                outNub.transform.localPosition = new Vector3(contentWidth + nubWidth - epsilon, -1 * (nodeHeight + nodeSpacing - epsilon) * i, 0);
                 setSortingOrder(outNub);
             }
         }
@@ -84,9 +144,11 @@ public class QNode : MonoBehaviour
         // single core
         else
         {
+            mainText.GetComponent<RectTransform>().parent.GetComponent<Canvas>().sortingOrder = id * 2 + 1;
             if (inputTypes.Length > 0)
             {
                 GameObject inNub = NodeManager.instance.NubFromNodeType(inputTypes[0]);
+                inNub.GetComponent<NodeNub>().Init(this, inputTypes[0], 0);
                 inNub.transform.SetParent(root.transform);
                 inNub.transform.localPosition = new Vector3(epsilon, 0, 0);
                 setSortingOrder(inNub);
@@ -95,19 +157,64 @@ public class QNode : MonoBehaviour
             if (outputTypes.Length > 0)
             {
                 GameObject outNub = NodeManager.instance.NubFromNodeType(outputTypes[0]);
+                outNub.GetComponent<NodeNub>().Init(this, outputTypes[0], 0);
                 outNub.transform.SetParent(root.transform);
-                outNub.transform.localPosition = new Vector3(nodeLength - 1 - epsilon, 0, 0);
+                outNub.transform.localPosition = new Vector3(contentWidth + nubWidth - epsilon, 0, 0);
                 setSortingOrder(outNub);
             }
         }
 
-        return root;
+        rootContent.transform.SetParent(root.transform);
+        rootObject = root;
+        return rootObject;
+    }
+
+    /// <summary>
+    /// Recursive method to look through all locked input/output nodes and add them to lockedRoots set.
+    /// Looks ugly, but in practice this should not take long at all
+    /// </summary>
+    void findLockedNodes(QNode fromStart)
+    {
+        foreach (QNode qNode in inputNodes)
+        {
+            if(qNode != null)
+            {
+                if (!qNode.isDragging)
+                {
+                    lockedRoots.Add(qNode.rootObject);
+                    qNode.isDragging = true;
+                    qNode.offsetToMainDrag = qNode.rootObject.transform.position - fromStart.rootObject.transform.position;
+                    findLockedNodes(qNode);
+                }
+            }
+        }
+        foreach (QNode qNode in outputNodes)
+        {
+            if (qNode != null)
+            {
+                if (!qNode.isDragging)
+                {
+                    lockedRoots.Add(qNode.rootObject);
+                    qNode.isDragging = true;
+                    qNode.offsetToMainDrag = qNode.rootObject.transform.position - fromStart.rootObject.transform.position;
+                    findLockedNodes(qNode);
+                }
+            }
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        //generateVisual();
+        lockedRoots = new HashSet<GameObject>();
+    }
+
+    private void Update()
+    {
+        if(isDragging)
+        {
+            rootObject.transform.position = lastMoved.rootObject.transform.position + offsetToMainDrag;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -117,18 +224,38 @@ public class QNode : MonoBehaviour
 
     private void OnMouseDown()
     {
+        lastMoved = this;
         Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -501);
         Vector3 screenPos = Camera.main.ScreenToWorldPoint(mousePosition);
         screenPos.z = 0;
         mouseDragPivot = screenPos - transform.position;
+
+        // calculate lockedRoots
+        lockedRoots.Clear();
+        findLockedNodes(this);
+    }
+
+    private void OnMouseUp()
+    {
+        draggingLocked = false;
+
+        isDragging = false;
+        foreach(GameObject node in lockedRoots)
+        {
+            QNode qNode = node.GetComponentInChildren<QNode>();
+            qNode.isDragging = false;
+        }
     }
 
     private void OnMouseDrag()
     {
-        Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -500);
-        Vector3 screenPos = Camera.main.ScreenToWorldPoint(mousePosition);
-        screenPos.z = 0;
-        transform.position = screenPos - mouseDragPivot;
+        if(!draggingLocked)
+        {
+            Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -500);
+            Vector3 screenPos = Camera.main.ScreenToWorldPoint(mousePosition);
+            screenPos.z = 0;
+            rootObject.transform.position = screenPos - mouseDragPivot;
+        }
     }
 }
 

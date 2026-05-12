@@ -38,8 +38,14 @@ public class NodeManager : MonoBehaviour
         //QNode q2 = new QNode(4, new QNodeType[] { qt1, qt1a, qt1b, qt1c }, new QNodeType[] { qt2, qt2a, qt2b, qt2c });
         QNodeCreateOrder q1 = new QNodeCreateOrder(4, new QNodeType[] { qt1, qt1a, qt1b, qt1c }, new QNodeType[] { qt2, qt2a, qt2b, qt2c });
         QNodeCreateOrder q2 = new QNodeCreateOrder(4, new QNodeType[] { qt1, qt1a, qt1b, qt1c }, new QNodeType[] { qt2, qt2a, qt2b, qt2c });
+
+        QNodeType cin = new QNodeType(QType.Characteristic, true, false, false);
+        QNodeType cout = new QNodeType(QType.Characteristic, false, false, false);
+        QNodeCreateOrder c1 = new QNodeCreateOrder(1, new QNodeType[] { cin }, new QNodeType[] { cout });
         AddNodeToGraph(q1);
         AddNodeToGraph(q2);
+        AddNodeToGraph(c1);
+        AddNodeToGraph(c1);
     }
 
     public void AddNodeToGraph(QNodeCreateOrder q)
