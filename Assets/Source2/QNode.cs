@@ -173,31 +173,35 @@ public class QNode : MonoBehaviour
     /// Recursive method to look through all locked input/output nodes and add them to lockedRoots set.
     /// Looks ugly, but in practice this should not take long at all
     /// </summary>
-    void findLockedNodes(QNode fromStart)
+    void findLockedNodes(QNode fromLast, QNode trueStart)
     {
-        foreach (QNode qNode in inputNodes)
+        foreach (QNode qNode in fromLast.inputNodes)
         {
             if(qNode != null)
             {
+                Debug.Log("Input recognized: " + qNode.id);
                 if (!qNode.isDragging)
                 {
                     lockedRoots.Add(qNode.rootObject);
                     qNode.isDragging = true;
-                    qNode.offsetToMainDrag = qNode.rootObject.transform.position - fromStart.rootObject.transform.position;
-                    findLockedNodes(qNode);
+                    qNode.offsetToMainDrag = qNode.rootObject.transform.position - trueStart.rootObject.transform.position;
+                    Debug.Log("Add to drag " + qNode.id);
+                    findLockedNodes(qNode, trueStart);
                 }
             }
         }
-        foreach (QNode qNode in outputNodes)
+        foreach (QNode qNode in fromLast.outputNodes)
         {
             if (qNode != null)
             {
+                Debug.Log("Output recognized: " + qNode.id);
                 if (!qNode.isDragging)
                 {
                     lockedRoots.Add(qNode.rootObject);
                     qNode.isDragging = true;
-                    qNode.offsetToMainDrag = qNode.rootObject.transform.position - fromStart.rootObject.transform.position;
-                    findLockedNodes(qNode);
+                    qNode.offsetToMainDrag = qNode.rootObject.transform.position - trueStart.rootObject.transform.position;
+                    Debug.Log("Add to drag " + qNode.id);
+                    findLockedNodes(qNode, trueStart);
                 }
             }
         }
@@ -232,7 +236,7 @@ public class QNode : MonoBehaviour
 
         // calculate lockedRoots
         lockedRoots.Clear();
-        findLockedNodes(this);
+        findLockedNodes(this, this);
     }
 
     private void OnMouseUp()

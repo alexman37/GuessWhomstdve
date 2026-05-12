@@ -49,6 +49,9 @@ public class NodeNub : MonoBehaviour
         {
             owner.BreakLock(data.input, nubIndex);
             connected.owner.BreakLock(connected.data.input, connected.nubIndex);
+
+            connected.connected = null;
+            connected = null;
         }
     }
 
