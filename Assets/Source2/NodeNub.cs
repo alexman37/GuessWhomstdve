@@ -10,6 +10,8 @@ public class NodeNub : MonoBehaviour
     public int nubIndex;
     public NodeNub connected = null;
 
+    private static object connectionProcessor_lockObj = new object();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,32 +26,29 @@ public class NodeNub : MonoBehaviour
     }
 
     // Connect this nub to another, linking both their owning nodes together
-    private void Connect(NodeNub otherNub)
+    public void Connect(NodeNub otherNub)
     {
         // These nodes connect - lock them together
         connected = otherNub;
         otherNub.connected = this;
-        // The one that's currently being moved should change position
-        if (otherNub.owner.id == QNode.lastMoved.id)
-        {
-            // You drag output into input
-            otherNub.owner.LockOnto(owner, false, otherNub.nubIndex, nubIndex);
-        }
-        else
-        {
-            // You drag input into output
-            owner.LockOnto(otherNub.owner, true, nubIndex, otherNub.nubIndex);
-        }
     }
 
     // Break this node's connection if it exists
-    private void Break()
+    public void Break()
     {
         if(connected != null)
         {
             owner.BreakLock(data.input, nubIndex);
             connected.owner.BreakLock(connected.data.input, connected.nubIndex);
 
+            BreakOnlyConnections();
+        }
+    }
+
+    public void BreakOnlyConnections()
+    {
+        if(connected != null)
+        {
             connected.connected = null;
             connected = null;
         }
@@ -57,15 +56,22 @@ public class NodeNub : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Both sides of the collision technically trigger, but we only need to check one
-        if(!connected && data.input)
+        lock (connectionProcessor_lockObj)
         {
-            NodeNub otherNub = collision.gameObject.GetComponent<NodeNub>();
-            if (otherNub != null && !otherNub.connected)
+            // Both sides of the collision technically trigger, but we only need to check one
+            if (!connected && data.input)
             {
-                if (otherNub.data.mainType == data.mainType && otherNub.data.input != data.input)
+                Debug.Log("****** A collision check");
+                NodeNub otherNub = collision.gameObject.GetComponent<NodeNub>();
+                if (otherNub != null && !otherNub.connected)
                 {
-                    Connect(otherNub);
+                    // Must verify one node is input and the other is output first.
+                    if (data.input != otherNub.data.input)
+                    {
+                        owner.CheckValidConnection(this, otherNub);
+                        // TODO run for all nubs connected
+                        //Connect(otherNub);
+                    }
                 }
             }
         }
