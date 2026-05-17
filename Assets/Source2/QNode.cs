@@ -5,8 +5,7 @@ using TMPro;
 
 public class QNode : MonoBehaviour
 {
-    GameObject rootObject;                    // basic container for everything
-    [SerializeField] GameObject coreContent;  // topmost content sprite, container for other content sprites
+    GameObject rootObject;  // basic container for everything
     [SerializeField] TextMeshProUGUI mainText;
 
     // keep track of which QNode we're currently interacting with
@@ -45,9 +44,7 @@ public class QNode : MonoBehaviour
     // TODO! be smarter about when we actually have to recalculate this
     // all roots of all objects currently locked together with this node
     HashSet<GameObject> lockedRoots;
-
-    // For multi-nub connections: (output, input)
-    List<(NodeNub, NodeNub)> nubPairs = new List<(NodeNub, NodeNub)>();
+    HashSet<int> lockedIDs;
 
     // Non-usable
     Vector3 mouseDragPivot;
@@ -100,6 +97,9 @@ public class QNode : MonoBehaviour
         // Else, make sure every output nub either has a matching input nub in the right spot, or, nothing at all
         else
         {
+            // For multi-nub connections: (output, input)
+            List<(NodeNub, NodeNub)> nubPairs = new List<(NodeNub, NodeNub)>();
+
             QNodeType[] outputs = otherNub.owner.outputTypes;
             // Add this to output nub index to get the corresponding input nub index
             int mapOutputToInput = inputNub.nubIndex - otherNub.nubIndex;
@@ -134,38 +134,79 @@ public class QNode : MonoBehaviour
             }
         }
 
-        // The one that's currently being moved should change position
-        if (otherNub.owner.id == lastMoved.id)
-        {
-            // You drag output into input
-            otherNub.owner.LockOnto(this, false, otherNub.nubIndex, inputNub.nubIndex);
-        }
-        else
-        {
-            // You drag input into output
-            LockOnto(otherNub.owner, true, inputNub.nubIndex, otherNub.nubIndex);
-        }
+        // Ultimately, the one that's currently being moved should change position
+        LockOnto(otherNub.owner, inputNub.nubIndex, otherNub.nubIndex);
     }
 
     /// <summary>
     /// Move this node into position so it aligns with another node
     /// </summary>
-    public void LockOnto(QNode stationaryTarget, bool draggingInput, int inputIndex, int outputIndex)
+    public void LockOnto(QNode outputNode, int inputIndex, int outputIndex)
     {
-
         // Dragging no longer effects position until object is let go of
         // TODO: It should instead drag if moved sufficiently far away enough
-        draggingLocked = true;
-        // Change position
-        Debug.Log("out " + outputIndex);
-        Debug.Log("in " + inputIndex);
-        rootObject.transform.position = new Vector3(
-            stationaryTarget.rootObject.transform.position.x - (contentWidth + nubWidth) * (draggingInput ? -1 : 1),
-            stationaryTarget.rootObject.transform.position.y - (nodeHeight + nodeSpacing) * (outputIndex - inputIndex),
-            0
-        );
+        lastMoved.draggingLocked = true;
+        // Case 1: Directly drag input into output
+        if(lastMoved.id == id)
+        {
+            Debug.Log("CASE 1");
+            Vector3 oldPos = rootObject.transform.position;
+            Vector3 newPos = new Vector3(
+                outputNode.rootObject.transform.position.x - (contentWidth + nubWidth) * -1,
+                outputNode.rootObject.transform.position.y - (nodeHeight + nodeSpacing) * (outputIndex - inputIndex),
+                0
+            );
+            rootObject.transform.position = newPos;
+        }
+        // Case 2: Directly drag output into input
+        else if(lastMoved.id == outputNode.id)
+        {
+            Debug.Log("CASE 2");
+            Vector3 oldPos = outputNode.rootObject.transform.position;
+            Vector3 newPos = new Vector3(
+                rootObject.transform.position.x - (contentWidth + nubWidth) * 1,
+                rootObject.transform.position.y - (nodeHeight + nodeSpacing) * (outputIndex - inputIndex),
+                0
+            );
+            outputNode.rootObject.transform.position = newPos;
+        }
+        // Case 3: Indirect dragging
+        else
+        {
+            // 3.1: last moved is attached to input node
+            Debug.Log("CASE 3: There are " + lastMoved.lockedIDs.Count);
+            if(lastMoved.lockedIDs.Contains(id))
+            {
+                Debug.Log("CASE 3.1: Part of input");
+                Vector3 oldPos = rootObject.transform.position;
+                Vector3 newPos = new Vector3(
+                    outputNode.rootObject.transform.position.x - (contentWidth + nubWidth) * -1,
+                    outputNode.rootObject.transform.position.y - (nodeHeight + nodeSpacing) * (outputIndex - inputIndex),
+                    0
+                );
+                rootObject.transform.position = newPos;
+                lastMoved.rootObject.transform.position += (newPos - oldPos);
+            }
+
+            // 3.2: last moved is attached to output node
+            else
+            {
+                Debug.Log("CASE 3.2: Part of output");
+                Vector3 oldPos = outputNode.rootObject.transform.position;
+                Vector3 newPos = new Vector3(
+                    rootObject.transform.position.x - (contentWidth + nubWidth) * 1,
+                    rootObject.transform.position.y - (nodeHeight + nodeSpacing) * (outputIndex - inputIndex),
+                    0
+                );
+                outputNode.rootObject.transform.position = newPos;
+                lastMoved.rootObject.transform.position += (newPos - oldPos);
+            }
+        }
+
         // Set input / output nodes
-        if(draggingInput)
+        inputNodes[inputIndex] = outputNode;
+        outputNode.outputNodes[outputIndex] = this;
+        /*if(draggingInput)
         {
             inputNodes[inputIndex] = stationaryTarget;
             stationaryTarget.outputNodes[outputIndex] = this;
@@ -173,11 +214,13 @@ public class QNode : MonoBehaviour
         {
             stationaryTarget.inputNodes[inputIndex] = this;
             outputNodes[outputIndex] = stationaryTarget;
-        }
+        }*/
     }
 
-    public void BreakLock(bool input, int index)
+    public void BreakLock(NodeNub self, int idOfOther)
     {
+        bool input = self.data.input;
+        int index = self.nubIndex;
         if (input)
         {
             inputNodes[index] = null;
@@ -189,23 +232,24 @@ public class QNode : MonoBehaviour
 
         if (verticalSize > 1)
         {
-            for(int i = 0; i < nubPairs.Count; i++)
+            QNode[] nodesToCheck = input ? inputNodes : outputNodes;
+            for(int i = 0; i < nodesToCheck.Length; i++)
             {
-                (NodeNub, NodeNub) nubPair = nubPairs[i];
-                if (input)
+                QNode node = nodesToCheck[i];
+                if(node.id == idOfOther)
                 {
-                    inputNodes[nubPair.Item2.nubIndex] = null;
+                    if (input)
+                    {
+                        inputNodes[i] = null;
+                    }
+                    else
+                    {
+                        outputNodes[i] = null;
+                    }
+                    self.BreakOnlyConnections();
                 }
-                else
-                {
-                    outputNodes[nubPair.Item1.nubIndex] = null;
-                }
-
-                nubPair.Item1.BreakOnlyConnections();
-                nubPair.Item2.BreakOnlyConnections();
             }
         }
-        nubPairs.Clear();
     }
 
     public GameObject generateVisual()
@@ -298,13 +342,13 @@ public class QNode : MonoBehaviour
         {
             if(qNode != null)
             {
-                Debug.Log("Input recognized: " + qNode.id);
+                Debug.Log("From " + fromLast.id + ": Look at " + qNode.id);
                 if (!qNode.isDragging)
                 {
                     lockedRoots.Add(qNode.rootObject);
+                    lockedIDs.Add(qNode.id);
                     qNode.isDragging = true;
                     qNode.offsetToMainDrag = qNode.rootObject.transform.position - trueStart.rootObject.transform.position;
-                    Debug.Log("Add to drag " + qNode.id);
                     findLockedNodes(qNode, trueStart);
                 }
             }
@@ -313,13 +357,13 @@ public class QNode : MonoBehaviour
         {
             if (qNode != null)
             {
-                Debug.Log("Output recognized: " + qNode.id);
+                Debug.Log("From " + fromLast.id + ": Look at " + qNode.id);
                 if (!qNode.isDragging)
                 {
                     lockedRoots.Add(qNode.rootObject);
+                    lockedIDs.Add(qNode.id);
                     qNode.isDragging = true;
                     qNode.offsetToMainDrag = qNode.rootObject.transform.position - trueStart.rootObject.transform.position;
-                    Debug.Log("Add to drag " + qNode.id);
                     findLockedNodes(qNode, trueStart);
                 }
             }
@@ -330,6 +374,7 @@ public class QNode : MonoBehaviour
     void Start()
     {
         lockedRoots = new HashSet<GameObject>();
+        lockedIDs = new HashSet<int>();
     }
 
     private void Update()
@@ -347,6 +392,7 @@ public class QNode : MonoBehaviour
 
     private void OnMouseDown()
     {
+        Debug.Log("This is ID " + id);
         lastMoved = this;
         Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -501);
         Vector3 screenPos = Camera.main.ScreenToWorldPoint(mousePosition);
@@ -355,6 +401,7 @@ public class QNode : MonoBehaviour
 
         // calculate lockedRoots
         lockedRoots.Clear();
+        lockedIDs.Clear();
         findLockedNodes(this, this);
     }
 

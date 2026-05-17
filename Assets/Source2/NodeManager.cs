@@ -8,6 +8,7 @@ public class NodeManager : MonoBehaviour
 
     public Dictionary<int, QNode> graph = new Dictionary<int, QNode>();
     static int totalNodeCount = 0;
+    public static int groupCount = 0;
     const int maxTotalNodes = 10000;
 
     [SerializeField] public GameObject qNode_single;
@@ -55,6 +56,8 @@ public class NodeManager : MonoBehaviour
 
         /*AddNodeToGraph(q1);
         AddNodeToGraph(q2);*/
+        AddNodeToGraph(c1);
+        AddNodeToGraph(c1);
         AddNodeToGraph(c1);
         AddNodeToGraph(c1);
         AddNodeToGraph(c1);

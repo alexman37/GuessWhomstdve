@@ -38,8 +38,8 @@ public class NodeNub : MonoBehaviour
     {
         if(connected != null)
         {
-            owner.BreakLock(data.input, nubIndex);
-            connected.owner.BreakLock(connected.data.input, connected.nubIndex);
+            owner.BreakLock(this, connected.owner.id);
+            connected.owner.BreakLock(connected, owner.id);
 
             BreakOnlyConnections();
         }
@@ -61,13 +61,13 @@ public class NodeNub : MonoBehaviour
             // Both sides of the collision technically trigger, but we only need to check one
             if (!connected && data.input)
             {
-                Debug.Log("****** A collision check");
                 NodeNub otherNub = collision.gameObject.GetComponent<NodeNub>();
                 if (otherNub != null && !otherNub.connected)
                 {
                     // Must verify one node is input and the other is output first.
                     if (data.input != otherNub.data.input)
                     {
+                        Debug.Log("****** A collision check");
                         owner.CheckValidConnection(this, otherNub);
                         // TODO run for all nubs connected
                         //Connect(otherNub);
