@@ -28,7 +28,7 @@ public class NodeManager : MonoBehaviour
         else Destroy(this);
 
         QNodeType qt1 = new QNodeType(QType.Characteristic, true, false, false);
-        QNodeType qt2 = new QNodeType(QType.Subcat, false, false, false);
+        QNodeType qt2 = new QNodeType(QType.Characteristic, false, false, false);
         QNodeType qt1a = new QNodeType(QType.Action, true, false, false);
         QNodeType qt2a = new QNodeType(QType.Completed_Action, false, false, false);
         QNodeType qt1b = new QNodeType(QType.Player, true, false, false);
@@ -54,18 +54,18 @@ public class NodeManager : MonoBehaviour
         QNodeCreateOrder mt2 = new QNodeCreateOrder(2, new QNodeType[] { mt1a, mt3a }, new QNodeType[] { mt1b, mt3b });
         QNodeCreateOrder mt3 = new QNodeCreateOrder(2, new QNodeType[] { mt2a, mt3a }, new QNodeType[] { mt2b, mt3b });
 
-        /*AddNodeToGraph(q1);
-        AddNodeToGraph(q2);*/
-        AddNodeToGraph(c1);
-        AddNodeToGraph(c1);
-        AddNodeToGraph(c1);
-        AddNodeToGraph(c1);
+        AddNodeToGraph(q1);
+        AddNodeToGraph(q2);
         AddNodeToGraph(c1);
         AddNodeToGraph(c1);
         /*AddNodeToGraph(mt1);
         AddNodeToGraph(mt2);
         AddNodeToGraph(mt3);
         AddNodeToGraph(mt1);*/
+        /*AddNodeToGraph(c1);
+        AddNodeToGraph(c1);
+        AddNodeToGraph(c1);
+        AddNodeToGraph(c1);*/
     }
 
     public void AddNodeToGraph(QNodeCreateOrder q)

@@ -93,6 +93,8 @@ public class QNode : MonoBehaviour
             {
                 inputNub.Connect(otherNub);
             }
+
+            LockOnto(otherNub.owner, inputNub.nubIndex, otherNub.nubIndex);
         } 
         // Else, make sure every output nub either has a matching input nub in the right spot, or, nothing at all
         else
@@ -100,42 +102,50 @@ public class QNode : MonoBehaviour
             // For multi-nub connections: (output, input)
             List<(NodeNub, NodeNub)> nubPairs = new List<(NodeNub, NodeNub)>();
 
-            QNodeType[] outputs = otherNub.owner.outputTypes;
             // Add this to output nub index to get the corresponding input nub index
             int mapOutputToInput = inputNub.nubIndex - otherNub.nubIndex;
 
-            for (int o = 0; o < outputs.Length; o++)
+            bool wasConnection = false;
+            // TODO probably doesn't start at 0
+            for (int o = otherNub.nubIndex; o < otherNub.nubIndex + inputNub.owner.verticalSize; o++)
             {
+                Debug.Log("[N] step 0");
                 // Must be either the same type, or one does not exist
-                if (outputs[o] != null && outputs[o].mainType != QType.EOE)
+                if (otherNub != null && inputNub != null && 
+                    otherNub.data.mainType != QType.EOE && inputNub.data.mainType != QType.EOE)
                 {
                     int inputIndex = o + mapOutputToInput;
-                    if (inputIndex >= 0 && inputIndex < inputTypes.Length)
+                    Debug.Log("[N] step 1");
+                    if (inputIndex >= 0 && inputIndex < inputNub.owner.inputTypes.Length)
                     {
-                        if (inputTypes[inputIndex] != null && inputTypes[inputIndex].mainType != QType.EOE)
+                        NodeNub mappedInputNode = inputNub.owner.inputNubs[inputIndex];
+                        Debug.Log("[N] step 2");
+                        if (mappedInputNode.data.mainType != otherNub.data.mainType)
                         {
-                            if (inputTypes[inputIndex].mainType != outputs[o].mainType)
-                            {
-                                Debug.Log("[N] These multi-nodes do not connect in one or more crucial places");
-                                return;
-                            } else
-                            {
-                                nubPairs.Add((otherNub, inputNubs[inputIndex]));
-                            }
+                            Debug.Log("[N] These multi-nodes do not connect in one or more crucial places");
+                            return;
+                        }
+                        else
+                        {
+                            nubPairs.Add((otherNub, mappedInputNode));
+                            wasConnection = true;
                         }
                     }
                 }
             }
-            Debug.Log("[N] Passed all checks, these multi-nodes connect");
-            foreach((NodeNub, NodeNub) pair in nubPairs)
+            if(wasConnection)
             {
-                Debug.Log("CONNECTIONED");
-                pair.Item1.Connect(pair.Item2);
+                Debug.Log("[N] Passed all checks, these multi-nodes connect");
+                foreach ((NodeNub, NodeNub) pair in nubPairs)
+                {
+                    Debug.Log("CONNECTIONED");
+                    pair.Item1.Connect(pair.Item2);
+                }
+
+                // Ultimately, the one that's currently being moved should change position
+                LockOnto(otherNub.owner, inputNub.nubIndex, otherNub.nubIndex);
             }
         }
-
-        // Ultimately, the one that's currently being moved should change position
-        LockOnto(otherNub.owner, inputNub.nubIndex, otherNub.nubIndex);
     }
 
     /// <summary>
@@ -150,7 +160,6 @@ public class QNode : MonoBehaviour
         if(lastMoved.id == id)
         {
             Debug.Log("CASE 1");
-            Vector3 oldPos = rootObject.transform.position;
             Vector3 newPos = new Vector3(
                 outputNode.rootObject.transform.position.x - (contentWidth + nubWidth) * -1,
                 outputNode.rootObject.transform.position.y - (nodeHeight + nodeSpacing) * (outputIndex - inputIndex),
@@ -162,7 +171,6 @@ public class QNode : MonoBehaviour
         else if(lastMoved.id == outputNode.id)
         {
             Debug.Log("CASE 2");
-            Vector3 oldPos = outputNode.rootObject.transform.position;
             Vector3 newPos = new Vector3(
                 rootObject.transform.position.x - (contentWidth + nubWidth) * 1,
                 rootObject.transform.position.y - (nodeHeight + nodeSpacing) * (outputIndex - inputIndex),
@@ -206,15 +214,6 @@ public class QNode : MonoBehaviour
         // Set input / output nodes
         inputNodes[inputIndex] = outputNode;
         outputNode.outputNodes[outputIndex] = this;
-        /*if(draggingInput)
-        {
-            inputNodes[inputIndex] = stationaryTarget;
-            stationaryTarget.outputNodes[outputIndex] = this;
-        } else
-        {
-            stationaryTarget.inputNodes[inputIndex] = this;
-            outputNodes[outputIndex] = stationaryTarget;
-        }*/
     }
 
     public void BreakLock(NodeNub self, int idOfOther)
@@ -236,7 +235,7 @@ public class QNode : MonoBehaviour
             for(int i = 0; i < nodesToCheck.Length; i++)
             {
                 QNode node = nodesToCheck[i];
-                if(node.id == idOfOther)
+                if(node != null && node.id == idOfOther)
                 {
                     if (input)
                     {
