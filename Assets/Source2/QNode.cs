@@ -92,13 +92,13 @@ public class QNode : MonoBehaviour
             if(otherNub.data.mainType == inputTypes[inputNub.nubIndex].mainType)
             {
                 inputNub.Connect(otherNub);
+                LockOnto(otherNub.owner, inputNub.nubIndex, otherNub.nubIndex);
             }
-
-            LockOnto(otherNub.owner, inputNub.nubIndex, otherNub.nubIndex);
         } 
         // Else, make sure every output nub either has a matching input nub in the right spot, or, nothing at all
         else
         {
+            Debug.Log("[N] Full check");
             // For multi-nub connections: (output, input)
             List<(NodeNub, NodeNub)> nubPairs = new List<(NodeNub, NodeNub)>();
 
@@ -106,20 +106,16 @@ public class QNode : MonoBehaviour
             int mapOutputToInput = inputNub.nubIndex - otherNub.nubIndex;
 
             bool wasConnection = false;
-            // TODO probably doesn't start at 0
             for (int o = otherNub.nubIndex; o < otherNub.nubIndex + inputNub.owner.verticalSize; o++)
             {
-                Debug.Log("[N] step 0");
                 // Must be either the same type, or one does not exist
                 if (otherNub != null && inputNub != null && 
                     otherNub.data.mainType != QType.EOE && inputNub.data.mainType != QType.EOE)
                 {
                     int inputIndex = o + mapOutputToInput;
-                    Debug.Log("[N] step 1");
                     if (inputIndex >= 0 && inputIndex < inputNub.owner.inputTypes.Length)
                     {
                         NodeNub mappedInputNode = inputNub.owner.inputNubs[inputIndex];
-                        Debug.Log("[N] step 2");
                         if (mappedInputNode.data.mainType != otherNub.data.mainType)
                         {
                             Debug.Log("[N] These multi-nodes do not connect in one or more crucial places");
