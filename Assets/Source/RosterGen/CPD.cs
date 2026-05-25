@@ -185,17 +185,16 @@ public class CPD_FilePath : CPD
             {
                 string[] fields = line.Split(';');
 
-                //probability
-                float p;
+                //probability - probably not what you think it is!
+                //the higher the number, the lower chance it has of appearing
+                int p;
                 if (fields[2] == "X")
                 {
-                    probX += 1.0f;
-                    p = -1;
+                    p = 0;
                 }
                 else
                 {
-                    p = float.Parse(fields[2]);
-                    probCounter += p;
+                    p = int.Parse(fields[2]);
                 }
 
                 string cat = fields[3];
@@ -229,15 +228,6 @@ public class CPD_FilePath : CPD
         else if (probX > 0)
         {
             probX = (1 - probCounter) / probX;
-        }
-
-        // Lastly, if we're giving all elements equal probability, do so here.
-        for (int i = 0; i < variants.Count; i++)
-        {
-            if (variants[i].probability == -1)
-            {
-                variants[i].probability = probX;
-            }
         }
 
         return variants;
@@ -317,17 +307,16 @@ public class CPD_Color : CPD
                 }
                 Color col = new Color(colors[0], colors[1], colors[2]);*/
 
-                //probability
-                float p;
+                //probability - probably not what you think it is!
+                //the higher the number, the lower chance it has of appearing
+                int p;
                 if (fields[1] == "X")
                 {
-                    probX += 1.0f;
-                    p = -1;
+                    p = 0;
                 }
                 else
                 {
-                    p = float.Parse(fields[1]);
-                    probCounter += p;
+                    p = int.Parse(fields[1]);
                 }
 
                 string cat = fields[3];
@@ -363,14 +352,6 @@ public class CPD_Color : CPD
             probX = (1 - probCounter) / probX;
         }
 
-        for (int i = 0; i < variants.Count; i++)
-        {
-            if (variants[i].probability == -1)
-            {
-                variants[i].probability = probX;
-            }
-        }
-
         return variants;
     }
 }
@@ -396,9 +377,9 @@ public class CPD_Variant
     public CPD_CriticalValue critVal; // the actual "thing" stored in this CPD (filepath? color? number? etc...)
     public string name;
     public string category;
-    public float probability;
+    public int probability;
 
-    public CPD_Variant(CPD_Type cpdCat, int catID, int cpdID, CPD_CriticalValue critVal, string name, string cat, float prob)
+    public CPD_Variant(CPD_Type cpdCat, int catID, int cpdID, CPD_CriticalValue critVal, string name, string cat, int prob)
     {
         this.cpdType = cpdCat;
         this.categoryID = catID;

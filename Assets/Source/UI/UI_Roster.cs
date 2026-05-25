@@ -212,13 +212,16 @@ public class UI_Roster : MonoBehaviour
         switch (newState)
         {
             case FormButtonState.Unknown:
-                PlayerAgent.instance.rosterConstraints.removeConstraint(cpdType, value);
+                // TODO PlayerSelf
+                TurnDriver.instance.playersInOrder[0].rosterConstraints.removeConstraint(cpdType, value);
                 break;
             case FormButtonState.Eliminated:
-                PlayerAgent.instance.rosterConstraints.addConstraint(cpdType, value, false);
+                // TODO PlayerSelf
+                TurnDriver.instance.playersInOrder[0].rosterConstraints.addConstraint(cpdType, value, false);
                 break;
             case FormButtonState.Confirmed:
-                PlayerAgent.instance.rosterConstraints.onlyConstraint(cpdType, value);
+                // TODO PlayerSelf
+                TurnDriver.instance.playersInOrder[0].rosterConstraints.onlyConstraint(cpdType, value);
                 break;
         }
 

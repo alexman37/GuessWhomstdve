@@ -13,6 +13,11 @@ public class Roster
     const int TOTAL_ROSTER_PERMUTATIONS = 999999; // How many different rosters can there be?
     private int rosterSeedOffset;                 // offset every random seed by this amount. It makes each new game unique.
 
+    // Making certain characteristics appear with probabilities requires a prime number
+    // Only rule: No CPD should have that amount of categories, nor any multiple of it
+    // Good candidates are 7, 11, 13 and 17
+    private int probabilityPrime = 13;
+
     public int simulatedTotalRosterSize = 1; // total number of "characters" we're working with
     private int simulatedCurrentRosterSize = 1; // total number of characters given constraints
 
@@ -60,9 +65,6 @@ public class Roster
         if (rosterReady == null) rosterReady += () => { };
         if (clearAllConstraints == null) clearAllConstraints += () => { };
         if (guessedWrongCharacter == null) guessedWrongCharacter += (_) => { };
-
-        ClueCard.clueCardDeclassified += onClueCardDeclassified;
-        CharacterCard.charCardClicked += GuessedCharacterAsTarget;
 
         // No need to recreate CPDs on each load
         if(cpdInstances == null)
@@ -124,8 +126,7 @@ public class Roster
 
     ~Roster()
     {
-        ClueCard.clueCardDeclassified -= onClueCardDeclassified;
-        CharacterCard.charCardClicked -= GuessedCharacterAsTarget;
+
     }
 
     /// <summary>
@@ -177,18 +178,10 @@ public class Roster
             applyConstraints(commonConstraints);
         } else
         {
-            applyConstraints(PlayerAgent.instance.rosterConstraints);
+            // TODO PlayerSelf
+            applyConstraints(TurnDriver.instance.playersInOrder[0].rosterConstraints);
         }
         redrawRosterVis();
-    }
-
-    public void onClueCardDeclassified(ClueCard cc)
-    {
-        commonConstraints.addConstraint(cc.cpdType, cc.category, false);
-        if(withCommonConstraints)
-        {
-            redrawRosterVis();
-        }
     }
 
     /// <summary>
@@ -225,7 +218,8 @@ public class Roster
             currConstraints = commonConstraints;
         } else
         {
-            currConstraints = PlayerAgent.instance.rosterConstraints;
+            // TODO PlayerSelf
+            currConstraints = TurnDriver.instance.playersInOrder[0].rosterConstraints;
         }
 
         applyConstraints(currConstraints);
@@ -333,10 +327,12 @@ public class Roster
     public void reInitializeVariants(CPD_Type onType, List<string> buttonsAreOff)
     {
         CPD cpd = cpdByType[onType];
-        PlayerAgent.instance.rosterConstraints.clearConstraints(cpd, false);
+        // TODO PlayerSelf
+        TurnDriver.instance.playersInOrder[0].rosterConstraints.clearConstraints(cpd, false);
         foreach(string exclude in buttonsAreOff)
         {
-            PlayerAgent.instance.rosterConstraints.addConstraint(cpd.cpdType, exclude, false);
+            // TODO PlayerSelf
+            TurnDriver.instance.playersInOrder[0].rosterConstraints.addConstraint(cpd.cpdType, exclude, false);
         }
     }
 

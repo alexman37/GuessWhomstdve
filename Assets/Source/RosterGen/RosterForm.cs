@@ -30,14 +30,6 @@ public class RosterForm : MonoBehaviour
     [SerializeField] private Sprite definiteYes;
     [SerializeField] private Sprite definiteYesImplied;
 
-    // Related to asking around
-    [SerializeField] private TextMeshProUGUI formTitle;
-    [SerializeField] private GameObject askAroundCommands;
-    private List<(CPD_Type, string)> askingFor = new List<(CPD_Type, string)>();
-    private int agentToAsk;
-    public static event Action askAroundCompleted = () => { };
-    public static event Action askAroundCancelled = () => { };
-
     private float nextFormGroupOffset = 0;
 
     // Start is called before the first frame update
@@ -56,18 +48,10 @@ public class RosterForm : MonoBehaviour
 
     private void OnEnable()
     {
-        AgentDisplay.selectedAgent_PT += StartedAskingAround;
-        AgentDisplay.deselectedAgent_PT += StoppedAskingAround;
-        FormButton.addToAskAroundList += AddToAskFor;
-        FormButton.removeFromAskAroundList += RemoveFromAskFor;
     }
 
     private void OnDisable()
     {
-        AgentDisplay.selectedAgent_PT -= StartedAskingAround;
-        AgentDisplay.deselectedAgent_PT -= StoppedAskingAround;
-        FormButton.addToAskAroundList -= AddToAskFor;
-        FormButton.removeFromAskAroundList -= RemoveFromAskFor;
     }
 
     /// <summary>
@@ -106,51 +90,7 @@ public class RosterForm : MonoBehaviour
         formGroups.Add(formGroup);
     }
 
-
-    private void StartedAskingAround(int id)
-    {
-        askAroundCommands.SetActive(true);
-        agentToAsk = id;
-        formTitle.text = "ASKING " + id;
-    }
-
-    public void StoppedAskingAround()
-    {
-        askingFor.Clear();
-        askAroundCommands.SetActive(false);
-        formTitle.text = "CHARACTER SHEET";
-        askAroundCancelled.Invoke();
-    }
-
-    private void AddToAskFor((CPD_Type, string) cat)
-    {
-        askingFor.Add(cat);
-    }
-
-    private void RemoveFromAskFor((CPD_Type, string) cat)
-    {
-        askingFor.Remove(cat);
-    }
-
-    public void AskAround()
-    {
-        PlayerAgent.instance.askAgent(TurnDriver.instance.agentsInOrder[agentToAsk], askingFor);
-        CompleteAskAround();
-
-    }
-
-    public bool canAskForMore()
-    {
-        return askingFor.Count < PlayerAgent.instance.getAskAroundLimit();
-    }
-
-    private void CompleteAskAround()
-    {
-        StoppedAskingAround();
-        askAroundCompleted.Invoke();
-    }
-
-    // The main ability of the "Insider" action card
+    // Decide if the current form has any errors
     public bool VerifyForm()
     {
         Character target = TurnDriver.instance.currentRoster.getTargetAsCharacter();
