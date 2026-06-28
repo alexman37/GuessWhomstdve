@@ -73,15 +73,21 @@ public class Roster
                 new CPD_SimpleIndex(CPD_Type.HairStyle, true, "properties/hairStyles"),
                 new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones"),
                 new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones"),
+                new CPD_Color(CPD_Type.FavoriteColor, true, "properties/faveColors"),
+                new CPD_Color(CPD_Type.EyeColor, true, "properties/eyeColors"),
+                new CPD_SimpleIndex(CPD_Type.Height, true, "properties/heights"),
+                new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights"),
+
                 new CPD_SimpleIndex(CPD_Type.BodyType, false, "properties/bodyTypes"),
                 new CPD_SimpleIndex(CPD_Type.Face, false, "properties/faceTypes"),
                 new CPD_SimpleIndex(CPD_Type.HeadType, false, "properties/headTypes"),
-                new CPD_SimpleIndex(CPD_Type.Test1, true, "properties/testType"),
+
+                /*new CPD_SimpleIndex(CPD_Type.Test1, true, "properties/testType"),
                 new CPD_SimpleIndex(CPD_Type.Test2, true, "properties/testType"),
                 new CPD_SimpleIndex(CPD_Type.Test3, true, "properties/testType"),
                 new CPD_SimpleIndex(CPD_Type.Test4, true, "properties/testType"),
                 new CPD_SimpleIndex(CPD_Type.Test5, true, "properties/testType"),
-                new CPD_SimpleIndex(CPD_Type.Test6, true, "properties/testType"),
+                new CPD_SimpleIndex(CPD_Type.Test6, true, "properties/testType"),*/
             };
             cpdConstrainables = new List<CPD>();
             cpdCounts = new List<int>();

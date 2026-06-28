@@ -34,6 +34,8 @@ public class CharacterCard : MonoBehaviour
         drawMat.SetInt("_BodyIdx", UnityEngine.Random.Range(0, 3));
         drawMat.SetInt("_HeadIdx", UnityEngine.Random.Range(0, 8));
         drawMat.SetInt("_FaceIdx", UnityEngine.Random.Range(0, 14));
+        drawMat.SetInt("_Height", c.getCategoryIndexofCharacteristic(CPD_Type.Height));
+        drawMat.SetInt("_Weight", c.getCategoryIndexofCharacteristic(CPD_Type.Weight));
 
         int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
         drawMat.SetInt("_HairLength", Hairlen);
@@ -41,8 +43,8 @@ public class CharacterCard : MonoBehaviour
 
         drawMat.SetColor("_HairColor", c.getColorField(CPD_Type.HairColor));
         drawMat.SetColor("_SkinColor", c.getColorField(CPD_Type.SkinTone));
-        // TODO favorite color / shirt color
-        drawMat.SetColor("_BodyColor", new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value, 1));
+        drawMat.SetColor("_EyeColor", c.getColorField(CPD_Type.EyeColor));
+        drawMat.SetColor("_BodyColor", c.getColorField(CPD_Type.FavoriteColor));
     }
 
     private void OnMouseDown()

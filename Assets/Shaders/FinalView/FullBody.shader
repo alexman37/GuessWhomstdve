@@ -18,10 +18,11 @@ Shader "Unlit/FullBody"
 
         _HairLength("HairLength", Float) = 0
 
-        _BodyIdx("BodyIdx", Float) = 0
         _HairIdx("HairIdx", Float) = 0
         _HeadIdx("HeadIdx", Float) = 0
         _FaceIdx("FaceIdx", Float) = 0
+        _Height("Height", Float) = 0
+        _Weight("Weight", Float) = 0
 
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
@@ -207,10 +208,11 @@ Shader "Unlit/FullBody"
         float4 _BodyColor;
 
         int _HairLength;
-        int _BodyIdx;
         int _HeadIdx;
         int _HairIdx;
         int _FaceIdx;
+        int _Height;
+        int _Weight;
 
         CBUFFER_END
 
@@ -271,14 +273,15 @@ Shader "Unlit/FullBody"
 
             // Height of character
             float2 FullBodyOffset;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), float2 (0, 0.2), FullBodyOffset);
+            float HeightOffset = 0.3 - (0.15 * _Height);
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), float2 (0, HeightOffset), FullBodyOffset);
 
             // Hair-specific offset
             float2 HairOffset;
             Unity_TilingAndOffset_float(FullBodyOffset, float2 (1, 1), float2 (0, -0.2), HairOffset);
 
             UnityTexture2DArray T2DR_Bodies_Arr = UnityBuildTexture2DArrayStruct(T2DR_Bodies);
-            float4 BodyChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Bodies_Arr.tex, T2DR_Bodies_Arr.samplerstate, FullBodyOffset, _BodyIdx);
+            float4 BodyChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Bodies_Arr.tex, T2DR_Bodies_Arr.samplerstate, FullBodyOffset, _Weight);
 
             UnityTexture2DArray T2DR_Heads_Arr = UnityBuildTexture2DArrayStruct(T2DR_Heads);
             float4 HeadChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Heads_Arr.tex, T2DR_Heads_Arr.samplerstate, FullBodyOffset, _HeadIdx);

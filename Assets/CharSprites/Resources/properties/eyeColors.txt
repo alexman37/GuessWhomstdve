@@ -1,0 +1,8 @@
+###[int id], string name, float probability, Color32 color (or range), string generalDescription(s)
+### Use "val, X0, X0" as the color to use colors from other spots (X0 = val 0)
+### Use "min-max, min-max, 128" to get colors in range min-max for r and g
+
+Brown;X;120-150,50-60,10-20;Brown
+Blue;X;17,20-134,140;Blue
+Green;X;17-50,150-191,25-59;Green
+Black;X;0,0,0;Black

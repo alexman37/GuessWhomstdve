@@ -16,7 +16,7 @@ static float4 C_BODY_OUTLINE = float4(0,0.6,0,1);
 
 static float4 C_EYE_BASE = float4(0,1,1,1);
 
-float epsilon = 0.01f;
+static float epsilon = 0.01;
 
 int AppxColor3(float3 Base, float3 Col) {
 	if(abs(Base.r - Col.r) <= epsilon && abs(Base.g - Col.g) <= epsilon && abs(Base.b - Col.b) <= epsilon) {
@@ -33,15 +33,15 @@ void Overlay_float(float4 Base, float4 Top, out float4 Out) {
 void OverlayHair_float(float4 Base, float4 Top, out float4 Out) {
 	if(Top.a == 0) 
 		Out = Base;
-	else if(AppxColor3(Top.rgb, C_HAIR_BACK) && Base.a > epsilon) Out = Base;
+	else if(distance(Top, C_HAIR_BACK) < epsilon) Out = Base;
 	else Out = Top;
 }
 
 void ColorSwap_float(float4 Base, float4 LookFor, float4 ReplaceWith, out float4 Res) {
-	Res = distance(Base, LookFor) < 0.01f ? ReplaceWith : Base;
+	Res = distance(Base, LookFor) < epsilon ? ReplaceWith : Base;
 }
 
-void Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, float4 BodyColor, float EyeColor, out float4 Colored) {
+void Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, float4 BodyColor, float4 EyeColor, out float4 Colored) {
 	//Colored = Uncolored;
 	if(Uncolored.a > epsilon) {
 		if(Uncolored.r > epsilon) {

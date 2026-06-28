@@ -135,15 +135,18 @@ public enum CPD_Type
     HairStyle,
     HairColor,
     SkinTone,
+    FavoriteColor,
+    EyeColor,
+    Height,
+    Weight,
 
     // Temporary (TODO remove)
-    
-    Test1,
+    /*Test1,
     Test2,
     Test3,
     Test4,
     Test5,
-    Test6,
+    Test6,*/
 
     // Not constrainable
     BodyType,
@@ -290,25 +293,8 @@ public class CPD_Color : CPD
                 {
                     critVal = new ConstantColor(new Color(float.Parse(strColors[0]) / 255f, float.Parse(strColors[1]) / 255f, float.Parse(strColors[2]) / 255f));
                 }
-                /*for (int s = 0; s < strColors.Length; s++)
-                {
-                    string curr = strColors[s];
-                    if (strColors[s].Contains("-"))
-                    {
-                        string[] _ = curr.Split('-');
-                        colors[s] = Random.Range(int.Parse(_[0]), int.Parse(_[1])) / 255.0f;
-                    }
-                    else if (strColors[s].Contains("X"))
-                    {
-                        if (strColors[s] == "X0") colors[s] = colors[0];
-                        if (strColors[s] == "X1") colors[s] = colors[1];
-                    }
-                    else colors[s] = int.Parse(strColors[s]) / 255.0f;
-                }
-                Color col = new Color(colors[0], colors[1], colors[2]);*/
 
-                //probability - probably not what you think it is!
-                //the higher the number, the lower chance it has of appearing
+                //probability - TODO
                 int p;
                 if (fields[1] == "X")
                 {
@@ -359,9 +345,37 @@ public class CPD_Color : CPD
 
 public class CPD_Number : CPD
 {
+    int min, max; // inclusive
+
+    // CPD Number type is assumed to be an int in the range given.
+    public CPD_Number(CPD_Type cat, bool constrainable, int min, int max)
+    {
+        this.constrainable = constrainable;
+        this.cpdType = cat;
+        this.propertiesPath = null;
+        this.min = min;
+        this.max = max;
+        initialize();
+    }
+
     public override List<CPD_Variant> initialize()
     {
-        throw new System.NotImplementedException();
+        // Definitely don't need a properties file unless we re-introduced probabilities again somehow
+        List<CPD_Variant> vars = new List<CPD_Variant>();
+        for(int i = min; i <= max; i++)
+        {
+            vars.Add(new CPD_Variant(
+                    cpdType,
+                    i - min,
+                    i - min,
+                    new CPD_CritVal_Number(i),
+                    i.ToString(),
+                    i.ToString(),
+                    i - min,
+                    1 / (max - min)
+            ));
+        }
+        return vars;
     }
 }
 
@@ -403,6 +417,16 @@ public class CPD_Variant
 public abstract class CPD_CriticalValue
 {
 
+}
+
+public class CPD_CritVal_Number : CPD_CriticalValue
+{
+    public int value;
+
+    public CPD_CritVal_Number(int num)
+    {
+        value = num;
+    }
 }
 
 public class CPD_CritVal_Color : CPD_CriticalValue
