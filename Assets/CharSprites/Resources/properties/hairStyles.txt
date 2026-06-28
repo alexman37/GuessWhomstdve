@@ -1,9 +1,9 @@
 ###[int id], string filename, string name, float probability, string generalDescription(s)
 
-male/afro-big;Afro Big;X;Long
-male/afro-small;Afro Small;X;Normal
-male/baker;Baker;X;Normal
 male/balding;Balding;X;Short
+male/afro-small;Afro Small;X;Normal
+male/afro-big;Afro Big;X;Long
+male/baker;Baker;X;Normal
 male/beret;Beret;X;Normal
 male/blob;Blob;X;Normal
 male/bucket;Bucket;X;Normal

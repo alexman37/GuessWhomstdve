@@ -82,15 +82,7 @@ public class Character
     /// </summary>
     public int getCategoryIndexofCharacteristic(CPD_Type characteristic)
     {
-        return Roster.cpdByType[createdCharacteristics[characteristic].cpdType].categoryIndices[createdCharacteristics[characteristic].category];
-    }
-
-    /// <summary>
-    /// Gets the filepath value from a CPD assumed to be a filepath
-    /// </summary>
-    public string getFilePath(CPD_Type cpdType)
-    {
-        return (createdCharacteristics[cpdType].critVal as CPD_CritVal_Filepath).filepath;
+        return createdCharacteristics[characteristic].categoryIndex;
     }
 
     /// <summary>

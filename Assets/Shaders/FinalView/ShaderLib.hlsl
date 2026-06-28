@@ -60,7 +60,7 @@ void Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, float4
 			ColorSwap_float(Colored, C_HAIR_BASE, HairColor, Colored);
 			ColorSwap_float(Colored, C_HAIR_OUTLINE, HairColor * 0.8f, Colored);
 			ColorSwap_float(Colored, C_HAIR_SHADOW, HairColor * 0.6f, Colored);
-			ColorSwap_float(Colored, C_HAIR_BACK, HairColor * 0.2f, Colored);
+			ColorSwap_float(Colored, C_HAIR_BACK, HairColor * 0.4f, Colored);
 		}
 	}
 }

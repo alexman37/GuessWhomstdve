@@ -64,7 +64,7 @@ public class UI_Roster : MonoBehaviour
         container.name = "RosterContainer";
 
         // TODO set position and such
-        container.transform.position = new Vector3(-14, 4.7f, 0);
+        container.transform.position = new Vector3(-14, 3.5f, 0);
     }
 
     void setRoster(Roster rost)
@@ -148,7 +148,7 @@ public class UI_Roster : MonoBehaviour
             charCard.characterId = c.simulatedId;
             charCard.SetMaterialParams(c);
 
-            roster.shownRosterSprites[i].name = i.ToString();
+            //roster.shownRosterSprites[i].name = i.ToString();
 
             // TODO roster.shownRosterSprites
             
@@ -174,7 +174,7 @@ public class UI_Roster : MonoBehaviour
                 //instantiate card in correct position
                 GameObject newCard = createdCards[i];
 
-                roster.shownRosterSprites[i].name = i.ToString();
+                //roster.shownRosterSprites[i].name = i.ToString();
 
                 // TODO roster.shownRosterSprites
 

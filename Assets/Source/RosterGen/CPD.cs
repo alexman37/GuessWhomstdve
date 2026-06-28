@@ -137,7 +137,7 @@ public enum CPD_Type
     SkinTone,
 
     // Temporary (TODO remove)
-    BodyType,
+    
     Test1,
     Test2,
     Test3,
@@ -146,25 +146,24 @@ public enum CPD_Type
     Test6,
 
     // Not constrainable
+    BodyType,
     Face,
     HeadType
 }
 
 
 /// <summary>
-/// A CPD whose critical value is a path to some file to load.
+/// A CPD without a "critical value", it just uses categoryIndex with a 2D texture array somewhere in shader
 /// </summary>
-public class CPD_FilePath : CPD
+public class CPD_SimpleIndex : CPD
 {
-    private string spritesPath;
 
-    // Given the path of this CPD's properties file and where its sprites are stored, we can initialize all variants.
-    public CPD_FilePath(CPD_Type cat, bool constrainable, string propertiesPath, string spritesPath)
+    // Given the path of this CPD's properties file, we can initialize all variants.
+    public CPD_SimpleIndex(CPD_Type cat, bool constrainable, string propertiesPath)
     {
         this.constrainable = constrainable;
         this.cpdType = cat;
         this.propertiesPath = propertiesPath;
-        this.spritesPath = spritesPath;
         initialize(); 
     }
 
@@ -209,9 +208,10 @@ public class CPD_FilePath : CPD
                     cpdType,
                     categoriesToVariants[cat].Count,
                     variants.Count,
-                    new CPD_CritVal_Filepath(spritesPath + fields[0]),
+                    null,
                     fields[1],
                     cat,
+                    categoryIndices[cat],
                     p
                 );
 
@@ -334,6 +334,7 @@ public class CPD_Color : CPD
                     new CPD_CritVal_Color(critVal),
                     fields[0],
                     cat,
+                    categoryIndices[cat],
                     p
                 );
 
@@ -377,9 +378,10 @@ public class CPD_Variant
     public CPD_CriticalValue critVal; // the actual "thing" stored in this CPD (filepath? color? number? etc...)
     public string name;
     public string category;
+    public int categoryIndex; // order of category in CPD.
     public int probability;
 
-    public CPD_Variant(CPD_Type cpdCat, int catID, int cpdID, CPD_CriticalValue critVal, string name, string cat, int prob)
+    public CPD_Variant(CPD_Type cpdCat, int catID, int cpdID, CPD_CriticalValue critVal, string name, string cat, int catIndex, int prob)
     {
         this.cpdType = cpdCat;
         this.categoryID = catID;
@@ -387,6 +389,7 @@ public class CPD_Variant
         this.critVal = critVal;
         this.name = name;
         this.category = cat;
+        this.categoryIndex = catIndex;
         this.probability = prob;
     }
 
@@ -400,21 +403,6 @@ public class CPD_Variant
 public abstract class CPD_CriticalValue
 {
 
-}
-
-public class CPD_CritVal_Filepath : CPD_CriticalValue
-{
-    public string filepath;
-
-    public CPD_CritVal_Filepath(string f)
-    {
-        filepath = f;
-    }
-
-    public Sprite getSprite()
-    {
-        return Resources.Load<Sprite>(filepath);
-    }
 }
 
 public class CPD_CritVal_Color : CPD_CriticalValue

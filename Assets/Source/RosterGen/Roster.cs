@@ -22,7 +22,6 @@ public class Roster
     private int simulatedCurrentRosterSize = 1; // total number of characters given constraints
 
     public List<Character> shownRoster; // all characters currently being displayed on the screen.
-    public List<Sprite> shownRosterSprites; // the sprites of the currently shown characters (for fast access).
     public HashSet<int> currentRosterIDs; // the simulated IDs of all characters we are currently showing.
 
     private HashSet<int> charactersGuessedAsTarget;  // all characters the player has guessed as the target (never show them again)
@@ -71,18 +70,18 @@ public class Roster
         {
             cpdInstances = new List<CPD>
             {
-                new CPD_FilePath(CPD_Type.HairStyle, true, "properties/hairStyles", "CharSprites64/Hair/"),
+                new CPD_SimpleIndex(CPD_Type.HairStyle, true, "properties/hairStyles"),
                 new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones"),
                 new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones"),
-                new CPD_FilePath(CPD_Type.BodyType, true, "properties/bodyTypes", "CharSprites64/Body/"),
-                new CPD_FilePath(CPD_Type.Face, false, "properties/faceTypes", "CharSprites64/Face/"),
-                new CPD_FilePath(CPD_Type.HeadType, false, "properties/headTypes", "CharSprites64/Head/"),
-                new CPD_FilePath(CPD_Type.Test1, true, "properties/testType", null),
-                new CPD_FilePath(CPD_Type.Test2, true, "properties/testType", null),
-                new CPD_FilePath(CPD_Type.Test3, true, "properties/testType", null),
-                new CPD_FilePath(CPD_Type.Test4, true, "properties/testType", null),
-                new CPD_FilePath(CPD_Type.Test5, true, "properties/testType", null),
-                new CPD_FilePath(CPD_Type.Test6, true, "properties/testType", null),
+                new CPD_SimpleIndex(CPD_Type.BodyType, false, "properties/bodyTypes"),
+                new CPD_SimpleIndex(CPD_Type.Face, false, "properties/faceTypes"),
+                new CPD_SimpleIndex(CPD_Type.HeadType, false, "properties/headTypes"),
+                new CPD_SimpleIndex(CPD_Type.Test1, true, "properties/testType"),
+                new CPD_SimpleIndex(CPD_Type.Test2, true, "properties/testType"),
+                new CPD_SimpleIndex(CPD_Type.Test3, true, "properties/testType"),
+                new CPD_SimpleIndex(CPD_Type.Test4, true, "properties/testType"),
+                new CPD_SimpleIndex(CPD_Type.Test5, true, "properties/testType"),
+                new CPD_SimpleIndex(CPD_Type.Test6, true, "properties/testType"),
             };
             cpdConstrainables = new List<CPD>();
             cpdCounts = new List<int>();
@@ -138,11 +137,9 @@ public class Roster
         if (shownRoster != null)
         {
             shownRoster.Clear();
-            shownRosterSprites.Clear();
         } else
         {
             shownRoster = new List<Character>();
-            shownRosterSprites = new List<Sprite>();
         }
 
         clearAllConstraints.Invoke();
@@ -156,7 +153,6 @@ public class Roster
             shownRoster.Add(new Character(i, simId));
 
             //Debug.Log("roster gen " + roster[i]);
-            shownRosterSprites.Add(CharSpriteGen.genSpriteFromLayers(shownRoster[i]));
             currentRosterIDs.Add(simId);
         }
 
@@ -243,7 +239,6 @@ public class Roster
             {
                 currentRosterIDs.Add(shownRoster[i].simulatedId);
                 newShownRoster.Add(shownRoster[i]);
-                shownRosterSprites[count] = shownRosterSprites[i];
                 count++;
             } 
             // If the character no longer meets constraints, remove it
@@ -272,7 +267,6 @@ public class Roster
             }
             shownRoster.Add(new Character(i, simId));
 
-            shownRosterSprites[i] = CharSpriteGen.genSpriteFromLayers(shownRoster[i]);
             currentRosterIDs.Add(simId);
         }
 
