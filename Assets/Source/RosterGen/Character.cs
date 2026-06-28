@@ -78,6 +78,14 @@ public class Character
     }
 
     /// <summary>
+    /// Get the Category index of a characteristic
+    /// </summary>
+    public int getCategoryIndexofCharacteristic(CPD_Type characteristic)
+    {
+        return Roster.cpdByType[createdCharacteristics[characteristic].cpdType].categoryIndices[createdCharacteristics[characteristic].category];
+    }
+
+    /// <summary>
     /// Gets the filepath value from a CPD assumed to be a filepath
     /// </summary>
     public string getFilePath(CPD_Type cpdType)

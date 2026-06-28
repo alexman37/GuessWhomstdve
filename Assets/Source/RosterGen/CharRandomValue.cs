@@ -13,6 +13,8 @@ public static class CharRandomValue
     private static int firstNamesFSize = firstNamesF.Count;
     private static int lastNamesSize = lastNames.Count;
 
+    private static int[] hairLengthSizes = new int[]{ 21, 21, 15 };
+
     //Return a random integer in range (min, max).
     //Used by: height, weight, etc.
     public static int range(int min, int max)
@@ -33,6 +35,13 @@ public static class CharRandomValue
     {
         if (isMale) return (firstNamesM[Random.Range(0, firstNamesMSize)], lastNames[Random.Range(0, lastNamesSize)]);
         else return (firstNamesF[Random.Range(0, firstNamesFSize)], lastNames[Random.Range(0, lastNamesSize)]);
+    }
+
+    //Return a random hair index. It depends on the hair length
+    //(...may later depend on sex)
+    public static int randomHairIndex(int HairLen)
+    {
+        return UnityEngine.Random.Range(0, hairLengthSizes[HairLen]);
     }
 
     private static List<string> getNames(string path)

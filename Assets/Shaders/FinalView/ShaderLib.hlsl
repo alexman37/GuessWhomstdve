@@ -2,22 +2,21 @@
 #ifndef MYHLSINCLUDE_INCLUDED
 #define MYHLSINCLUDE_INCLUDED
 
-float epsilon = 0.01f;
-
 // Color codes
-static float3 C_HAIR_BASE = float3(0,0,1);
-static float3 C_HAIR_OUTLINE = float3(0,0,0.6);
-static float3 C_HAIR_SHADOW = float3(0,0,0.4);
-static float3 C_HAIR_BACK = float3(0,0,0.2);
+static float4 C_HAIR_BASE = float4(0,0,1,1);
+static float4 C_HAIR_OUTLINE = float4(0,0,0.6,1);
+static float4 C_HAIR_SHADOW = float4(0,0,0.4,1);
+static float4 C_HAIR_BACK = float4(0,0,0.2,1);
 
-static float3 C_SKIN_BASE = float3(1,0,0);
-static float3 C_SKIN_OUTLINE = float3(0.6,0,0);
+static float4 C_SKIN_BASE = float4(1,0,0,1);
+static float4 C_SKIN_OUTLINE = float4(0.6,0,0,1);
 
-static float3 C_BODY_BASE = float3(0,1,0);
-static float3 C_BODY_OUTLINE = float3(0,0.6,0);
+static float4 C_BODY_BASE = float4(0,1,0,1);
+static float4 C_BODY_OUTLINE = float4(0,0.6,0,1);
 
-static float3 C_EYE_BASE = float3(0,1,1);
+static float4 C_EYE_BASE = float4(0,1,1,1);
 
+float epsilon = 0.01f;
 
 int AppxColor3(float3 Base, float3 Col) {
 	if(abs(Base.r - Col.r) <= epsilon && abs(Base.g - Col.g) <= epsilon && abs(Base.b - Col.b) <= epsilon) {
@@ -38,49 +37,30 @@ void OverlayHair_float(float4 Base, float4 Top, out float4 Out) {
 	else Out = Top;
 }
 
+void ColorSwap_float(float4 Base, float4 LookFor, float4 ReplaceWith, out float4 Res) {
+	Res = distance(Base, LookFor) < 0.01f ? ReplaceWith : Base;
+}
+
 void Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, float4 BodyColor, float EyeColor, out float4 Colored) {
+	//Colored = Uncolored;
 	if(Uncolored.a > epsilon) {
-		// Red: Skin color
 		if(Uncolored.r > epsilon) {
-			if(AppxColor3(Uncolored.rgb, C_SKIN_BASE)) {
-				Colored = SkinColor;
-			} else if(AppxColor3(Uncolored.rgb, C_SKIN_OUTLINE)) {
-				Colored = SkinColor * 0.8f;
-			}
-			else {
-				Colored = Uncolored;
-			}
+			ColorSwap_float(Uncolored, C_SKIN_BASE, SkinColor, Colored);
+			ColorSwap_float(Colored, C_SKIN_OUTLINE, SkinColor * 0.8f, Colored);
 		}
-		// Green: Body / Shirt color
-		else if(Uncolored.g > epsilon) {
-			if(AppxColor3(Uncolored.rgb, C_BODY_BASE)) {
-				Colored = BodyColor;
-			} else if(AppxColor3(Uncolored.rgb, C_BODY_OUTLINE)) {
-				Colored = BodyColor * 0.8f;
-			} else if(AppxColor3(Uncolored.rgb, C_EYE_BASE)) {
-				Colored = EyeColor;
-			}
-			else {
-				Colored = Uncolored;
-			}
+
+		ColorSwap_float(Colored, C_EYE_BASE, EyeColor, Colored);
+
+		if(Uncolored.g > epsilon) {
+			ColorSwap_float(Colored, C_BODY_BASE, BodyColor, Colored);
+			ColorSwap_float(Colored, C_BODY_OUTLINE, BodyColor * 0.8f, Colored);
 		}
-		// Blue: Hair color
-		else if(Uncolored.b > epsilon) {
-			if(AppxColor3(Uncolored.rgb, C_HAIR_BASE)) {
-				Colored = HairColor;
-			} else if(AppxColor3(Uncolored.rgb, C_HAIR_OUTLINE)) {
-				Colored = HairColor * 0.8f;
-			} else if(AppxColor3(Uncolored.rgb, C_HAIR_SHADOW)) {
-				Colored = HairColor * 0.6f;
-			} else if(AppxColor3(Uncolored.rgb, C_HAIR_BACK)) {
-				Colored = HairColor * 0.2f;
-			}
-			else {
-				Colored = Uncolored;
-			}
-		}
-		else {
-			Colored = Uncolored;
+
+		if(Uncolored.b > epsilon) {
+			ColorSwap_float(Colored, C_HAIR_BASE, HairColor, Colored);
+			ColorSwap_float(Colored, C_HAIR_OUTLINE, HairColor * 0.8f, Colored);
+			ColorSwap_float(Colored, C_HAIR_SHADOW, HairColor * 0.6f, Colored);
+			ColorSwap_float(Colored, C_HAIR_BACK, HairColor * 0.2f, Colored);
 		}
 	}
 }

@@ -22,9 +22,8 @@ public class UI_Roster : MonoBehaviour
     [SerializeField] private Image commonButton;
     [SerializeField] private Image filteredButton;
 
-    //UI components
-    public Image rosterWindow;
-    public Image characterCardTemplate;
+    // Roster cards are sprites now, so canvas terms not used anymore
+    public GameObject characterCardTemplate;
     public TextMeshProUGUI suspectsRemaining;
 
     private GameObject container;
@@ -63,16 +62,9 @@ public class UI_Roster : MonoBehaviour
 
         container = new GameObject();
         container.name = "RosterContainer";
-        container.AddComponent<RectTransform>();
-        RectTransform rt = container.GetComponent<RectTransform>();
 
-        container.transform.SetParent(transform);
-        rt.localScale = new Vector3(1, 1, 1);
-
-        rt.pivot = new Vector2(0, 1);
-        rt.anchorMax = new Vector2(0, 1);
-        rt.anchorMin = new Vector2(0, 1);
-        rt.anchoredPosition = new Vector2(0, 0);
+        // TODO set position and such
+        container.transform.position = new Vector3(-14, 4.7f, 0);
     }
 
     void setRoster(Roster rost)
@@ -104,7 +96,7 @@ public class UI_Roster : MonoBehaviour
     /// </summary>
     public void toggleRosterWindow()
     {
-        bool newVal = !rosterWindow.gameObject.activeInHierarchy;
+        bool newVal = gameObject.activeInHierarchy;
         if (newVal == true) generateAllCharCards();
         else
         {
@@ -113,7 +105,7 @@ public class UI_Roster : MonoBehaviour
             createContainer();
         }
 
-        rosterWindow.gameObject.SetActive(newVal);
+        gameObject.SetActive(newVal);
     }
 
     /// <summary>
@@ -132,10 +124,10 @@ public class UI_Roster : MonoBehaviour
         createContainer();
 
         int entriesPerRow = 8;
-        float startingX = characterCardTemplate.rectTransform.position.x + 20;
-        float startingY = characterCardTemplate.rectTransform.position.y;
-        float cardWidth = characterCardTemplate.rectTransform.rect.width;
-        float cardHeight = characterCardTemplate.rectTransform.rect.height;
+        float startingX = 0;
+        float startingY = 0;
+        float cardWidth = 2.4f;
+        float cardHeight = 3.2f;
         float cardOffsetW = cardWidth / 10f;
         float cardOffsetH = cardHeight / 10f;
 
@@ -145,19 +137,21 @@ public class UI_Roster : MonoBehaviour
             Character c = roster.shownRoster[i];
 
             //instantiate card in correct position
-            Image newCard = GameObject.Instantiate(characterCardTemplate);
+            GameObject newCard = GameObject.Instantiate(characterCardTemplate);
             newCard.transform.SetParent(container.transform);
-            newCard.rectTransform.localPosition = new Vector3(
+            newCard.transform.localPosition = new Vector3(
                 startingX + Mathf.Floor(i % entriesPerRow) * (cardWidth + cardOffsetW), 
                 startingY - Mathf.Floor(i / entriesPerRow) * (cardHeight + cardOffsetH), 0);
-            newCard.rectTransform.localScale = Vector3.one;
             newCard.gameObject.SetActive(true);
 
-            newCard.gameObject.GetComponent<CharacterCard>().characterId = c.simulatedId;
+            CharacterCard charCard = newCard.gameObject.GetComponent<CharacterCard>();
+            charCard.characterId = c.simulatedId;
+            charCard.SetMaterialParams(c);
 
             roster.shownRosterSprites[i].name = i.ToString();
-            // TODO would it be better as a sprite renderer???
-            newCard.transform.GetChild(0).GetComponent<Image>().sprite = roster.shownRosterSprites[i];
+
+            // TODO roster.shownRosterSprites
+            
 
             //set portrait and name
             newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
@@ -178,13 +172,15 @@ public class UI_Roster : MonoBehaviour
                 Character c = roster.shownRoster[i];
 
                 //instantiate card in correct position
-                Image newCard = createdCards[i].GetComponent<Image>();
+                GameObject newCard = createdCards[i];
 
                 roster.shownRosterSprites[i].name = i.ToString();
-                // TODO would it be better as a sprite renderer???
-                newCard.transform.GetChild(0).GetComponent<Image>().sprite = roster.shownRosterSprites[i];
 
-                newCard.gameObject.GetComponent<CharacterCard>().characterId = c.simulatedId;
+                // TODO roster.shownRosterSprites
+
+                CharacterCard charCard = newCard.GetComponent<CharacterCard>();
+                charCard.characterId = c.simulatedId;
+                charCard.SetMaterialParams(c);
 
                 //set portrait and name
                 newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
