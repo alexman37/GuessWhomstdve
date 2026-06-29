@@ -1,0 +1,14 @@
+###[int id], string filename, string name, float probability, string generalDescription(s)
+
+aries;Aries;X;Aries
+taurus;Taurus;X;Taurus
+gemini;Gemini;X;Gemini
+cancer;Cancer;X;Cancer
+leo;Leo;X;Leo
+virgo;Virgo;X;Virgo
+libra;Libra;X;Libra
+scorpio;Scorpio;X;Scorpio
+sagittarius;Sagittarius;X;Sagittarius
+capricorn;Capricorn;X;Capricorn
+aquarius;Aquarius;X;Aquarius
+pisces;Pisces;X;Pisces

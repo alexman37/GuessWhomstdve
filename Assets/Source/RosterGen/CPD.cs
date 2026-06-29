@@ -139,6 +139,8 @@ public enum CPD_Type
     EyeColor,
     Height,
     Weight,
+    BloodType,
+    Zodiac,
 
     // Temporary (TODO remove)
     /*Test1,

@@ -69,6 +69,8 @@ Material:
     - _HairIdx: 0
     - _HairLength: 0
     - _HeadIdx: 0
+    - _Height: 0
+    - _Weight: 0
     m_Colors:
     - SkinColor: {r: 1, g: 1, b: 1, a: 1}
     - _BodyColor: {r: 0.4245283, g: 0.31038627, b: 0.31038627, a: 1}

@@ -1,0 +1,10 @@
+###[int id], string filename, string name, float probability, string generalDescription(s)
+
+an;A-;X;A-
+ap;A+;X;A+
+bn;B-;X;B-
+bp;B+;X;B+
+abn;AB-;X;AB-
+abp;AB+;X;AB+
+on;O-;X;O-
+op;O+;X;O+
