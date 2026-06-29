@@ -30,11 +30,13 @@ void Overlay_float(float4 Base, float4 Top, out float4 Out) {
 	else Out = Top;
 }
 
+// Hair layering: Back hair -> "base" -> All other hair
 void OverlayHair_float(float4 Base, float4 Top, out float4 Out) {
-	if(Top.a == 0) 
-		Out = Base;
-	else if(distance(Top, C_HAIR_BACK) < epsilon) Out = Base;
-	else Out = Top;
+	if(distance(Top, C_HAIR_BACK) < epsilon) {
+		Out = Base.a == 0 ? Top : Base;
+	} else {
+		Out = Top.a == 0 ? Base : Top;
+	}
 }
 
 void ColorSwap_float(float4 Base, float4 LookFor, float4 ReplaceWith, out float4 Res) {
