@@ -25,9 +25,10 @@ public abstract class CPD
     /// <summary>
     /// Returns a completely random CPD variant
     /// </summary>
-    public CPD_Variant getRandom()
+    public (uint, CPD_Variant) getRandom(uint seed)
     {
-        return variants[Random.Range(0, variants.Count)];
+        (uint s, int v) randIndex = CharRandomValue.RangedSeedRandomizer(seed, 0, variants.Count);
+        return (randIndex.s, variants[(int)randIndex.v]);
     }
 
     /// <summary>
@@ -35,7 +36,7 @@ public abstract class CPD
     /// </summary>
     public int getRandomIndex()
     {
-        return Random.Range(0, variants.Count);
+        return UnityEngine.Random.Range(0, variants.Count);
     }
 
     /// <summary>
@@ -52,7 +53,10 @@ public abstract class CPD
             }
         }
         if (allPossible.Count == 0) return null;
-        else return allPossible[Random.Range(0, allPossible.Count)];
+        else
+        {
+            return allPossible[UnityEngine.Random.Range(0, allPossible.Count)];
+        }
     }
 
     /// <summary>
@@ -67,14 +71,14 @@ public abstract class CPD
     /// <summary>
     /// Get all possible category indicies with respect to whichever categories are constrained
     /// </summary>
-    public List<int> getAllConstrainedIndicies(HashSet<string> restrictedCats)
+    public List<uint> getAllConstrainedIndicies(HashSet<string> restrictedCats)
     {
-        List<int> cats = new List<int>();
+        List<uint> cats = new List<uint>();
         foreach(string cat in categories)
         {
             if(!restrictedCats.Contains(cat))
             {
-                cats.Add(categoryIndices[cat]);
+                cats.Add((uint)categoryIndices[cat]);
             }
         }
         return cats;
@@ -448,7 +452,7 @@ public class CPD_CritVal_Color : CPD_CriticalValue
 
 public abstract class CPD_ColorType
 {
-    public abstract Color getColor(int simId);
+    public abstract (uint, Color) getColor(uint simId);
 }
 
 public class ConstantColor : CPD_ColorType
@@ -459,9 +463,9 @@ public class ConstantColor : CPD_ColorType
     {
         col = co;
     }
-    public override Color getColor(int simId)
+    public override (uint, Color) getColor(uint seed)
     {
-        return col;
+        return (seed, col);
     }
 }
 
@@ -486,13 +490,12 @@ public class ColorRange : CPD_ColorType
         this.maxB = maxB;
     }
 
-    public override Color getColor(int simId)
+    // TODO: Do we want to pass the seed along or not? Seems like a minor thing...prob OK without it...
+    public override (uint, Color) getColor(uint seed)
     {
-        Random.InitState(simId);
-        return new Color(
-            (float)Random.Range(minR, maxR) / 255f,
-            (float)Random.Range(minG, maxG) / 255f,
-            (float)Random.Range(minB, maxB) / 255f,
-        1);
+        (uint s, float v) r = CharRandomValue.RangedSeedRandomizer(seed, minR, maxR);
+        (uint s, float v) g = CharRandomValue.RangedSeedRandomizer(r.s, minG, maxG);
+        (uint s, float v) b = CharRandomValue.RangedSeedRandomizer(g.s, minB, maxB);
+        return (b.s, new Color(r.v / 255f, g.v / 255f, b.v / 255f, 1));
     }
 }

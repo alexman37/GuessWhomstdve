@@ -26,7 +26,7 @@ public abstract class Player
     /// <summary>
     /// Guess the target outright
     /// </summary>
-    public abstract void guessTarget(int characterId);
+    public abstract void guessTarget(uint characterId);
 
     public virtual void clearConstraints()
     {

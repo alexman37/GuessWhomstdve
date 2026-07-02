@@ -35,7 +35,7 @@ public class HumanPlayer : Player
 
     // When a target has been guessed, do these actions
     // Some are performed only if it's your turn
-    public override void guessTarget(int characterId)
+    public override void guessTarget(uint characterId)
     {
         bool correct = TurnDriver.instance.currentRoster.targetId == characterId;
         // TODO obv. gotta do more than just click/respond

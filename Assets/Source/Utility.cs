@@ -21,6 +21,23 @@ public class Utility
         return ts;
     }
 
+    /// <summary>
+    /// Round float to unsigned integer
+    /// </summary>
+    public static uint RoundToUInt(float f)
+    {
+        if (f % 1 > 0.5f) return (uint)(f + 1);
+        else return (uint)(f);
+    }
+
+    /// <summary>
+    /// Floor float to unsigned integer
+    /// </summary>
+    public static uint FloorToUInt(float f)
+    {
+        return (uint)(f);
+    }
+
 
     /// <summary>
     /// Return the abbreviated string representation of a number   \  

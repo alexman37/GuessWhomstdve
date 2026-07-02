@@ -10,7 +10,7 @@ using TMPro;
 public class UI_Roster : MonoBehaviour
 {
     // How many characters should we display at a time?
-    public const int CHARACTERS_TO_SHOW = 32;
+    public const uint CHARACTERS_TO_SHOW = 32;
 
     public static UI_Roster instance;
 
@@ -111,7 +111,7 @@ public class UI_Roster : MonoBehaviour
     /// <summary>
     /// Change the display at the top of the roster to show a new number
     /// </summary>
-    public void updateRosterCount(int newCount)
+    public void updateRosterCount(uint newCount)
     {
         suspectsRemaining.text = newCount.ToString() + " Suspects Remaining";
     }
@@ -161,11 +161,11 @@ public class UI_Roster : MonoBehaviour
     }
 
     // TODO - fancier animations for this - one day.
-    public void regenerateCharCards(int newNumber)
+    public void regenerateCharCards(uint newNumber)
     {
         if(roster != null)
         {
-            int numPortraits = Mathf.Min(newNumber, CHARACTERS_TO_SHOW);
+            int numPortraits = (int)Mathf.Min(newNumber, CHARACTERS_TO_SHOW);
             for (int i = 0; i < numPortraits; i++)
             {
                 createdCards[i].SetActive(true);

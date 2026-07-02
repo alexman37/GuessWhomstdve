@@ -32,7 +32,7 @@ public class BotPlayer : Player
 
     }
 
-    public override void guessTarget(int characterId)
+    public override void guessTarget(uint characterId)
     {
         bool correct = TurnDriver.instance.currentRoster.targetId == characterId;
 

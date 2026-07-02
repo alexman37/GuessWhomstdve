@@ -5,13 +5,13 @@ using System;
 
 public class CharacterCard : MonoBehaviour
 {
-    public int characterId;
+    public uint characterId;
 
     [SerializeField] SpriteRenderer portraitFrame;
     [SerializeField] SpriteRenderer portrait;
     [SerializeField] Material drawMat;
 
-    public static event Action<int> charCardClicked = (_) => { };
+    public static event Action<uint> charCardClicked = (_) => { };
 
     // Start is called before the first frame update
     void Start()
@@ -31,20 +31,30 @@ public class CharacterCard : MonoBehaviour
     {
         drawMat = portrait.material;
 
-        drawMat.SetInt("_BodyIdx", UnityEngine.Random.Range(0, 3));
-        drawMat.SetInt("_HeadIdx", UnityEngine.Random.Range(0, 8));
-        drawMat.SetInt("_FaceIdx", UnityEngine.Random.Range(0, 14));
+        uint startingSeed = c.simulatedId;
+
+        (uint s, int v) crv1 = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 3);
+        drawMat.SetInt("_BodyIdx", crv1.v);
+        (uint s, int v) crv2 = CharRandomValue.RangedSeedRandomizer(crv1.s, 0, 8);
+        drawMat.SetInt("_HeadIdx", crv2.v);
+        (uint s, int v) crv3 = CharRandomValue.RangedSeedRandomizer(crv2.s, 0, 14);
+        drawMat.SetInt("_FaceIdx", crv3.v);
         drawMat.SetInt("_Height", c.getCategoryIndexofCharacteristic(CPD_Type.Height));
         drawMat.SetInt("_Weight", c.getCategoryIndexofCharacteristic(CPD_Type.Weight));
 
         int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
         drawMat.SetInt("_HairLength", Hairlen);
-        drawMat.SetInt("_HairIdx", CharRandomValue.randomHairIndex(Hairlen));
+        (uint s, int v) crv4 = CharRandomValue.randomHairIndex(crv3.s, Hairlen);
+        drawMat.SetInt("_HairIdx", crv4.v);
 
-        drawMat.SetColor("_HairColor", c.getColorField(CPD_Type.HairColor));
-        drawMat.SetColor("_SkinColor", c.getColorField(CPD_Type.SkinTone));
-        drawMat.SetColor("_EyeColor", c.getColorField(CPD_Type.EyeColor));
-        drawMat.SetColor("_BodyColor", c.getColorField(CPD_Type.FavoriteColor));
+        (uint s, Color v) crv5 = c.getColorField(crv4.s, CPD_Type.HairColor);
+        drawMat.SetColor("_HairColor", crv5.v);
+        (uint s, Color v) crv6 = c.getColorField(crv5.s, CPD_Type.SkinTone);
+        drawMat.SetColor("_SkinColor", crv6.v);
+        (uint s, Color v) crv7 = c.getColorField(crv6.s, CPD_Type.EyeColor);
+        drawMat.SetColor("_EyeColor", crv7.v);
+        (uint s, Color v) crv8 = c.getColorField(crv7.s, CPD_Type.FavoriteColor);
+        drawMat.SetColor("_BodyColor", crv8.v);
     }
 
     private void OnMouseDown()
