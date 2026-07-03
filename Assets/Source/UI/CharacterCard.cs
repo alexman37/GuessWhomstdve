@@ -11,6 +11,9 @@ public class CharacterCard : MonoBehaviour
     [SerializeField] SpriteRenderer portrait;
     [SerializeField] Material drawMat;
 
+    [SerializeField] SpriteRenderer[] simpleIndexBadges;
+    [SerializeField] CPD_Type[] simpleIndexOrder;
+
     public static event Action<uint> charCardClicked = (_) => { };
 
     // Start is called before the first frame update
@@ -33,6 +36,7 @@ public class CharacterCard : MonoBehaviour
 
         uint startingSeed = c.simulatedId;
 
+        // Main portrait
         (uint s, int v) crv1 = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 3);
         drawMat.SetInt("_BodyIdx", crv1.v);
         (uint s, int v) crv2 = CharRandomValue.RangedSeedRandomizer(crv1.s, 0, 8);
@@ -55,6 +59,15 @@ public class CharacterCard : MonoBehaviour
         drawMat.SetColor("_EyeColor", crv7.v);
         (uint s, Color v) crv8 = c.getColorField(crv7.s, CPD_Type.FavoriteColor);
         drawMat.SetColor("_BodyColor", crv8.v);
+
+        // Simple index mats
+        if(simpleIndexBadges.Length == simpleIndexOrder.Length)
+        {
+            for (int i = 0; i < simpleIndexBadges.Length; i++)
+            {
+                simpleIndexBadges[i].material.SetFloat("Ref_MatIndex", c.getCategoryIndexofCharacteristic(simpleIndexOrder[i]));
+            }
+        }
     }
 
     private void OnMouseDown()

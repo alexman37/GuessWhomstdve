@@ -23,7 +23,6 @@ public static class CharRandomValue
         (uint s, int v) firstNameIdx = isMale ? RangedSeedRandomizer(seed, 0, firstNamesMSize) : RangedSeedRandomizer(seed, 0, firstNamesFSize);
         (uint s, int v) lastNameIdx = RangedSeedRandomizer(firstNameIdx.s, 0, lastNamesSize);
         return (lastNameIdx.s, firstNamesM[firstNameIdx.v], lastNames[lastNameIdx.v]);
-        return (seed, seed.ToString(), "");
     }
 
     //Return a random hair index. It depends on the hair length

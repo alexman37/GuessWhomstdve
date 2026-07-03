@@ -21,6 +21,7 @@ Shader "Unlit/FullBody"
         _HairIdx("HairIdx", Float) = 0
         _HeadIdx("HeadIdx", Float) = 0
         _FaceIdx("FaceIdx", Float) = 0
+
         _Height("Height", Float) = 0
         _Weight("Weight", Float) = 0
 
@@ -211,6 +212,7 @@ Shader "Unlit/FullBody"
         int _HeadIdx;
         int _HairIdx;
         int _FaceIdx;
+
         int _Height;
         int _Weight;
 
