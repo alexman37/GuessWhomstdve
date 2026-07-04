@@ -8,6 +8,7 @@ Shader "Unlit/FullBody"
         [NoScaleOffset]T2DR_Hair_S("T2DR_Hair_S", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Hair_M("T2DR_Hair_M", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Hair_L("T2DR_Hair_L", 2DArray) = "" {}
+        [NoScaleOffset]T2DR_City_l1("T2DR_City_l1", 2DArray) = "" {}
         [NoScaleOffset]MainTexProp("MainTex", 2D) = "white" {}
         
         // Specifics
@@ -24,6 +25,9 @@ Shader "Unlit/FullBody"
 
         _Height("Height", Float) = 0
         _Weight("Weight", Float) = 0
+
+        _LLOD("LLOD", Float) = 0
+        _CityIdx_l1("CityIdx_l1", Float) = 0
 
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
@@ -216,6 +220,9 @@ Shader "Unlit/FullBody"
         int _Height;
         int _Weight;
 
+        int _LLOD;
+        int _CityIdx_l1;
+
         CBUFFER_END
 
         // Object and Global properties
@@ -231,6 +238,8 @@ Shader "Unlit/FullBody"
         SAMPLER(samplerT2DR_Hair_M);
         TEXTURE2D_ARRAY(T2DR_Hair_L);
         SAMPLER(samplerT2DR_Hair_L);
+        TEXTURE2D_ARRAY(T2DR_City_l1);
+        SAMPLER(samplerT2DR_City_l1);
         TEXTURE2D(MainTexProp);
         SAMPLER(samplerMainTexProp);
         SAMPLER(SamplerState_Linear_Repeat);
@@ -240,6 +249,21 @@ Shader "Unlit/FullBody"
         void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
         {
             Out = UV * Tiling + Offset;
+        }
+
+        void Unity_Rotate_Degrees_float(float2 UV, float2 Center, float Rotation, out float2 Out)
+        {
+            Rotation = Rotation * (3.1415926f/180.0f);
+            UV -= Center;
+            float s = sin(Rotation);
+            float c = cos(Rotation);
+            float2x2 rMatrix = float2x2(c, -s, s, c);
+            rMatrix *= 0.5;
+            rMatrix += 0.5;
+            rMatrix = rMatrix * 2 - 1;
+            UV.xy = mul(UV.xy, rMatrix);
+            UV += Center;
+            Out = UV;
         }
 
         // 3114e4fb6f435b044aee665411644ffd
@@ -276,12 +300,14 @@ Shader "Unlit/FullBody"
             // Height of character
             float2 FullBodyOffset;
             float HeightOffset = 0.3 - (0.15 * _Height);
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), float2 (0, HeightOffset), FullBodyOffset);
+            float HorzOffset = _LLOD > 0 ? -0.25 : 0;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), float2 (HorzOffset, HeightOffset), FullBodyOffset);
 
             // Hair-specific offset
             float2 HairOffset;
             Unity_TilingAndOffset_float(FullBodyOffset, float2 (1, 1), float2 (0, -0.2), HairOffset);
 
+            // Create main portrait
             UnityTexture2DArray T2DR_Bodies_Arr = UnityBuildTexture2DArrayStruct(T2DR_Bodies);
             float4 BodyChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Bodies_Arr.tex, T2DR_Bodies_Arr.samplerstate, FullBodyOffset, _Weight);
 
@@ -305,17 +331,28 @@ Shader "Unlit/FullBody"
                 HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
             }
 
-            float4 OverlayStep1;
-            Overlay_float(BodyChoice, HeadChoice, OverlayStep1);
-            float4 OverlayStep2;
-            Overlay_float(OverlayStep1, FaceChoice, OverlayStep2);
-            float4 OverlayStep3;
-            OverlayHair_float(OverlayStep2, HairChoice, OverlayStep3);
+            float4 OverlayStep1 = Overlay_float(BodyChoice, HeadChoice);
+            float4 OverlayStep2 = Overlay_float(OverlayStep1, FaceChoice);
+            float4 OverlayStep3 = OverlayHair_float(OverlayStep2, HairChoice);
             
             float4 Colorized;
             // TODO replace consts with actual variables
-            Colorize_float(OverlayStep3, _SkinColor, _HairColor, _BodyColor, _EyeColor, Colorized);
-            surface.BaseColor = (Colorized.xyz);
+            Colorized = Colorize_float(OverlayStep3, _SkinColor, _HairColor, _BodyColor, _EyeColor);
+            float4 Finalized = Colorized;
+
+            // Location stuff (depends on LOD)
+            if(_LLOD == 1) {
+                float2 CityOffset;
+                Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1.5, 1.5), float2 (0, 0), CityOffset);
+                Unity_Rotate_Degrees_float(CityOffset, float2 (0.5, 0.5), float (15), CityOffset);
+
+                UnityTexture2DArray T2DR_City_l1_Arr = UnityBuildTexture2DArrayStruct(T2DR_City_l1);
+                float4 CityPic = SAMPLE_TEXTURE2D_ARRAY(T2DR_City_l1_Arr.tex, T2DR_City_l1_Arr.samplerstate, CityOffset, _CityIdx_l1);
+                Finalized = Overlay_float(CityPic, Colorized);
+            }
+            
+
+            surface.BaseColor = (Finalized.xyz);
             surface.Alpha = 1;
             return surface;
         }

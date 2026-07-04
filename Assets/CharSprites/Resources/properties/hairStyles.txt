@@ -1,64 +1,61 @@
 ###[int id], string filename, string name, float probability, string generalDescription(s)
 
-male/balding;Balding;X;Short
-male/afro-small;Afro Small;X;Normal
-male/afro-big;Afro Big;X;Long
-male/baker;Baker;X;Normal
-male/beret;Beret;X;Normal
-male/blob;Blob;X;Normal
-male/bucket;Bucket;X;Normal
-male/doc;Doc;X;Normal
-male/dorky;Dorky;X;Normal
-male/double-spiked;Double Spiked;X;Normal
-male/elvis;Elvis;X;Normal
-male/fancy-twopart;Fancy Two Part;X;Normal
-male/flicked;Flicked;X;Normal
-male/fold-left;Fold Left;X;Normal
-male/fold-right;Fold Right;X;Normal
-male/frizzled;Frizzled;X;Long
-male/goku;Goku;X;Long
-male/kpop;Kpop;X;Normal
-male/lightning;Lightning;X;Normal
-male/likeahat;Like A Hat;X;Short
-male/matted;Matted;X;Normal
-male/middle-piece;Middle Piece;X;Normal
-male/mohawk;Mohawk;X;Short
-male/one-side-flick;One Sided Flick;X;Normal
-male/round-top;Round Top;X;Normal
-male/royalty;Royalty;X;Normal
-male/semicircle;Semicircle;X;Normal
-male/slimy;Slimy;X;Normal
-male/sloppy;Sloppy;X;Normal
-male/small-twirl;Small Twirl;X;Long
-male/soft-mohawk;Soft Mohawk;X;Short
-male/spiky-sloppy;Spiky Sloppy;X;Long
-male/squilliam-rain;Squilliam Rain;X;Normal
-male/squilliam;Squilliam;X;Normal
-male/toupee;Toupee;X;Normal
-male/triple-spiked;Triple Spiked;X;Normal
-male/two-part;Two Part;X;Normal
-male/very-spiky;Very Spiky;X;Long
+balding1;M-balding1;X;Short
+balding2;M-balding2;X;Short
+balding3;M-balding3;X;Short
+balding4;M-balding4;X;Short
+balding5;M-balding5;X;Short
+balding6;N-balding6;X;Short
+crew1;N-crew1;X;Short
+crew2;N-crew2;X;Short
+crew3;N-crew3;X;Short
+crew4;N-crew4;X;Short
+crew5;N-crew5;X;Short
+slimy;N-slimy;X;Short
+fizz;N-fizz;X;Short
+crew6;N-crew6;X;Short
+crew7;N-crew7;X;Short
+crew8;M-crew8;X;Short
+buns1;F-buns1;X;Short
+buns2;F-buns2;X;Short
+buns3;F-buns3;X;Short
+puff1;F-puff1;X;Short
+puff2;F-puff2;X;Short
 
+elvis;M-elvis;X;Medium
+spiky;M-spiky;X;Medium
+comb1;N-comb1;X;Medium
+comb2;N-comb2;X;Medium
+comb3;N-comb3;X;Medium
+comb4;N-comb4;X;Medium
+comb5;N-comb5;X;Medium
+comb6;N-comb6;X;Medium
+comb7;N-comb7;X;Medium
+comb8;N-comb8;X;Medium
+comb9;N-comb9;X;Medium
+comb10;N-comb10;X;Medium
+pop1;N-pop1;X;Medium
+pop2;N-pop2;X;Medium
+pop3;N-pop3;X;Medium
+pop4;N-pop4;X;Medium
+pop5;N-pop5;X;Medium
+sides1;F-sides1;X;Medium
+sides2;F-sides2;X;Medium
+sides3;F-sides3;X;Medium
+sides4;F-sides4;X;Medium
 
-female/cassidy;Cassidy;X;Long
-female/curly;Curly;X;Long
-female/fold-left-long;Fold Left;X;Long
-female/frowy;Frowy;X;Long
-female/hairbun-2;Hairbun2;X;Short
-female/hairbun;Hairbun;X;Short
-female/karen;Karen;X;Short
-female/long-mat;LongMat;X;Long
-female/long-sideburns;LongSideburns;X;Long
-female/long-streams-2;LongStreams2;X;Long
-female/long-streams;LongStreams;X;Long
-female/mop;Mop;X;Short
-female/multi-prong;MultiProng;X;Long
-female/off-to-side;OffToSide;X;Normal
-female/pigtails-1;Pigtails1;X;Normal
-female/pigtails-2;Pigtails2;X;Long
-female/ponytail;Ponytail;X;Normal
-female/puffy;Puffy;X;Short
-female/short-normal;ShortNormal;X;Short
-female/slide;Side;X;Normal
-female/super-karen;Superkaren;X;Short
-female/two-ls;TwoLs;X;Normal
+goku;M-goku;X;Long
+long1;N-long1;X;Long
+long2;N-long2;X;Long
+long3;N-long3;X;Long
+long4;N-long4;X;Long
+long5;N-long5;X;Long
+long6;N-long6;X;Long
+long7;N-long7;X;Long
+long8;N-long8;X;Long
+long9;N-long9;X;Long
+long10;N-long10;X;Long
+long11;N-long11;X;Long
+long12;N-long12;X;Long
+pigtails1;F-pigtails1;X;Long
+pigtails2;F-pigtails2;X;Long

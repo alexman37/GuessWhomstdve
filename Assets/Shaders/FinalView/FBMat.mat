@@ -27,6 +27,10 @@ Material:
         m_Texture: {fileID: 18700000, guid: 3641504cb2bb960448d29b3dd586dab0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - T2DR_City_l1:
+        m_Texture: {fileID: 18700000, guid: a19c72ca7752d024183f9e2875f548f5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - T2DR_Faces:
         m_Texture: {fileID: 18700000, guid: 5db836fff5baafa4da7634c0162b7d38, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -65,16 +69,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BodyIdx: 0
+    - _CityIdx_l1: 0
     - _FaceIdx: 0
     - _HairIdx: 0
     - _HairLength: 0
     - _HeadIdx: 0
     - _Height: 0
+    - _LLOD: 1
     - _Weight: 0
     m_Colors:
     - SkinColor: {r: 1, g: 1, b: 1, a: 1}
     - _BodyColor: {r: 0.4245283, g: 0.31038627, b: 0.31038627, a: 1}
     - _EyeColor: {r: 0, g: 0, b: 0, a: 1}
     - _HairColor: {r: 0.7264151, g: 0.34607512, b: 0.34607512, a: 1}
-    - _SkinColor: {r: 0.6415094, g: 0.6415094, b: 0.6415094, a: 0}
+    - _SkinColor: {r: 0.6698113, g: 0.635057, b: 0.635057, a: 1}
   m_BuildTextureStacks: []

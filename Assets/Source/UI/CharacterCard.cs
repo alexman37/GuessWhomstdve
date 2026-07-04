@@ -60,6 +60,17 @@ public class CharacterCard : MonoBehaviour
         (uint s, Color v) crv8 = c.getColorField(crv7.s, CPD_Type.FavoriteColor);
         drawMat.SetColor("_BodyColor", crv8.v);
 
+        // Locations
+        switch(drawMat.GetInt("_LLOD"))
+        {
+            case 1:
+                int city = c.getCategoryIndexofCharacteristic(CPD_Type.City_L1);
+                drawMat.SetInt("_CityIdx_l1", city);
+                break;
+            default:
+                break;
+        }
+
         // Simple index mats
         if(simpleIndexBadges.Length == simpleIndexOrder.Length)
         {

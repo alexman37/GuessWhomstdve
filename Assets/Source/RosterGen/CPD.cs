@@ -146,13 +146,8 @@ public enum CPD_Type
     BloodType,
     Zodiac,
 
-    // Temporary (TODO remove)
-    /*Test1,
-    Test2,
-    Test3,
-    Test4,
-    Test5,
-    Test6,*/
+    // Constrainable Locations
+    City_L1,
 
     // Not constrainable
     BodyType,

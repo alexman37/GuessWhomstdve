@@ -1,0 +1,14 @@
+###[int id], string filename, string name, float probability, string generalDescription(s)
+
+nyc;New York City;X;New York City
+tokyo;Tokyo;X;Tokyo
+beijing;Beijing;X;Beijing
+london;London;X;London
+paris;Paris;X;Paris
+rio;Rio De Janeiro;X;Rio De Janeiro
+cairo;Cairo;X;Cairo
+istanbul;Istanbul;X;Istanbul
+rome;Rome;X;Rome
+newdelhi;New Delhi;X;New Delhi
+moscow;Moscow;X;Moscow
+berlin;Berlin;X;Berlin
