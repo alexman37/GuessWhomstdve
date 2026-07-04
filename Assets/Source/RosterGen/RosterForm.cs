@@ -63,7 +63,7 @@ public class RosterForm : MonoBehaviour
 
         foreach(CPD cpd in formFields)
         {
-            createWithParameters(cpd.cpdType, cpd.categories);
+            createWithParameters(cpd.cpdType, cpd.categories, cpd.dependentOn);
         }
 
         self.sizeDelta = new Vector2(self.rect.width, nextFormGroupOffset);
@@ -72,7 +72,7 @@ public class RosterForm : MonoBehaviour
     /// <summary>
     /// Build the sorting menu for a single CPD
     /// </summary>
-    private void createWithParameters(CPD_Type cpdType, List<string> cpdCategories)
+    private void createWithParameters(CPD_Type cpdType, List<string> cpdCategories, int dependentOn)
     {
         GameObject next = GameObject.Instantiate(formButtonGroupTemplate, this.transform);
         next.name = cpdType.ToString();
@@ -82,7 +82,7 @@ public class RosterForm : MonoBehaviour
         formGroup.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = cpdType.ToString().ToUpper();
 
         // Offset every form field grouping by a constant amount of pixels
-        float totalHeight = formGroup.buildFormButtonGroup(cpdType, cpdCategories, -nextFormGroupOffset) + 30;
+        float totalHeight = formGroup.buildFormButtonGroup(cpdType, cpdCategories, -nextFormGroupOffset, dependentOn) + 30;
         RectTransform container = next.GetComponent<Image>().rectTransform;
         container.sizeDelta = new Vector2(container.rect.width, totalHeight + 10);
         nextFormGroupOffset += totalHeight + 20;

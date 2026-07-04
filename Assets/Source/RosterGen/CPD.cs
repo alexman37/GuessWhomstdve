@@ -8,9 +8,14 @@ using UnityEngine;
 /// </summary>
 public abstract class CPD
 {
+    public static Dictionary<CPD_Type, CPD> registry = new Dictionary<CPD_Type, CPD>();
+
     public CPD_Type cpdType;          // Check the enum below.
     protected string propertiesPath;  // Each CPD has a text file that outlines the data of all its variants - this is the path to it
     public bool constrainable;        // Whether or not this CPD is constrainable, e.g. sortable, part of the game.
+
+    public int dependentOn;          // Index of the CPD this depends on, if any. -1 if no dependency.
+    protected int depInterval;
 
     protected float probCounter = 0.0f;
     protected float probX = 0.0f;
@@ -19,6 +24,9 @@ public abstract class CPD
     public List<string> categories;                   // All categories for this CPD in the order they appeared
     public Dictionary<string, int> categoryIndices;   // All categories matched up with their position in cats list (faster than FindIndex)
     protected Dictionary<string, List<CPD_Variant>> categoriesToVariants;  // All variants associated with a particular category
+
+    // For dependent CPDs only!!
+    protected List<string> categoriesIntervaled;
 
     public abstract List<CPD_Variant> initialize();
 
@@ -116,6 +124,11 @@ public abstract class CPD
         return ((float)(categories.Count - restrictedCats.Count) / (float)categories.Count);
     }
 
+    public string getIntervaledCategory(int dependencyId, int catId)
+    {
+        return categoriesIntervaled[depInterval * dependencyId + catId];
+    }
+
     public TargetCPDGuessReward getGuessReward()
     {
         int cpdDifficulty = categories.Count;
@@ -149,6 +162,9 @@ public enum CPD_Type
     // Constrainable Locations
     City_L1,
 
+    City_L2,
+    Region_L2,
+
     // Not constrainable
     BodyType,
     Face,
@@ -163,11 +179,12 @@ public class CPD_SimpleIndex : CPD
 {
 
     // Given the path of this CPD's properties file, we can initialize all variants.
-    public CPD_SimpleIndex(CPD_Type cat, bool constrainable, string propertiesPath)
+    public CPD_SimpleIndex(CPD_Type cat, bool constrainable, string propertiesPath, int dependentOn)
     {
         this.constrainable = constrainable;
         this.cpdType = cat;
         this.propertiesPath = propertiesPath;
+        this.dependentOn = dependentOn;
         initialize(); 
     }
 
@@ -179,8 +196,22 @@ public class CPD_SimpleIndex : CPD
         variants = new List<CPD_Variant>();
         categoriesToVariants = new Dictionary<string, List<CPD_Variant>>();
         categories = new List<string>();
+        categoriesIntervaled = new List<string>();
         categoryIndices = new Dictionary<string, int>();
 
+        if(dependentOn > -1)
+        {
+            CPD_Type dependantType = (CPD_Type)dependentOn;
+            if(registry.ContainsKey(dependantType))
+            {
+                depInterval = registry[dependantType].categories.Count;
+            } else
+            {
+                throw new System.Exception("CPD " + cpdType + " is dependent on a type that has not been instantiated yet!");
+            }
+        }
+
+        int count = 0;
         for (int i = 0; i < lines.Length; i++)
         {
             string line = lines[i].Split('#')[0].Trim(); //ignore comments
@@ -201,26 +232,33 @@ public class CPD_SimpleIndex : CPD
                 }
 
                 string cat = fields[3];
-                if (!categoriesToVariants.ContainsKey(cat))
+
+                if(dependentOn == -1 || count < depInterval)
                 {
-                    categoriesToVariants.Add(cat, new List<CPD_Variant>());
-                    categories.Add(cat);
-                    categoryIndices.Add(cat, categories.Count - 1);
+                    if (!categoriesToVariants.ContainsKey(cat))
+                    {
+                        categoriesToVariants.Add(cat, new List<CPD_Variant>());
+                        categories.Add(cat);
+                        categoryIndices.Add(cat, categories.Count - 1);
+                    }
+
+                    CPD_Variant variant = new CPD_Variant(
+                        cpdType,
+                        categoriesToVariants[cat].Count,
+                        variants.Count,
+                        null,
+                        fields[1],
+                        cat,
+                        categoryIndices[cat],
+                        p
+                    );
+
+                    variants.Add(variant);
+                    categoriesToVariants[cat].Add(variant);
                 }
 
-                CPD_Variant variant = new CPD_Variant(
-                    cpdType,
-                    categoriesToVariants[cat].Count,
-                    variants.Count,
-                    null,
-                    fields[1],
-                    cat,
-                    categoryIndices[cat],
-                    p
-                );
-
-                variants.Add(variant);
-                categoriesToVariants[cat].Add(variant);
+                count++;
+                categoriesIntervaled.Add(cat);
             }
         }
 
@@ -234,6 +272,8 @@ public class CPD_SimpleIndex : CPD
             probX = (1 - probCounter) / probX;
         }
 
+        registry.Add(cpdType, this);
+
         return variants;
     }
 }
@@ -244,11 +284,12 @@ public class CPD_SimpleIndex : CPD
 public class CPD_Color : CPD
 {
     // Given the path of this CPD's properties file and where its sprites are stored, we can initialize all variants.
-    public CPD_Color(CPD_Type cat, bool constrainable, string propertiesPath)
+    public CPD_Color(CPD_Type cat, bool constrainable, string propertiesPath, int dependentOn)
     {
         this.constrainable = constrainable;
         this.cpdType = cat;
         this.propertiesPath = propertiesPath;
+        this.dependentOn = dependentOn;
         initialize();
     }
 
@@ -339,6 +380,8 @@ public class CPD_Color : CPD
         {
             probX = (1 - probCounter) / probX;
         }
+
+        registry.Add(cpdType, this);
 
         return variants;
     }

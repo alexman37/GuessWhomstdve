@@ -44,6 +44,7 @@ public class UI_Roster : MonoBehaviour
         Roster.constrainedResult += updateRosterCount;
         FormButton.updatedConstraint += handleUpdatedConstraint;
         FormButton.reinitializeConstraints += handleDeconfirmed;
+        FormButtonGroup.resetConstraints += handleReset;
         Roster.rosterReady += rosterFormCreation;
     }
 
@@ -53,6 +54,7 @@ public class UI_Roster : MonoBehaviour
         Roster.constrainedResult -= updateRosterCount;
         FormButton.updatedConstraint -= handleUpdatedConstraint;
         FormButton.reinitializeConstraints -= handleDeconfirmed;
+        FormButtonGroup.resetConstraints -= handleReset;
         Roster.rosterReady -= rosterFormCreation;
     }
 
@@ -230,5 +232,11 @@ public class UI_Roster : MonoBehaviour
     private void handleDeconfirmed(CPD_Type cpdType, List<string> exclude)
     {
         roster.reInitializeVariants(cpdType, exclude);
+    }
+
+    public void handleReset(CPD_Type cpdType)
+    {
+        Debug.Log("Handling reset for " + cpdType);
+        TurnDriver.instance.playersInOrder[0].rosterConstraints.clearConstraints(cpdType, true);
     }
 }

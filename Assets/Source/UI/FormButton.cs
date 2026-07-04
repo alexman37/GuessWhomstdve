@@ -16,6 +16,7 @@ public class FormButton : MonoBehaviour
     public FormButtonState state;
     public CPD_Type cpdType; // which CPD is this Formbutton acting on?
     public string category; // which category is this FormButton tracking for the given CPD?
+    public int categoryID; // what's the ID of the category?
 
     // TODO replace with fancier sprites
     Image imgCol1;
@@ -27,11 +28,8 @@ public class FormButton : MonoBehaviour
     public Button yesButton;
     public TextMeshProUGUI title;
 
-    [SerializeField] private GameObject askAroundMenu;
-    [SerializeField] private Button askAroundAsk;
-    [SerializeField] private Image askAroundAssessment;
-    private bool currentlyAskingAround;
 
+    private bool blocked = false; // true if the CPD this one depends on is not solved yet
     private bool locked = false; // if true, you can not change this value ever again
     private bool acceptingInput = true; // currently allowed / not allowed to change this value
     private bool noTicked = false; // currently chosen as "no"
@@ -43,9 +41,10 @@ public class FormButton : MonoBehaviour
     public static event Action<CPD_Type, string, FormButtonState> updatedConstraint;
     // Re-initialize the list of constraints when un-confirming an option. Use pre-existing "no" values.
     public static event Action<CPD_Type, List<string>> reinitializeConstraints;
+    // A group being confirmed may free up other groups with it as a dependency
+    public static event Action<CPD_Type, int> groupConfirmed;
+    public static event Action<CPD_Type> groupUnconfirmed;
 
-    public static event Action<(CPD_Type, string)> addToAskAroundList = (_) => { };
-    public static event Action<(CPD_Type, string)> removeFromAskAroundList = (_) => { };
 
     // Start is called before the first frame update
     void Start()
@@ -56,6 +55,8 @@ public class FormButton : MonoBehaviour
         imgCol3 = yesButton.gameObject.GetComponent<Image>();
 
         updatedConstraint += (_,__,f) => { };
+        groupConfirmed += (_, __) => { };
+        groupUnconfirmed += (_) => { };
     }
 
     private void OnEnable()
@@ -71,7 +72,7 @@ public class FormButton : MonoBehaviour
     /// </summary>
     public void toggleYesButton()
     {
-        if (!locked && acceptingInput)
+        if (!blocked && !locked && acceptingInput)
         {
             yesTicked = !yesTicked;
             if (yesTicked)
@@ -101,7 +102,7 @@ public class FormButton : MonoBehaviour
     /// </summary>
     public void toggleNoButton()
     {
-        if (!locked && acceptingInput && !yesTicked)
+        if (!blocked && !locked && acceptingInput && !yesTicked)
         {
             noTicked = !noTicked;
             if (noTicked && state != FormButtonState.Confirmed)
@@ -147,7 +148,7 @@ public class FormButton : MonoBehaviour
     /// </summary>
     private void updateConstraintForButton(bool withCertainty)
     {
-        if (!locked)
+        if (!blocked && !locked)
         {
             // Adjust draws
             if (state == FormButtonState.Confirmed)
@@ -236,7 +237,36 @@ public class FormButton : MonoBehaviour
         if(!wasConfirmed)
         {
             reinitializeConstraints.Invoke(cpdType, buttonsAreOff);
+            groupUnconfirmed.Invoke(cpdType);
+        } else
+        {
+            // Free up groups dependent on this now that we know what it is
+            groupConfirmed.Invoke(cpdType, categoryID);
         }
+    }
+
+    /// <summary>
+    /// If the group depends on another group being solved first, you cannot interact with this group's buttons at all.
+    /// </summary>
+    public void blockButton()
+    {
+        blocked = true;
+        title.text = "???";
+
+        /*if(RosterForm.instance != null)
+        {
+            imgCol1.sprite = RosterForm.instance.getFormSprite("x");
+            imgCol3.sprite = RosterForm.instance.getFormSprite("x");
+        }*/
+        noTicked = false;
+        yesTicked = false;
+    }
+
+    public void unblockButton(int dependencyCatId)
+    {
+        blocked = false;
+        category = CPD.registry[cpdType].getIntervaledCategory(dependencyCatId, categoryID);
+        title.text = category;
     }
 }
 

@@ -75,7 +75,7 @@ Material:
     - _HairLength: 0
     - _HeadIdx: 0
     - _Height: 0
-    - _LLOD: 1
+    - _LLOD: 2
     - _Weight: 0
     m_Colors:
     - SkinColor: {r: 1, g: 1, b: 1, a: 1}

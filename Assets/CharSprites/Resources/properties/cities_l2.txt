@@ -1,0 +1,156 @@
+
+New York City;New York City_us;X;New York City
+Washington;Washington_us;X;Washington
+Chicago;Chicago_us;X;Chicago
+Los Angeles;Los Angeles_us;X;Los Angeles
+Ottawa;Ottawa_ca;X;Ottawa
+Toronto;Toronto_ca;X;Toronto
+Philadelphia;Philadelphia_us;X;Philadelphia
+Denver;Denver_us;X;Denver
+Vancouver;Vancouver_ca;X;Vancouver
+Phoenix;Phoenix_us;X;Phoenix
+Miami;Miami_us;X;Miami
+Winnipeg;Winnipeg_ca;X;Winnipeg
+
+Mexico City;Mexico City_mx;X;Mexico City
+Monterrey;Monterrey_mx;X;Monterrey
+Guatemala;Guatemala_gt;X;Guatemala
+San Jose;San Jose_cr;X;San Jose
+Panama City;Panama City_pa;X;Panama City
+Havana;Havana_cu;X;Havana
+Managua;Managua_ni;X;Managua
+Tegucigalpa;Tegucigalpa_hn;X;Tegucigalpa
+Santo Domingo;Santo Domingo_do;X;Santo Domingo
+Port-au-Prince;Prince_ht;X;Prince
+San Juan;San Juan_pr;X;San Juan
+Kingston;Kingston_jm;X;Kingston
+
+Rio De Janeiro;Rio De Janeiro_br;X;Rio De Janeiro
+Sao Paulo;Sao Paulo_br;X;Sao Paulo
+Caracas;Caracas_ve;X;Caracas
+Bogota;Bogota_co;X;Bogota
+Lima;Lima_pe;X;Lima
+Buenos Aires;Buenos Aires_ar;X;Buenos Aires
+Santiago;Santiago_cl;X;Santiago
+Montevideo;Montevideo_ug;X;Montevideo
+La Paz;La Paz_bo;X;La Paz
+Asuncion;Asuncion_py;X;Asuncion
+Quito;Quito_ec;X;Quito
+Manaus;Manaus_br;X;Manaus
+
+London;London_uk;X;London
+Paris;Paris_fr;X;Paris
+Berlin;Berlin_de;X;Berlin
+Madrid;Madrid_es;X;Madrid
+Lisbon;Lisbon_pt;X;Lisbon
+Rome;Rome_it;X;Rome
+Zurich;Zurich_ch;X;Zurich
+Amsterdam;Amsterdam_nl;X;Amsterdam
+Copenhagen;Copenhagen_dk;X;Copenhagen
+Oslo;Oslo_no;X;Oslo
+Stockholm;Stockholm_se;X;Stockholm
+Dublin;Dublin_ie;X;Dublin
+
+Warsaw;Warsaw_pl;X;Warsaw
+Kyiv;Kyiv_ua;X;Kyiv
+Budapest;Budapest_hu;X;Budapest
+Bucharest;Bucharest_ro;X;Bucharest
+Athens;Athens_gr;X;Athens
+Istanbul;Istanbul_tr;X;Istanbul
+Belgrade;Belgrade_sk;X;Belgrade
+Prague;Prague_cz;X;Prague
+Helsinki;Helsinki_fi;X;Helsinki
+Minsk;Minsk_by;X;Minsk
+Zagreb;Zagreb_hr;X;Zagreb
+Sofia;Sofia_bg;X;Sofia
+
+Cairo;Cairo_eg;X;Cairo
+Casablanca;Casablanca_ma;X;Casablanca
+Tunis;Tunis_tn;X;Tunis
+Algiers;Algiers_dz;X;Algiers
+Cape Town;Cape Town_za;X;Cape Town
+Nairobi;Nairobi_ke;X;Nairobi
+Kampala;Kampala_ug;X;Kampala
+Lagos;Lagos_ng;X;Lagos
+Tripoli;Tripoli_ly;X;Tripoli
+Accra;Accra_gh;X;Accra
+Dakar;Dakar_sn;X;Dakar
+Antananarivo;Antananarivo_mg;X;Antananarivo
+
+Riyadh;Riyadh_sa;X;Riyadh
+Mecca;Mecca_sa;X;Mecca
+Damascus;Damascus_sy;X;Damascus
+Baghdad;Baghdad_iq;X;Baghdad
+Tehran;Tehran_ir;X;Tehran
+Jerusalem;Jerusalem_ps;X;Jerusalem
+Beirut;Beirut_lb;X;Beirut
+Nicosia;Nicosia_cy;X;Nicosia
+Medina;Medina_sa;X;Medina
+Sanaa;Sanaa_ye;X;Sanaa
+Amman;Amman_jo;X;Amman
+Kuwait;Kuwait_kw;X;Kuwait
+
+Moscow;Moscow_ru;X;Moscow
+St. Petersburg; Petersburg_ru;X; Petersburg
+Rostov;Rostov_ru;X;Rostov
+Volgograd;Volgograd_ru;X;Volgograd
+Novgorod;Novgorod_ru;X;Novgorod
+Vladivostok;Vladivostok_ru;X;Vladivostok
+Irkutsk;Irkutsk_ru;X;Irkutsk
+Yekaterinburg;Yekaterinburg_ru;X;Yekaterinburg
+Saratov;Saratov_ru;X;Saratov
+Astana;Astana_kz;X;Astana
+Tashkent;Tashkent_uz;X;Tashkent
+Baku;Baku_az;X;Baku
+
+Beijing;Beijing_cn;X;Beijing
+Hong Kong;Hong Kong_cn;X;Hong Kong
+Chongqing;Chongqing_cn;X;Chongqing
+Shanghai;Shanghai_cn;X;Shanghai
+Nanjing;Nanjing_cn;X;Nanjing
+Wuhan;Wuhan_cn;X;Wuhan
+Harbin;Harbin_cn;X;Harbin
+Lhasa;Lhasa_cn;X;Lhasa
+Urumqi;Urumqi_cn;X;Urumqi
+Taipei;Taipei_tw;X;Taipei
+Pyongyang;Pyongyang_kp;X;Pyongyang
+Ulaanbaatar;Ulaanbaatar_mn;X;Ulaanbaatar
+
+New Delhi;New Delhi_in;X;New Delhi
+Mumbai;Mumbai_in;X;Mumbai
+Karachi;Karachi_pk;X;Karachi
+Bangkok;Bangkok_th;X;Bangkok
+Hanoi;Hanoi_vn;X;Hanoi
+Kuala Lumpur;Kuala Lumpur_my;X;Kuala Lumpur
+Kolkata;Kolkata_in;X;Kolkata
+Yangon;Yangon_mm;X;Yangon
+Dhaka;Dhaka_bd;X;Dhaka
+Islamabad;Islamabad_pk;X;Islamabad
+Kathmandu;Kathmandu_np;X;Kathmandu
+Thimphu;Thimphu_bt;X;Thimphu
+
+Tokyo;Tokyo_jp;X;Tokyo
+Osaka;Osaka_jp;X;Osaka
+Kyoto;Kyoto_jp;X;Kyoto
+Sapporo;Sapporo_jp;X;Sapporo
+Manila;Manila_ph;X;Manila
+Seoul;Seoul_kr;X;Seoul
+Yokohama;Yokohama_jp;X;Yokohama
+Okinawa;Okinawa_jp;X;Okinawa
+Busan;Busan_kr;X;Busan
+Nagoya;Nagoya_jp;X;Nagoya
+Fukuoka;Fukuoka_jp;X;Fukuoka
+Sendai;Sendai_jp;X;Sendai
+
+Canberra;Canberra_au;X;Canberra
+Sydney;Sydney_au;X;Sydney
+Perth;Perth_au;X;Perth
+Honolulu;Honolulu_us;X;Honolulu
+Jakarta;Jakarta_id;X;Jakarta
+Wellington;Wellington_nz;X;Wellington
+Surabaya;Surabaya_id;X;Surabaya
+Auckland;Auckland_nz;X;Auckland
+Suva;Suva_fj;X;Suva
+Darwin;Darwin_au;X;Darwin
+Port Moresby;Port Moresby_pg;X;Port Moresby
+Bora Bora;Bora Bora_fr;X;Bora Bora

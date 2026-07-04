@@ -1,0 +1,14 @@
+###[int id], string filename, string name, float probability, string generalDescription(s)
+
+noram;North America;X;N. America
+cenam;Central America;X;C. America
+stham;South America;X;S. America
+wsteu;Western Europe;X;W. Europe
+esteu;Eastern Europe;X;E. Europe
+afric;Africa;X;Africa
+mides;Middle East;X;Middle East
+russa;Russia;X;Russia
+china;China;X;China
+sthas;South Asia;X;S. Asia
+fares;Far East;X;Far East
+ocean;Oceania;X;Oceania

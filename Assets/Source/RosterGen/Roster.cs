@@ -70,22 +70,25 @@ public class Roster
         {
             cpdInstances = new List<CPD>
             {
-                new CPD_SimpleIndex(CPD_Type.HairStyle, true, "properties/hairStyles"),
-                new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones"),
-                new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones"),
-                new CPD_Color(CPD_Type.FavoriteColor, true, "properties/faveColors"),
-                new CPD_Color(CPD_Type.EyeColor, true, "properties/eyeColors"),
-                new CPD_SimpleIndex(CPD_Type.Height, true, "properties/heights"),
-                new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights"),
-                new CPD_SimpleIndex(CPD_Type.BloodType, true, "properties/bloodtypes2"),
-                new CPD_SimpleIndex(CPD_Type.Zodiac, true, "properties/zodiacs"),
+                new CPD_SimpleIndex(CPD_Type.HairStyle, true, "properties/hairStyles", -1),
+                new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones", -1),
+                new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones", -1),
+                new CPD_Color(CPD_Type.FavoriteColor, true, "properties/faveColors", -1),
+                new CPD_Color(CPD_Type.EyeColor, true, "properties/eyeColors", -1),
+                new CPD_SimpleIndex(CPD_Type.Height, true, "properties/heights", -1),
+                new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights", -1),
+                new CPD_SimpleIndex(CPD_Type.BloodType, true, "properties/bloodtypes2", -1),
+                new CPD_SimpleIndex(CPD_Type.Zodiac, true, "properties/zodiacs", -1),
 
                 // Locations
-                new CPD_SimpleIndex(CPD_Type.City_L1, true, "properties/cities_l1"),
+                //new CPD_SimpleIndex(CPD_Type.City_L1, true, "properties/cities_l1", -1),
 
-                new CPD_SimpleIndex(CPD_Type.BodyType, false, "properties/bodyTypes"),
-                new CPD_SimpleIndex(CPD_Type.Face, false, "properties/faceTypes"),
-                new CPD_SimpleIndex(CPD_Type.HeadType, false, "properties/headTypes"),
+                new CPD_SimpleIndex(CPD_Type.Region_L2, true, "properties/regions_l2", -1),
+                new CPD_SimpleIndex(CPD_Type.City_L2, true, "properties/cities_l2", (int) CPD_Type.Region_L2),
+
+                new CPD_SimpleIndex(CPD_Type.BodyType, false, "properties/bodyTypes", -1),
+                new CPD_SimpleIndex(CPD_Type.Face, false, "properties/faceTypes", -1),
+                new CPD_SimpleIndex(CPD_Type.HeadType, false, "properties/headTypes", -1),
             };
             cpdConstrainables = new List<CPD>();
             cpdCounts = new List<uint>();
@@ -645,11 +648,11 @@ public class RosterConstraints
     /// Removes all constraints from a CPD (all categories will be allowed again)
     /// </summary>
     /// <param name="cpd">Clear all constraints from this CPD</param>
-    public void clearConstraints(CPD cpd, bool cleanSweep)
+    public void clearConstraints(CPD_Type onType, bool cleanSweep)
     {
-        lock(lockObj)
+        Debug.Log("Supposed to clear all for " + onType);
+        lock (lockObj)
         {
-            CPD_Type onType = cpd.cpdType;
             if (allCurrentConstraints.ContainsKey(onType))
             {
                 if (cleanSweep)
@@ -664,6 +667,11 @@ public class RosterConstraints
                 allCurrentConstraints.Add(onType, new HashSet<string>());
             }
         }
+    }
+
+    public void clearConstraints(CPD cpd, bool cleanSweep)
+    {
+        clearConstraints(cpd.cpdType, cleanSweep);
     }
 
     public void clearAllConstraints(bool cleanSweep)
