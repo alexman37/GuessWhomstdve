@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using TMPro;
 
 public class CharacterCard : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class CharacterCard : MonoBehaviour
 
     [SerializeField] SpriteRenderer[] simpleIndexBadges;
     [SerializeField] CPD_Type[] simpleIndexOrder;
+
+    [SerializeField] TextMeshProUGUI cityAbbrText;
 
     public static event Action<uint> charCardClicked = (_) => { };
 
@@ -32,6 +35,7 @@ public class CharacterCard : MonoBehaviour
     // You will need different versions of this for different LODs...
     public void SetMaterialParams(Character c)
     {
+        cityAbbrText.enabled = false;
         drawMat = portrait.material;
 
         uint startingSeed = c.simulatedId;
@@ -68,7 +72,14 @@ public class CharacterCard : MonoBehaviour
                 drawMat.SetInt("_CityIdx_l1", city);
                 break;
             case 2:
-                Debug.Log(c.getCategoryofCharacteristic(CPD_Type.City_L2, CPD_Type.Region_L2));
+                string[] locName = c.getVariantNameofCharacteristic(CPD_Type.City_L2).Split('_');
+
+                string cityAbbr = locName[0].Substring(0, 3).ToUpper();
+                cityAbbrText.enabled = true;
+                cityAbbrText.text = cityAbbr;
+
+                int flag = CountryMap.instance.getCode(locName[1]);
+                drawMat.SetInt("_FlagIdx_l2", flag);
                 break;
             default:
                 break;

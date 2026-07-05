@@ -35,6 +35,10 @@ Material:
         m_Texture: {fileID: 18700000, guid: 5db836fff5baafa4da7634c0162b7d38, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - T2DR_Flag_l2:
+        m_Texture: {fileID: 18700000, guid: 7dd066ed94ae3bb4ba81c662f1992ea0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - T2DR_Hair:
         m_Texture: {fileID: 18700000, guid: dbf83a597bb7abc4c8269f79a1632a14, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -70,7 +74,9 @@ Material:
     m_Floats:
     - _BodyIdx: 0
     - _CityIdx_l1: 0
+    - _CityIdx_l2: 0
     - _FaceIdx: 0
+    - _FlagIdx_l2: 0
     - _HairIdx: 0
     - _HairLength: 0
     - _HeadIdx: 0

@@ -1,0 +1,95 @@
+ar;Argentina
+au;Australia
+az;Azerbaijan
+bd;Bangladesh
+bg;Bulgaria
+bo;Bolivia
+br;Brazil
+bt;Bhutan
+by;Belarus
+ca;Canada
+ch;Switzerland
+cl;Chile
+cn;China
+co;Colombia
+cr;Costa Rica
+cu;Cuba
+cy;Cyprus
+cz;Czechia
+de;Germany
+dk;Denmark
+do;Dominican Republic
+dz;Algeria
+ec;Ecuador
+eg;Egypt
+es;Spain
+fi;Finland
+fj;Fiji
+fr;France
+gh;Ghana
+gr;Greece
+gt;Guatemala
+hn;Honduras
+hr;Croatia
+ht;Haiti
+hu;Hungary
+id;Indonesia
+ie;Ireland
+in;India
+iq;Iraq
+ir;Iran
+it;Italy
+jm;Jamaica
+jo;Jordan
+jp;Japan
+ke;Kenya
+kp;North Korea
+kr;South Korea
+kw;Kuwait
+kz;Kazakhstan
+lb;Lebanon
+ly;Libya
+ma;Morocco
+mg;Madagascar
+mm;Myanmar
+mn;Mongolia
+mx;Mexico
+my;Malaysia
+ng;Nigeria
+ni;Nicaragua
+nl;Netherlands
+no;Norway
+np;Nepal
+nz;New Zealand
+pa;Panama
+pe;Peru
+pg;Papua New Guinea
+ph;Philippines
+pk;Pakistan
+pl;Poland
+pr;Puerto Rico
+ps;Palestine
+pt;Portugal
+py;Paraguay
+ro;Romania
+ru;Russia
+sa;Saudi Arabia
+se;Sweden
+sk;Serbia
+sn;Senegal
+sy;Syria
+test;Test
+th;Thailand
+tn;Tunisia
+tr;Turkey
+tw;Taiwan
+ua;Ukraine
+ug;Uganda
+uk;United Kingdom
+us;United States
+uy;Uruguay
+uz;Uzbekistan
+ve;Venezuela
+vn;Vietnam
+ye;Yemen
+za;South Africa

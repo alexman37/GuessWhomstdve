@@ -95,22 +95,28 @@ public abstract class CPD
     /// <summary>
     /// Get all possible variants from a category
     /// </summary>
-    public List<CPD_Variant> getPossibleVariantsFromCategory(string cat)
+    public List<CPD_Variant> getPossibleVariantsFromCategory(string cat, int dependentResult)
     {
-        return categoriesToVariants[cat];
+        if(dependentOn > -1)
+        {
+            return categoriesToVariants[categoriesIntervaled[depInterval * dependentResult + categoryIndices[cat]]];
+        } else
+        {
+            return categoriesToVariants[cat];
+        }
     }
 
     /// <summary>
     /// Get all variants from whatever categories are possible (given a set of constraints)
     /// </summary>
-    public List<CPD_Variant> getConstrainedCategoryVariants(HashSet<string> restrictedCats)
+    public List<CPD_Variant> getConstrainedCategoryVariants(HashSet<string> restrictedCats, int dependentResult)
     {
         List<CPD_Variant> allPossible = new List<CPD_Variant>();
         foreach (string cat in categories)
         {
             if(!restrictedCats.Contains(cat))
             {
-                allPossible.AddRange(getPossibleVariantsFromCategory(cat));
+                allPossible.AddRange(getPossibleVariantsFromCategory(cat, dependentResult));
             }
         }
         return allPossible;
@@ -235,12 +241,20 @@ public class CPD_SimpleIndex : CPD
 
                 if(dependentOn == -1 || count < depInterval)
                 {
-                    if (!categoriesToVariants.ContainsKey(cat))
+                    if(!categories.Contains(cat))
                     {
-                        categoriesToVariants.Add(cat, new List<CPD_Variant>());
                         categories.Add(cat);
-                        categoryIndices.Add(cat, categories.Count - 1);
                     }
+                }
+
+                if (!categoryIndices.ContainsKey(cat))
+                {
+                    categoryIndices.Add(cat, categoryIndices.Count);
+                }
+                
+                if (!categoriesToVariants.ContainsKey(cat))
+                {
+                    categoriesToVariants.Add(cat, new List<CPD_Variant>());
 
                     CPD_Variant variant = new CPD_Variant(
                         cpdType,

@@ -9,6 +9,7 @@ Shader "Unlit/FullBody"
         [NoScaleOffset]T2DR_Hair_M("T2DR_Hair_M", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Hair_L("T2DR_Hair_L", 2DArray) = "" {}
         [NoScaleOffset]T2DR_City_l1("T2DR_City_l1", 2DArray) = "" {}
+        [NoScaleOffset]T2DR_Flag_l2("T2DR_Flag_l2", 2DArray) = "" {}
         [NoScaleOffset]MainTexProp("MainTex", 2D) = "white" {}
         
         // Specifics
@@ -28,6 +29,8 @@ Shader "Unlit/FullBody"
 
         _LLOD("LLOD", Float) = 0
         _CityIdx_l1("CityIdx_l1", Float) = 0
+        _CityIdx_l2("CityIdx_l2", Float) = 0
+        _FlagIdx_l2("CityIdx_l2", Float) = 0
 
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
@@ -222,6 +225,8 @@ Shader "Unlit/FullBody"
 
         int _LLOD;
         int _CityIdx_l1;
+        int _CityIdx_l2;
+        int _FlagIdx_l2;
 
         CBUFFER_END
 
@@ -240,6 +245,8 @@ Shader "Unlit/FullBody"
         SAMPLER(samplerT2DR_Hair_L);
         TEXTURE2D_ARRAY(T2DR_City_l1);
         SAMPLER(samplerT2DR_City_l1);
+        TEXTURE2D_ARRAY(T2DR_Flag_l2);
+        SAMPLER(samplerT2DR_Flag_l2);
         TEXTURE2D(MainTexProp);
         SAMPLER(samplerMainTexProp);
         SAMPLER(SamplerState_Linear_Repeat);
@@ -349,6 +356,16 @@ Shader "Unlit/FullBody"
                 UnityTexture2DArray T2DR_City_l1_Arr = UnityBuildTexture2DArrayStruct(T2DR_City_l1);
                 float4 CityPic = SAMPLE_TEXTURE2D_ARRAY(T2DR_City_l1_Arr.tex, T2DR_City_l1_Arr.samplerstate, CityOffset, _CityIdx_l1);
                 Finalized = Overlay_float(CityPic, Colorized);
+            } 
+            else if(_LLOD == 2) {
+                float2 FlagOffset;
+                Unity_TilingAndOffset_float(IN.uv0.xy, float2 (2, 2), float2 (0, -0.4), FlagOffset);
+
+                if(FlagOffset.x > 0 && FlagOffset.x < 1 && FlagOffset.y < 1 && FlagOffset.y > 0) {
+                    UnityTexture2DArray T2DR_Flag_l2_Arr = UnityBuildTexture2DArrayStruct(T2DR_Flag_l2);
+                    float4 FlagPic = SAMPLE_TEXTURE2D_ARRAY(T2DR_Flag_l2_Arr.tex, T2DR_Flag_l2_Arr.samplerstate, FlagOffset, _FlagIdx_l2);
+                    Finalized = Overlay_float(FlagPic, Colorized);
+                }
             }
             
 

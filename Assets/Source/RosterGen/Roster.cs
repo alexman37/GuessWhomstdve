@@ -383,6 +383,8 @@ public class Roster
             // We gotta get all the categories associated with each sim ID - one at a time.
             List<CPD_Variant> vars = new List<CPD_Variant>();
             int c = 0;
+            uint prevCPDcategory = 0;
+
             for (int iter = 0; iter < cpdInstances.Count; iter++)
             {
                 // Two distinct cases. If the CPD is constrainable it directly affects simulated ID. Otherwise it's just "random".
@@ -392,7 +394,7 @@ public class Roster
 
                     CPD currCpd = cpdConstrainables[c];
                     currCPDcategory = Utility.FloorToUInt(simulatedId / simIDtourGuide[c]);
-                    List<CPD_Variant> possibles = currCpd.getPossibleVariantsFromCategory(currCpd.categories[(int)currCPDcategory]);
+                    List<CPD_Variant> possibles = currCpd.getPossibleVariantsFromCategory(currCpd.categories[(int)currCPDcategory], (int)prevCPDcategory);
 
                     (uint s, int v) randTemp = CharRandomValue.RangedSeedRandomizer(randomizerSeed, 0, possibles.Count);
                     //Debug.Log("In list of size " + possibles.Count + " I give you " + randTemp.v);
@@ -401,6 +403,8 @@ public class Roster
 
                     simulatedId -= simIDtourGuide[c] * currCPDcategory;
                     c++;
+
+                    prevCPDcategory = currCPDcategory;
                 } else
                 {
                     (uint s, CPD_Variant v) rand = cpdInstances[iter].getRandom(randomizerSeed);
