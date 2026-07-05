@@ -650,7 +650,6 @@ public class RosterConstraints
     /// <param name="cpd">Clear all constraints from this CPD</param>
     public void clearConstraints(CPD_Type onType, bool cleanSweep)
     {
-        Debug.Log("Supposed to clear all for " + onType);
         lock (lockObj)
         {
             if (allCurrentConstraints.ContainsKey(onType))

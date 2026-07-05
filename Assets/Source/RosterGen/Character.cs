@@ -78,11 +78,31 @@ public class Character
     }
 
     /// <summary>
+    /// If second argument passed in, assuming the first depends on it
+    /// </summary>
+    public string getCategoryofCharacteristic(CPD_Type characteristic, CPD_Type dependsOn)
+    {
+        return CPD.registry[CPD_Type.City_L2].getIntervaledCategory(
+                getCategoryIndexofCharacteristic(dependsOn),
+                getCategoryIndexofCharacteristic(characteristic)
+            );;
+    }
+
+    /// <summary>
     /// Get the Category index of a characteristic
     /// </summary>
     public int getCategoryIndexofCharacteristic(CPD_Type characteristic)
     {
         return createdCharacteristics[characteristic].categoryIndex;
+    }
+
+    /// <summary>
+    /// If second argument passed in, assuming the first depends on it
+    /// </summary>
+    public int getCategoryIndexofCharacteristic(CPD_Type characteristic, CPD_Type dependsOn)
+    {
+        return createdCharacteristics[characteristic].categoryIndex + 
+            getCategoryIndexofCharacteristic(dependsOn) * CPD.registry[dependsOn].categories.Count;
     }
 
     /// <summary>

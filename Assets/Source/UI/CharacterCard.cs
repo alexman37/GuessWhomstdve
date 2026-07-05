@@ -67,6 +67,9 @@ public class CharacterCard : MonoBehaviour
                 int city = c.getCategoryIndexofCharacteristic(CPD_Type.City_L1);
                 drawMat.SetInt("_CityIdx_l1", city);
                 break;
+            case 2:
+                Debug.Log(c.getCategoryofCharacteristic(CPD_Type.City_L2, CPD_Type.Region_L2));
+                break;
             default:
                 break;
         }

@@ -18,15 +18,12 @@ public class FormButtonGroup : MonoBehaviour
     private int dependency = -1;
     private bool blocked = false; // if there is a dependency, cannot interact with CPD until dependency solved
 
-    public static event Action<CPD_Type> resetConstraints;
-
     // TEMPLATE
     public GameObject formObjectComponent;
 
     private void Start()
     {
         img = GetComponent<Image>();
-        resetConstraints = (_) => { };
     }
 
     private void OnEnable()
@@ -112,7 +109,6 @@ public class FormButtonGroup : MonoBehaviour
         {
             fb.blockButton();
         }
-        Debug.Log("BLOCKED " + cpdType);
         UI_Roster.instance.handleReset(cpdType);
     }
 

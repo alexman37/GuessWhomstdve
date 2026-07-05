@@ -23,9 +23,9 @@ public class FormButton : MonoBehaviour
     Image imgCol2;
     Image imgCol3;
 
-    public Button noButton;
+    [SerializeField] Button noButton;
     //public Button priButton;
-    public Button yesButton;
+    [SerializeField] Button yesButton;
     public TextMeshProUGUI title;
 
 
@@ -253,11 +253,11 @@ public class FormButton : MonoBehaviour
         blocked = true;
         title.text = "???";
 
-        /*if(RosterForm.instance != null)
+        if(imgCol1 != null)
         {
             imgCol1.sprite = RosterForm.instance.getFormSprite("x");
             imgCol3.sprite = RosterForm.instance.getFormSprite("x");
-        }*/
+        }
         noTicked = false;
         yesTicked = false;
     }
