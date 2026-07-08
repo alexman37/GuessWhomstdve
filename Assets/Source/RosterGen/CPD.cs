@@ -164,6 +164,7 @@ public enum CPD_Type
     Weight,
     BloodType,
     Zodiac,
+    Job,
 
     // Constrainable Locations
     City_L1,

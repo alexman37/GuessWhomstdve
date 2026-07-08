@@ -79,6 +79,7 @@ public class Roster
                 new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights", -1),
                 new CPD_SimpleIndex(CPD_Type.BloodType, true, "properties/bloodtypes2", -1),
                 new CPD_SimpleIndex(CPD_Type.Zodiac, true, "properties/zodiacs", -1),
+                new CPD_SimpleIndex(CPD_Type.Job, true, "properties/jobs", -1),
 
                 // Locations
                 //new CPD_SimpleIndex(CPD_Type.City_L1, true, "properties/cities_l1", -1),

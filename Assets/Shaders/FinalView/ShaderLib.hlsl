@@ -39,6 +39,13 @@ float4 OverlayHair_float(float4 Base, float4 Top) {
 	}
 }
 
+// Some textures are slightly larger on top (e.g. 64x96) to account for height differences
+float4 OverlayTaller_float(float4 Base, float4 Top) {
+	if(Top.a == 0) 
+		return Base;
+	else return Top;
+}
+
 float4 ColorSwap_float(float4 Base, float4 LookFor, float4 ReplaceWith) {
 	return distance(Base, LookFor) < epsilon ? ReplaceWith : Base;
 }

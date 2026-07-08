@@ -1,0 +1,20 @@
+###[int id], string filename, string name, float probability, string generalDescription(s)
+
+doctor1;H-doctor1;X;Doctor
+doctor2;doctor2;X;Doctor
+doctor3;doctor3;X;Doctor
+doctor4;doctor4;X;Doctor
+doctor5;doctor5;X;Doctor
+doctor6;doctor6;X;Doctor
+doctor7;H-doctor7;X;Doctor
+doctor8;doctor8;X;Doctor
+
+engineer1;engineer1;X;Engineer
+engineer2;H-engineer2;X;Engineer
+engineer3;H-engineer3;X;Engineer
+engineer4;engineer4;X;Engineer
+engineer5;H-engineer5;X;Engineer
+
+lawyer1;lawyer1;X;Lawyer
+lawyer2;lawyer2;X;Lawyer
+lawyer3;lawyer3;X;Lawyer

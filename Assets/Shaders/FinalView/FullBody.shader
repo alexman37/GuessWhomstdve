@@ -8,6 +8,7 @@ Shader "Unlit/FullBody"
         [NoScaleOffset]T2DR_Hair_S("T2DR_Hair_S", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Hair_M("T2DR_Hair_M", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Hair_L("T2DR_Hair_L", 2DArray) = "" {}
+        [NoScaleOffset]T2DR_Jobs("T2DR_Jobs", 2DArray) = "" {}
         [NoScaleOffset]T2DR_City_l1("T2DR_City_l1", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Flag_l2("T2DR_Flag_l2", 2DArray) = "" {}
         [NoScaleOffset]MainTexProp("MainTex", 2D) = "white" {}
@@ -23,6 +24,7 @@ Shader "Unlit/FullBody"
         _HairIdx("HairIdx", Float) = 0
         _HeadIdx("HeadIdx", Float) = 0
         _FaceIdx("FaceIdx", Float) = 0
+        _JobIdx("JobIdx", Float) = 0
 
         _Height("Height", Float) = 0
         _Weight("Weight", Float) = 0
@@ -219,6 +221,7 @@ Shader "Unlit/FullBody"
         int _HeadIdx;
         int _HairIdx;
         int _FaceIdx;
+        int _JobIdx;
 
         int _Height;
         int _Weight;
@@ -243,6 +246,8 @@ Shader "Unlit/FullBody"
         SAMPLER(samplerT2DR_Hair_M);
         TEXTURE2D_ARRAY(T2DR_Hair_L);
         SAMPLER(samplerT2DR_Hair_L);
+        TEXTURE2D_ARRAY(T2DR_Jobs);
+        SAMPLER(samplerT2DR_Jobs);
         TEXTURE2D_ARRAY(T2DR_City_l1);
         SAMPLER(samplerT2DR_City_l1);
         TEXTURE2D_ARRAY(T2DR_Flag_l2);
@@ -314,6 +319,10 @@ Shader "Unlit/FullBody"
             float2 HairOffset;
             Unity_TilingAndOffset_float(FullBodyOffset, float2 (1, 1), float2 (0, -0.2), HairOffset);
 
+            // Offsets for tall items (may extend above given 64x64 range)
+            float2 TallOffset;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (0.6667, 0.6667), float2 (0, 0.2 - (0.1 * _Height)), TallOffset);
+
             // Create main portrait
             UnityTexture2DArray T2DR_Bodies_Arr = UnityBuildTexture2DArrayStruct(T2DR_Bodies);
             float4 BodyChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Bodies_Arr.tex, T2DR_Bodies_Arr.samplerstate, FullBodyOffset, _Weight);
@@ -323,6 +332,9 @@ Shader "Unlit/FullBody"
 
             UnityTexture2DArray T2DR_Faces_Arr = UnityBuildTexture2DArrayStruct(T2DR_Faces);
             float4 FaceChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Faces_Arr.tex, T2DR_Faces_Arr.samplerstate, FullBodyOffset, _FaceIdx);
+
+            UnityTexture2DArray T2DR_Jobs_Arr = UnityBuildTexture2DArrayStruct(T2DR_Jobs);
+            float4 JobChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Jobs_Arr.tex, T2DR_Jobs_Arr.samplerstate, TallOffset, _JobIdx);
 
             UnityTexture2DArray T2DR_Hair_Arr;
             float4 HairChoice;
@@ -341,10 +353,11 @@ Shader "Unlit/FullBody"
             float4 OverlayStep1 = Overlay_float(BodyChoice, HeadChoice);
             float4 OverlayStep2 = Overlay_float(OverlayStep1, FaceChoice);
             float4 OverlayStep3 = OverlayHair_float(OverlayStep2, HairChoice);
+            float4 OverlayStep4 = Overlay_float(OverlayStep3, JobChoice);
             
             float4 Colorized;
             // TODO replace consts with actual variables
-            Colorized = Colorize_float(OverlayStep3, _SkinColor, _HairColor, _BodyColor, _EyeColor);
+            Colorized = Colorize_float(OverlayStep4, _SkinColor, _HairColor, _BodyColor, _EyeColor);
             float4 Finalized = Colorized;
 
             // Location stuff (depends on LOD)
