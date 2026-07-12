@@ -48,15 +48,15 @@ public class CharacterCard : MonoBehaviour
         (uint s, int v) crv3 = CharRandomValue.RangedSeedRandomizer(crv2.s, 0, 14);
         drawMat.SetInt("_FaceIdx", crv3.v);
 
+        int weight = c.getCategoryIndexofCharacteristic(CPD_Type.Weight);
         drawMat.SetInt("_Height", c.getCategoryIndexofCharacteristic(CPD_Type.Height));
-        drawMat.SetInt("_Weight", c.getCategoryIndexofCharacteristic(CPD_Type.Weight));
+        drawMat.SetInt("_Weight", weight);
 
-        (uint s, int v) crvj = CharRandomValue.RangedSeedRandomizer(crv3.s, 0, 14);
-        drawMat.SetInt("_JobIdx", crvj.v);
+        drawMat.SetInt("_JobIdx", c.getVariantIndexofCharacteristic(CPD_Type.Job) + (weight * 64));
 
         int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
         drawMat.SetInt("_HairLength", Hairlen);
-        (uint s, int v) crv4 = CharRandomValue.randomHairIndex(crvj.s, Hairlen);
+        (uint s, int v) crv4 = CharRandomValue.randomHairIndex(crv3.s, Hairlen);
         drawMat.SetInt("_HairIdx", crv4.v);
 
         (uint s, Color v) crv5 = c.getColorField(crv4.s, CPD_Type.HairColor);

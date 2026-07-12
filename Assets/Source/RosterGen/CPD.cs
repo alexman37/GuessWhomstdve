@@ -256,7 +256,10 @@ public class CPD_SimpleIndex : CPD
                 if (!categoriesToVariants.ContainsKey(cat))
                 {
                     categoriesToVariants.Add(cat, new List<CPD_Variant>());
+                }
 
+                if(dependentOn == -1 || categoriesToVariants[cat].Count == 0)
+                {
                     CPD_Variant variant = new CPD_Variant(
                         cpdType,
                         categoriesToVariants[cat].Count,

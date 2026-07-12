@@ -85,6 +85,12 @@ public class Character
         return createdCharacteristics[characteristic].name;
     }
 
+    public int getVariantIndexofCharacteristic(CPD_Type characteristic)
+    {
+        Debug.Log("Variant " + createdCharacteristics[characteristic].name + " has index " + createdCharacteristics[characteristic].cpdID);
+        return createdCharacteristics[characteristic].cpdID;
+    }
+
     /// <summary>
     /// Get the Category index of a characteristic
     /// </summary>

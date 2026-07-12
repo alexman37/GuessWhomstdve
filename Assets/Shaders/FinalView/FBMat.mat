@@ -59,6 +59,10 @@ Material:
         m_Texture: {fileID: 18700000, guid: 989606445f064ef4694a5dcfa531d9c2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - T2DR_Jobs:
+        m_Texture: {fileID: 18700000, guid: 20760902eb923f24cb1fff5f54a862d9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -81,6 +85,7 @@ Material:
     - _HairLength: 0
     - _HeadIdx: 0
     - _Height: 0
+    - _JobIdx: 0
     - _LLOD: 2
     - _Weight: 0
     m_Colors:

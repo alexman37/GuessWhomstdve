@@ -372,7 +372,7 @@ Shader "Unlit/FullBody"
             } 
             else if(_LLOD == 2) {
                 float2 FlagOffset;
-                Unity_TilingAndOffset_float(IN.uv0.xy, float2 (2, 2), float2 (0, -0.4), FlagOffset);
+                Unity_TilingAndOffset_float(IN.uv0.xy, float2 (4, 4), float2 (-0.2, -1.5), FlagOffset);
 
                 if(FlagOffset.x > 0 && FlagOffset.x < 1 && FlagOffset.y < 1 && FlagOffset.y > 0) {
                     UnityTexture2DArray T2DR_Flag_l2_Arr = UnityBuildTexture2DArrayStruct(T2DR_Flag_l2);
