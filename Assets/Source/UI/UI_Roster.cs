@@ -111,12 +111,12 @@ public class UI_Roster : MonoBehaviour
     /// <summary>
     /// Change the display at the top of the roster to show a new number
     /// </summary>
-    public void updateRosterCount(uint newCount)
+    public void updateRosterCount(ulong newCount)
     {
         suspectsRemaining.text = commafy(newCount) + " Suspects Remaining";
     }
 
-    private string commafy(uint num)
+    private string commafy(ulong num)
     {
         string copy = num.ToString();
         if (copy.Length < 4) return copy;
@@ -185,7 +185,7 @@ public class UI_Roster : MonoBehaviour
     }
 
     // TODO - fancier animations for this - one day.
-    public void regenerateCharCards(uint newNumber)
+    public void regenerateCharCards(ulong newNumber)
     {
         if(roster != null)
         {

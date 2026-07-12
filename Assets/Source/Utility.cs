@@ -24,18 +24,18 @@ public class Utility
     /// <summary>
     /// Round float to unsigned integer
     /// </summary>
-    public static uint RoundToUInt(float f)
+    public static ulong RoundToulong(float f)
     {
-        if (f % 1 > 0.5f) return (uint)(f + 1);
-        else return (uint)(f);
+        if (f % 1 > 0.5f) return (ulong)(f + 1);
+        else return (ulong)(f);
     }
 
     /// <summary>
     /// Floor float to unsigned integer
     /// </summary>
-    public static uint FloorToUInt(float f)
+    public static ulong FloorToulong(float f)
     {
-        return (uint)(f);
+        return (ulong)(f);
     }
 
 

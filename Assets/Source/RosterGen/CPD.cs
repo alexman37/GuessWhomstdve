@@ -33,9 +33,9 @@ public abstract class CPD
     /// <summary>
     /// Returns a completely random CPD variant
     /// </summary>
-    public (uint, CPD_Variant) getRandom(uint seed)
+    public (ulong, CPD_Variant) getRandom(ulong seed)
     {
-        (uint s, int v) randIndex = CharRandomValue.RangedSeedRandomizer(seed, 0, variants.Count);
+        (ulong s, int v) randIndex = CharRandomValue.RangedSeedRandomizer(seed, 0, variants.Count);
         return (randIndex.s, variants[(int)randIndex.v]);
     }
 
@@ -79,14 +79,14 @@ public abstract class CPD
     /// <summary>
     /// Get all possible category indicies with respect to whichever categories are constrained
     /// </summary>
-    public List<uint> getAllConstrainedIndicies(HashSet<string> restrictedCats)
+    public List<ulong> getAllConstrainedIndicies(HashSet<string> restrictedCats)
     {
-        List<uint> cats = new List<uint>();
+        List<ulong> cats = new List<ulong>();
         foreach(string cat in categories)
         {
             if(!restrictedCats.Contains(cat))
             {
-                cats.Add((uint)categoryIndices[cat]);
+                cats.Add((ulong)categoryIndices[cat]);
             }
         }
         return cats;
@@ -509,7 +509,7 @@ public class CPD_CritVal_Color : CPD_CriticalValue
 
 public abstract class CPD_ColorType
 {
-    public abstract (uint, Color) getColor(uint simId);
+    public abstract (ulong, Color) getColor(ulong simId);
 }
 
 public class ConstantColor : CPD_ColorType
@@ -520,7 +520,7 @@ public class ConstantColor : CPD_ColorType
     {
         col = co;
     }
-    public override (uint, Color) getColor(uint seed)
+    public override (ulong, Color) getColor(ulong seed)
     {
         return (seed, col);
     }
@@ -548,11 +548,11 @@ public class ColorRange : CPD_ColorType
     }
 
     // TODO: Do we want to pass the seed along or not? Seems like a minor thing...prob OK without it...
-    public override (uint, Color) getColor(uint seed)
+    public override (ulong, Color) getColor(ulong seed)
     {
-        (uint s, float v) r = CharRandomValue.RangedSeedRandomizer(seed, minR, maxR);
-        (uint s, float v) g = CharRandomValue.RangedSeedRandomizer(r.s, minG, maxG);
-        (uint s, float v) b = CharRandomValue.RangedSeedRandomizer(g.s, minB, maxB);
+        (ulong s, float v) r = CharRandomValue.RangedSeedRandomizer(seed, minR, maxR);
+        (ulong s, float v) g = CharRandomValue.RangedSeedRandomizer(r.s, minG, maxG);
+        (ulong s, float v) b = CharRandomValue.RangedSeedRandomizer(g.s, minB, maxB);
         return (b.s, new Color(r.v / 255f, g.v / 255f, b.v / 255f, 1));
     }
 }

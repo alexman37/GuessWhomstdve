@@ -19,17 +19,17 @@ public static class CharRandomValue
     //Return a random name
     //The list of first and last names is supplied in "FirstNamesM/F.txt" and "LastNamesM/F.txt"
     //If male or female, use only provided names, if nonbinary use a name from either list
-    public static (uint, string, string) CRV_randomName(uint seed, bool isMale)
+    public static (ulong, string, string) CRV_randomName(ulong seed, bool isMale)
     {
-        (uint s, int v) firstNameIdx = isMale ? RangedSeedRandomizer(seed, 0, firstNamesMSize) : RangedSeedRandomizer(seed, 0, firstNamesFSize);
-        (uint s, int v) lastNameIdx = RangedSeedRandomizer(firstNameIdx.s, 0, lastNamesSize);
+        (ulong s, int v) firstNameIdx = isMale ? RangedSeedRandomizer(seed, 0, firstNamesMSize) : RangedSeedRandomizer(seed, 0, firstNamesFSize);
+        (ulong s, int v) lastNameIdx = RangedSeedRandomizer(firstNameIdx.s, 0, lastNamesSize);
         return (lastNameIdx.s, isMale ? firstNamesM[firstNameIdx.v] : firstNamesF[firstNameIdx.v], lastNames[lastNameIdx.v]);
     }
 
     //Return a random hair index. It depends on the hair length
     //(...may later depend on sex)
     // TODO is this even accurate anymore? check the hair file...
-    public static (uint, int) randomHairIndex(uint seed, int HairLen)
+    public static (ulong, int) randomHairIndex(ulong seed, int HairLen)
     {
         return RangedSeedRandomizer(seed, 0, hairLengthSizes[HairLen]);
     }
@@ -44,7 +44,7 @@ public static class CharRandomValue
     // For example, randomizing the exact hair color, or which variant of long hair to use.
     // Why not use built in randomizer? Because you have to set the seed in one place.
     // That won't fly if we are doing async stuff.
-    public static uint SeedRandomizer(uint input)
+    public static ulong SeedRandomizer(ulong input)
     {
         input ^= input << 13;
         input ^= input >> 7;
@@ -57,13 +57,13 @@ public static class CharRandomValue
     /// Note on ulong vs. int: If you have a ulong but need to pass in an int, try only taking a slice of the end of the ulong?
     /// That should still get pretty decent results.
     /// </summary>
-    public static (uint, int) RangedSeedRandomizer(uint input, int min, int max)
+    public static (ulong, int) RangedSeedRandomizer(ulong input, int min, int max)
     {
-        uint orig = input;
+        ulong orig = input;
         input ^= input << 13;
         input ^= input >> 7;
         input ^= input << 17;
-        float clampedVal = ((float) input) / ((float) uint.MaxValue);
+        float clampedVal = ((float) input) / ((float) ulong.MaxValue);
         return (input, min + (int)(clampedVal * (float)(max - min)));
     }
 }
