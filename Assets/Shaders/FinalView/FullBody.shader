@@ -353,7 +353,7 @@ Shader "Unlit/FullBody"
             float4 OverlayStep1 = Overlay_float(BodyChoice, HeadChoice);
             float4 OverlayStep2 = Overlay_float(OverlayStep1, FaceChoice);
             float4 OverlayStep3 = OverlayHair_float(OverlayStep2, HairChoice);
-            float4 OverlayStep4 = Overlay_float(OverlayStep3, JobChoice);
+            float4 OverlayStep4 = OverlayJob_float(OverlayStep3, JobChoice);
             
             float4 Colorized;
             // TODO replace consts with actual variables

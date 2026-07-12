@@ -55,7 +55,7 @@ Purple3;X;178,102,255;Purple
 Purple4;X;204,153,255;Purple
 
 Pink1;X;204,0,204;Pink
-Pink2;X;255,0,255;Pink
+Pink2;X;255,153,255;Pink
 Pink3;X;255,51,255;Pink
 Pink4;X;255,102,255;Pink
 
