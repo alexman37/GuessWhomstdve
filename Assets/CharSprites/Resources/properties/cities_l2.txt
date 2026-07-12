@@ -91,7 +91,7 @@ Amman;Amman_jo;X;Amman
 Kuwait;Kuwait_kw;X;Kuwait
 
 Moscow;Moscow_ru;X;Moscow
-St. Petersburg; Petersburg_ru;X; Petersburg
+St. Petersburg;St Petersburg_ru;X;St Petersburg
 Rostov;Rostov_ru;X;Rostov
 Volgograd;Volgograd_ru;X;Volgograd
 Novgorod;Novgorod_ru;X;Novgorod

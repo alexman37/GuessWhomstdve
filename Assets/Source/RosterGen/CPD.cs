@@ -160,6 +160,7 @@ public enum CPD_Type
     SkinTone,
     FavoriteColor,
     EyeColor,
+    Gender,
     Height,
     Weight,
     BloodType,

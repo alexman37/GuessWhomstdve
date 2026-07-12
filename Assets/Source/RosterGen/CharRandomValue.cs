@@ -18,11 +18,12 @@ public static class CharRandomValue
 
     //Return a random name
     //The list of first and last names is supplied in "FirstNamesM/F.txt" and "LastNamesM/F.txt"
+    //If male or female, use only provided names, if nonbinary use a name from either list
     public static (uint, string, string) CRV_randomName(uint seed, bool isMale)
     {
         (uint s, int v) firstNameIdx = isMale ? RangedSeedRandomizer(seed, 0, firstNamesMSize) : RangedSeedRandomizer(seed, 0, firstNamesFSize);
         (uint s, int v) lastNameIdx = RangedSeedRandomizer(firstNameIdx.s, 0, lastNamesSize);
-        return (lastNameIdx.s, firstNamesM[firstNameIdx.v], lastNames[lastNameIdx.v]);
+        return (lastNameIdx.s, isMale ? firstNamesM[firstNameIdx.v] : firstNamesF[firstNameIdx.v], lastNames[lastNameIdx.v]);
     }
 
     //Return a random hair index. It depends on the hair length

@@ -75,6 +75,7 @@ public class Roster
                 new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones", -1),
                 new CPD_Color(CPD_Type.FavoriteColor, true, "properties/faveColors", -1),
                 new CPD_Color(CPD_Type.EyeColor, true, "properties/eyeColors", -1),
+                new CPD_SimpleIndex(CPD_Type.Gender, true, "properties/gender", -1),
                 new CPD_SimpleIndex(CPD_Type.Height, true, "properties/heights", -1),
                 new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights", -1),
                 new CPD_SimpleIndex(CPD_Type.BloodType, true, "properties/bloodtypes2", -1),

@@ -113,7 +113,31 @@ public class UI_Roster : MonoBehaviour
     /// </summary>
     public void updateRosterCount(uint newCount)
     {
-        suspectsRemaining.text = newCount.ToString() + " Suspects Remaining";
+        suspectsRemaining.text = commafy(newCount) + " Suspects Remaining";
+    }
+
+    private string commafy(uint num)
+    {
+        string copy = num.ToString();
+        if (copy.Length < 4) return copy;
+
+        string temp = copy;
+        int count = 0;
+        int firstCommaOffset = copy.Length % 3;
+        if(firstCommaOffset > 0)
+        {
+            temp = temp.Substring(0, firstCommaOffset) + "," + temp.Substring(firstCommaOffset);
+            count++;
+        }
+        for(int i = firstCommaOffset + 1; i < copy.Length; i++)
+        {
+            if((i - firstCommaOffset) % 3 == 0)
+            {
+                temp = temp.Substring(0, i + count) + "," + temp.Substring(i + count);
+                count++;
+            }
+        }
+        return temp;
     }
 
     /// <summary>

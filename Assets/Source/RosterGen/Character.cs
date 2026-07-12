@@ -55,7 +55,22 @@ public class Character
         // There are some other traits we want to give our characters here
         // We can still get away with using "random" traits, since the randomSeed was set to a predictable value in unpackSimulationID
         // and will not be reset until we call it again.
-        (uint s, string f, string l) fullName = CharRandomValue.CRV_randomName(simulatedId, true); // TODO isMale
+
+        bool isMale = true;
+        uint workingSeed = simulatedId;
+        if(createdCharacteristics.ContainsKey(CPD_Type.Gender))
+        {
+            int gender = createdCharacteristics[CPD_Type.Gender].cpdID;
+            if (gender < 2) isMale = gender == 0;
+            else
+            {
+                (uint s, int v) nbName = CharRandomValue.RangedSeedRandomizer(simulatedId, 0, 2);
+                workingSeed = nbName.s;
+                isMale = nbName.v == 0;
+            }
+        }
+        Debug.Log("Will use male name: " + isMale);
+        (uint s, string f, string l) fullName = CharRandomValue.CRV_randomName(workingSeed, isMale);
         firstName = fullName.f;
         lastName = fullName.l;
     }
@@ -87,7 +102,6 @@ public class Character
 
     public int getVariantIndexofCharacteristic(CPD_Type characteristic)
     {
-        Debug.Log("Variant " + createdCharacteristics[characteristic].name + " has index " + createdCharacteristics[characteristic].cpdID);
         return createdCharacteristics[characteristic].cpdID;
     }
 
