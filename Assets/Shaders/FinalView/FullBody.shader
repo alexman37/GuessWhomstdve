@@ -312,7 +312,7 @@ Shader "Unlit/FullBody"
             // Height of character
             float2 FullBodyOffset;
             float HeightOffset = 0.3 - (0.15 * _Height);
-            float HorzOffset = _LLOD > 0 ? -0.25 : 0;
+            float HorzOffset = _LLOD == 1 ? -0.25 : 0;
             Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), float2 (HorzOffset, HeightOffset), FullBodyOffset);
 
             // Hair-specific offset
@@ -321,7 +321,7 @@ Shader "Unlit/FullBody"
 
             // Offsets for tall items (may extend above given 64x64 range)
             float2 TallOffset;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (0.6667, 0.6667), float2 (0, 0.2 - (0.1 * _Height)), TallOffset);
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (0.6667, 0.6667), float2 (0.166667, 0.2 - (0.1 * _Height)), TallOffset);
 
             // Create main portrait
             UnityTexture2DArray T2DR_Bodies_Arr = UnityBuildTexture2DArrayStruct(T2DR_Bodies);
@@ -371,14 +371,14 @@ Shader "Unlit/FullBody"
                 Finalized = Overlay_float(CityPic, Colorized);
             } 
             else if(_LLOD == 2) {
-                float2 FlagOffset;
+                /*float2 FlagOffset;
                 Unity_TilingAndOffset_float(IN.uv0.xy, float2 (4, 4), float2 (-0.2, -1.5), FlagOffset);
 
                 if(FlagOffset.x > 0 && FlagOffset.x < 1 && FlagOffset.y < 1 && FlagOffset.y > 0) {
                     UnityTexture2DArray T2DR_Flag_l2_Arr = UnityBuildTexture2DArrayStruct(T2DR_Flag_l2);
                     float4 FlagPic = SAMPLE_TEXTURE2D_ARRAY(T2DR_Flag_l2_Arr.tex, T2DR_Flag_l2_Arr.samplerstate, FlagOffset, _FlagIdx_l2);
                     Finalized = Overlay_float(FlagPic, Colorized);
-                }
+                }*/
             }
             
 

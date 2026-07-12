@@ -11,6 +11,7 @@ public class CharacterCard : MonoBehaviour
     [SerializeField] SpriteRenderer portraitFrame;
     [SerializeField] SpriteRenderer portrait;
     [SerializeField] Material drawMat;
+    [SerializeField] SpriteRenderer flag;
 
     [SerializeField] SpriteRenderer[] simpleIndexBadges;
     [SerializeField] CPD_Type[] simpleIndexOrder;
@@ -55,8 +56,9 @@ public class CharacterCard : MonoBehaviour
         drawMat.SetInt("_JobIdx", c.getVariantIndexofCharacteristic(CPD_Type.Job) + (weight * 64));
 
         int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
+        int gender = c.getCategoryIndexofCharacteristic(CPD_Type.Gender);
         drawMat.SetInt("_HairLength", Hairlen);
-        (ulong s, int v) crv4 = CharRandomValue.randomHairIndex(crv3.s, Hairlen);
+        (ulong s, int v) crv4 = CharRandomValue.randomHairIndex(crv3.s, Hairlen, gender);
         drawMat.SetInt("_HairIdx", crv4.v);
 
         (ulong s, Color v) crv5 = c.getColorField(crv4.s, CPD_Type.HairColor);
@@ -82,8 +84,8 @@ public class CharacterCard : MonoBehaviour
                 cityAbbrText.enabled = true;
                 cityAbbrText.text = cityAbbr;
 
-                int flag = CountryMap.instance.getCode(locName[1]);
-                drawMat.SetInt("_FlagIdx_l2", flag);
+                int flagCode = CountryMap.instance.getCode(locName[1]);
+                flag.material.SetFloat("Ref_MatIndex", flagCode);
                 break;
             default:
                 break;

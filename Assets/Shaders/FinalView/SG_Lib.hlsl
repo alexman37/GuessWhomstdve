@@ -7,6 +7,8 @@ static float4 C_HAIR_BASE = float4(0,0,1,1);
 static float4 C_HAIR_OUTLINE = float4(0,0,0.6,1);
 static float4 C_HAIR_SHADOW = float4(0,0,0.4,1);
 static float4 C_HAIR_BACK = float4(0,0,0.2,1);
+static float4 C_HAIR_CUT = float4(1,0,1,1);
+static float4 C_HAIR_CUT_LINE = float4(1,0,0.6,1);
 
 static float4 C_SKIN_BASE = float4(1,0,0,1);
 static float4 C_SKIN_OUTLINE = float4(0.6,0,0,1);
@@ -28,6 +30,24 @@ void SG_Overlay_float(float4 Base, float4 Top, out float4 Out) {
 void SG_OverlayHair_float(float4 Base, float4 Top, out float4 Out) {
 	if(distance(Top, C_HAIR_BACK) < epsilon) {
 		Out = Base.a == 0 ? Top : Base;
+	} else {
+		Out = Top.a == 0 ? Base : Top;
+	}
+}
+
+// Jobs sometimes have hats, which can restrict how long/wide hair is with pink regions
+void SG_OverlayJob_float(float4 Base, float4 Top, out float4 Out) {
+	if(distance(Top, C_HAIR_CUT) < epsilon) {
+		Out = float4(0,0,0,0);
+	} else if(distance(Top, C_HAIR_CUT_LINE) < epsilon) {
+		// Probably hair
+		if(Base.b > 0) {
+			Out = C_HAIR_OUTLINE;
+		}
+		// Probably clothes or empty space
+		else {
+			Out = Base.a > 0 ? Base : float4(0,0,0,0);
+		}
 	} else {
 		Out = Top.a == 0 ? Base : Top;
 	}

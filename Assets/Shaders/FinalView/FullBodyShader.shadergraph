@@ -2429,7 +2429,7 @@
     "m_ShaderOutputName": "Offset",
     "m_StageCapability": 3,
     "m_Value": {
-        "x": 0.0,
+        "x": 0.1704999953508377,
         "y": 0.10000000149011612
     },
     "m_DefaultValue": {
@@ -2463,7 +2463,7 @@
     "m_ShaderOutputName": "Offset",
     "m_StageCapability": 3,
     "m_Value": {
-        "x": -0.25,
+        "x": 0.0,
         "y": 0.15000000596046449
     },
     "m_DefaultValue": {
@@ -2744,7 +2744,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "SG_Overlay (Custom Function)",
+    "m_Name": "SG_OverlayJob (Custom Function)",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -2774,7 +2774,7 @@
         "m_SerializableColors": []
     },
     "m_SourceType": 0,
-    "m_FunctionName": "SG_Overlay",
+    "m_FunctionName": "SG_OverlayJob",
     "m_FunctionSource": "983c60acde6d71543bef7e84713bb53e",
     "m_FunctionBody": "Comp = TopLayer.a == 0;\nOut = TopLayer;"
 }
@@ -4367,7 +4367,7 @@
     "m_Hidden": false,
     "m_ShaderOutputName": "Index",
     "m_StageCapability": 3,
-    "m_Value": 0.0,
+    "m_Value": 66.0,
     "m_DefaultValue": 0.0,
     "m_Labels": []
 }
@@ -5553,7 +5553,7 @@
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
     "m_Value": {
-        "m_SerializedTexture": "{\"textureArray\":{\"fileID\":18700000,\"guid\":\"82908465d1893304ca53802cc85506e5\",\"type\":3}}",
+        "m_SerializedTexture": "{\"textureArray\":{\"fileID\":18700000,\"guid\":\"20760902eb923f24cb1fff5f54a862d9\",\"type\":3}}",
         "m_Guid": ""
     },
     "m_Modifiable": true

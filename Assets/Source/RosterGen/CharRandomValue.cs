@@ -29,9 +29,25 @@ public static class CharRandomValue
     //Return a random hair index. It depends on the hair length
     //(...may later depend on sex)
     // TODO is this even accurate anymore? check the hair file...
-    public static (ulong, int) randomHairIndex(ulong seed, int HairLen)
+    public static (ulong, int) randomHairIndex(ulong seed, int HairLen, int gender)
     {
-        return RangedSeedRandomizer(seed, 0, hairLengthSizes[HairLen]);
+        // Not really a better way to do this than by hardcoding...too specific.
+        int start = 0;
+        int stop = hairLengthSizes[HairLen];
+        switch (gender)
+        {
+            case 0:
+                if (HairLen == 0) stop = 16;
+                else if (HairLen == 1) stop = 17;
+                else if (HairLen == 2) stop = 8;
+                break;
+            case 1:
+                if (HairLen == 0)      start = 7;
+                else if (HairLen == 1) start = 13;
+                else if (HairLen == 2) start = 1;
+                break;
+        }
+        return RangedSeedRandomizer(seed, start, stop);
     }
 
     private static List<string> getNames(string path)
