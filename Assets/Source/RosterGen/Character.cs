@@ -12,21 +12,12 @@ public class Character
     Dictionary<CPD_Type, CPD_Variant> createdCharacteristics; // Once we create a character we can assign them data in here
 
 
-    // TODO ???
     //Attributes
     string firstName;
     string lastName;
-    /*(int day, int month) birthday;
-    int age;
 
-    //Relationships
-    int[] family; //Murderer fairly unlikely to kill family
-    int[] friends; //Murderer VERY unlikely to kill a friend
-    int[] contacts; //Can be a good or bad relationship
-    int[] enemies; //Murderer fairly likely to kill enemies
-
-    //Traits
-    //List<Trait> traits = new List<Trait>();*/
+    // Use this when you need a random number that doesn't really matter in the grand scheme of things
+    float magicNumber;
 
     // The only thing you need to create a character is their position in the roster and their simulated ID!
     // Everything else can be determined on the fly as necessary
@@ -73,6 +64,9 @@ public class Character
         (ulong s, string f, string l) fullName = CharRandomValue.CRV_randomName(workingSeed, isMale);
         firstName = fullName.f;
         lastName = fullName.l;
+
+        (ulong finalSeed, float mn) = CharRandomValue.Random(fullName.s);
+        this.magicNumber = mn;
     }
 
     /// <summary>
@@ -128,6 +122,19 @@ public class Character
     {
         if (newline == false) return firstName + " " + lastName;
         else return firstName + "\n" + lastName;
+    }
+
+    /// <summary>
+    /// Get a random value using the magic number.
+    /// </summary>
+    public int getOneTimeRandomNumber(int min, int max)
+    {
+        return min + (int)(magicNumber * (float)(max - min));
+    }
+
+    public float getOneTimeRandomNumber(float min, float max)
+    {
+        return min + (magicNumber * (max - min));
     }
 
     public override string ToString()

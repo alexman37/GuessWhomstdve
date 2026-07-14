@@ -99,6 +99,10 @@ public class CharacterCard : MonoBehaviour
                 simpleIndexBadges[i].material.SetFloat("Ref_MatIndex", c.getCategoryIndexofCharacteristic(simpleIndexOrder[i]));
             }
         }
+
+        // Background
+        int backgroundIdx = c.getOneTimeRandomNumber(0, 8);
+        drawMat.SetInt("_Background_Idx", backgroundIdx);
     }
 
     private void OnMouseDown()

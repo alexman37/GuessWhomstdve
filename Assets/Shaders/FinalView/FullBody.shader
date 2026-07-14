@@ -10,7 +10,7 @@ Shader "Unlit/FullBody"
         [NoScaleOffset]T2DR_Hair_L("T2DR_Hair_L", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Jobs("T2DR_Jobs", 2DArray) = "" {}
         [NoScaleOffset]T2DR_City_l1("T2DR_City_l1", 2DArray) = "" {}
-        [NoScaleOffset]T2DR_Flag_l2("T2DR_Flag_l2", 2DArray) = "" {}
+        [NoScaleOffset]T2DR_Backgrounds_Simple("T2DR_Backgrounds_Simple", 2DArray) = "" {}
         [NoScaleOffset]MainTexProp("MainTex", 2D) = "white" {}
         
         // Specifics
@@ -31,8 +31,12 @@ Shader "Unlit/FullBody"
 
         _LLOD("LLOD", Float) = 0
         _CityIdx_l1("CityIdx_l1", Float) = 0
-        _CityIdx_l2("CityIdx_l2", Float) = 0
-        _FlagIdx_l2("CityIdx_l2", Float) = 0
+
+        _Background_Idx("Background_Idx", Float) = 0
+        [HideInInspector]_Background_MoveSpeed("Background_MoveSpeed", Float) = 0.5
+        [HideInInspector]_Background_MoveDir("Background_MoveDir", Float) = 0.5
+        [HideInInspector]_Background_MoveRot("Background_MoveDir", Float) = 15
+        [HideInInspector]_Background_MoveTile("Background_MoveDir", Float) = 3
 
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
@@ -228,8 +232,12 @@ Shader "Unlit/FullBody"
 
         int _LLOD;
         int _CityIdx_l1;
-        int _CityIdx_l2;
-        int _FlagIdx_l2;
+        
+        int _Background_Idx;
+        static float  _Background_MoveSpeed = 0.5;
+        static float2 _Background_MoveDir = float2(0.5, 0.5);
+        static float  _Background_MoveRot = -15;
+        static float2 _Background_MoveTile = float2(3, 3);
 
         CBUFFER_END
 
@@ -250,8 +258,8 @@ Shader "Unlit/FullBody"
         SAMPLER(samplerT2DR_Jobs);
         TEXTURE2D_ARRAY(T2DR_City_l1);
         SAMPLER(samplerT2DR_City_l1);
-        TEXTURE2D_ARRAY(T2DR_Flag_l2);
-        SAMPLER(samplerT2DR_Flag_l2);
+        TEXTURE2D_ARRAY(T2DR_Backgrounds_Simple);
+        SAMPLER(samplerT2DR_Backgrounds_Simple);
         TEXTURE2D(MainTexProp);
         SAMPLER(samplerMainTexProp);
         SAMPLER(SamplerState_Linear_Repeat);
@@ -276,6 +284,18 @@ Shader "Unlit/FullBody"
             UV.xy = mul(UV.xy, rMatrix);
             UV += Center;
             Out = UV;
+        }
+
+        float4 SimpleBackground_float(float2 StartUV) {
+            float2 Movement = float2(_Time.y, _Time.y) * float2(_Background_MoveSpeed, _Background_MoveSpeed) * _Background_MoveDir;
+            float2 BackUV;
+            Unity_Rotate_Degrees_float(StartUV, float2 (0.5, 0.5), _Background_MoveRot, BackUV);
+            Unity_TilingAndOffset_float(BackUV, _Background_MoveTile, Movement, BackUV);
+            float2 FinalUV = fmod(BackUV, float2(1,1));
+
+            UnityTexture2DArray T2DR_Backs_Arr = UnityBuildTexture2DArrayStruct(T2DR_Backgrounds_Simple);
+            float4 samp = SAMPLE_TEXTURE2D_ARRAY(T2DR_Backs_Arr.tex, T2DR_Backs_Arr.samplerstate, FinalUV, _Background_Idx);
+            return samp * _BodyColor * 0.37;
         }
 
         // 3114e4fb6f435b044aee665411644ffd
@@ -371,16 +391,12 @@ Shader "Unlit/FullBody"
                 Finalized = Overlay_float(CityPic, Colorized);
             } 
             else if(_LLOD == 2) {
-                /*float2 FlagOffset;
-                Unity_TilingAndOffset_float(IN.uv0.xy, float2 (4, 4), float2 (-0.2, -1.5), FlagOffset);
-
-                if(FlagOffset.x > 0 && FlagOffset.x < 1 && FlagOffset.y < 1 && FlagOffset.y > 0) {
-                    UnityTexture2DArray T2DR_Flag_l2_Arr = UnityBuildTexture2DArrayStruct(T2DR_Flag_l2);
-                    float4 FlagPic = SAMPLE_TEXTURE2D_ARRAY(T2DR_Flag_l2_Arr.tex, T2DR_Flag_l2_Arr.samplerstate, FlagOffset, _FlagIdx_l2);
-                    Finalized = Overlay_float(FlagPic, Colorized);
-                }*/
+                // Flags moved to a separate sprite now.
             }
-            
+
+            // Apply a simple background to the finalized character
+            float4 Background = SimpleBackground_float(IN.uv0.xy);
+            Finalized = Overlay_float(Background, Finalized);
 
             surface.BaseColor = (Finalized.xyz);
             surface.Alpha = 1;

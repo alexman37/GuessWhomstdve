@@ -14,7 +14,17 @@ public static class CharRandomValue
     private static int lastNamesSize = lastNames.Count;
 
     private static int[] hairLengthSizes = new int[]{ 21, 21, 15 };
-    
+
+
+    //Return a random value and the next seed.
+    public static (ulong, float) Random(ulong seed)
+    {
+        seed ^= seed << 13;
+        seed ^= seed >> 7;
+        seed ^= seed << 17;
+        float clampedVal = ((float)seed) / ((float)ulong.MaxValue);
+        return (seed, clampedVal);
+    }
 
     //Return a random name
     //The list of first and last names is supplied in "FirstNamesM/F.txt" and "LastNamesM/F.txt"
@@ -75,11 +85,12 @@ public static class CharRandomValue
     /// </summary>
     public static (ulong, int) RangedSeedRandomizer(ulong input, int min, int max)
     {
-        ulong orig = input;
         input ^= input << 13;
         input ^= input >> 7;
         input ^= input << 17;
         float clampedVal = ((float) input) / ((float) ulong.MaxValue);
         return (input, min + (int)(clampedVal * (float)(max - min)));
     }
+
+
 }
