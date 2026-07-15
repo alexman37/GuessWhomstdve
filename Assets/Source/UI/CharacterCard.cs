@@ -70,8 +70,10 @@ public class CharacterCard : MonoBehaviour
         (ulong s, Color v) crv8 = c.getColorField(crv7.s, CPD_Type.FavoriteColor);
         drawMat.SetColor("_BodyColor", crv8.v);
 
+        ulong workingSeed = crv8.s;
+
         // Locations
-        switch(drawMat.GetInt("_LLOD"))
+        switch (drawMat.GetInt("_LLOD"))
         {
             case 1:
                 int city = c.getCategoryIndexofCharacteristic(CPD_Type.City_L1);
@@ -98,6 +100,20 @@ public class CharacterCard : MonoBehaviour
             {
                 simpleIndexBadges[i].material.SetFloat("Ref_MatIndex", c.getCategoryIndexofCharacteristic(simpleIndexOrder[i]));
             }
+        }
+
+        // Optionals
+        if(c.optionalTraits.hasMoustache)
+        {
+            (ulong s, int v) opt_moustache = CharRandomValue.RangedSeedRandomizer(workingSeed, 0, 20);
+            drawMat.SetVector("_OPT_Stache", new Vector4(1, opt_moustache.v, 0, 0));
+            workingSeed = opt_moustache.s;
+        }
+        if(c.optionalTraits.hasBeard)
+        {
+            (ulong s, int v) opt_beard = CharRandomValue.RangedSeedRandomizer(workingSeed, 0, 8);
+            drawMat.SetVector("_OPT_Beard", new Vector4(1, opt_beard.v, 0, 0));
+            workingSeed = opt_beard.s;
         }
 
         // Background

@@ -5,4 +5,4 @@
 Brown;X;120-150,50-60,10-20;Brown
 Blue;X;17,20-134,140;Blue
 Green;X;17-50,150-191,25-59;Green
-Black;X;0,0,0;Black
+Black;X;70,70,70;Black

@@ -10,6 +10,10 @@ Shader "Unlit/FullBody"
         [NoScaleOffset]T2DR_Hair_L("T2DR_Hair_L", 2DArray) = "" {}
         [NoScaleOffset]T2DR_Jobs("T2DR_Jobs", 2DArray) = "" {}
         [NoScaleOffset]T2DR_City_l1("T2DR_City_l1", 2DArray) = "" {}
+
+        [NoScaleOffset]T2DR_Staches("T2DR_Staches", 2DArray) = "" {}
+        [NoScaleOffset]T2DR_Beards("T2DR_Beards", 2DArray) = "" {}
+
         [NoScaleOffset]T2DR_Backgrounds_Simple("T2DR_Backgrounds_Simple", 2DArray) = "" {}
         [NoScaleOffset]MainTexProp("MainTex", 2D) = "white" {}
         
@@ -31,6 +35,9 @@ Shader "Unlit/FullBody"
 
         _LLOD("LLOD", Float) = 0
         _CityIdx_l1("CityIdx_l1", Float) = 0
+
+        _OPT_Stache("OPT_Stache", Vector) = (0, 0, 0, 0)
+        _OPT_Beard("OPT_Beard", Vector) = (0, 0, 0, 0)
 
         _Background_Idx("Background_Idx", Float) = 0
         [HideInInspector]_Background_MoveSpeed("Background_MoveSpeed", Float) = 0.5
@@ -232,6 +239,9 @@ Shader "Unlit/FullBody"
 
         int _LLOD;
         int _CityIdx_l1;
+
+        float2 _OPT_Stache;
+        float2 _OPT_Beard;
         
         int _Background_Idx;
         static float  _Background_MoveSpeed = 0.5;
@@ -258,6 +268,10 @@ Shader "Unlit/FullBody"
         SAMPLER(samplerT2DR_Jobs);
         TEXTURE2D_ARRAY(T2DR_City_l1);
         SAMPLER(samplerT2DR_City_l1);
+        TEXTURE2D_ARRAY(T2DR_Staches);
+        SAMPLER(samplerT2DR_Staches);
+        TEXTURE2D_ARRAY(T2DR_Beards);
+        SAMPLER(samplerT2DR_Beards);
         TEXTURE2D_ARRAY(T2DR_Backgrounds_Simple);
         SAMPLER(samplerT2DR_Backgrounds_Simple);
         TEXTURE2D(MainTexProp);
@@ -370,14 +384,27 @@ Shader "Unlit/FullBody"
                 HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
             }
 
+            // Main components - head, body, hair etc.
             float4 OverlayStep1 = Overlay_float(BodyChoice, HeadChoice);
             float4 OverlayStep2 = Overlay_float(OverlayStep1, FaceChoice);
             float4 OverlayStep3 = OverlayHair_float(OverlayStep2, HairChoice);
-            float4 OverlayStep4 = OverlayJob_float(OverlayStep3, JobChoice);
+            float4 MainBuild = OverlayJob_float(OverlayStep3, JobChoice);
+
+            // Optional components, like facial hair
+            if(_OPT_Stache.x) {
+                UnityTexture2DArray T2DR_Stache_Arr = UnityBuildTexture2DArrayStruct(T2DR_Staches);
+                float4 StacheChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Stache_Arr.tex, T2DR_Stache_Arr.samplerstate, FullBodyOffset, _OPT_Stache.y);
+                MainBuild = Overlay_float(MainBuild, StacheChoice);
+            }
+            if(_OPT_Beard.x) {
+                UnityTexture2DArray T2DR_Beard_Arr = UnityBuildTexture2DArrayStruct(T2DR_Beards);
+                float4 BeardChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Beard_Arr.tex, T2DR_Beard_Arr.samplerstate, FullBodyOffset, _OPT_Beard.y);
+                MainBuild = Overlay_float(MainBuild, BeardChoice);
+            }
             
             float4 Colorized;
             // TODO replace consts with actual variables
-            Colorized = Colorize_float(OverlayStep4, _SkinColor, _HairColor, _BodyColor, _EyeColor);
+            Colorized = Colorize_float(MainBuild, _SkinColor, _HairColor, _BodyColor, _EyeColor);
             float4 Finalized = Colorized;
 
             // Location stuff (depends on LOD)

@@ -23,6 +23,14 @@ Material:
         m_Texture: {fileID: 2800000, guid: ffcca5a06164fd442ac6b128fe77eaef, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - T2DR_Backgrounds_Simple:
+        m_Texture: {fileID: 18700000, guid: f6fb6a7ddfd8776479f31a4f33bff606, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Beards:
+        m_Texture: {fileID: 18700000, guid: 5e5e5207baa3d5b419fbe74596e602d2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - T2DR_Bodies:
         m_Texture: {fileID: 18700000, guid: 3641504cb2bb960448d29b3dd586dab0, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -63,6 +71,10 @@ Material:
         m_Texture: {fileID: 18700000, guid: 20760902eb923f24cb1fff5f54a862d9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - T2DR_Staches:
+        m_Texture: {fileID: 18700000, guid: 686e1fb30b200ea4996ca659f098f4e9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -76,6 +88,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _Background_Idx: 0
+    - _Background_MoveDir: 0.5
+    - _Background_MoveRot: 15
+    - _Background_MoveSpeed: 0.5
+    - _Background_MoveTile: 3
     - _BodyIdx: 0
     - _CityIdx_l1: 0
     - _CityIdx_l2: 0
@@ -93,5 +110,7 @@ Material:
     - _BodyColor: {r: 0.4245283, g: 0.31038627, b: 0.31038627, a: 1}
     - _EyeColor: {r: 0, g: 0, b: 0, a: 1}
     - _HairColor: {r: 0.7264151, g: 0.34607512, b: 0.34607512, a: 1}
+    - _OPT_Beard: {r: 0, g: 0, b: 0, a: 0}
+    - _OPT_Stache: {r: 0, g: 0, b: 0, a: 0}
     - _SkinColor: {r: 0.6698113, g: 0.635057, b: 0.635057, a: 1}
   m_BuildTextureStacks: []

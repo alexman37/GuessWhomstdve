@@ -1,0 +1,10 @@
+###[int id], string filename, string name, float probability, string generalDescription(s)
+
+beard1;beard1;X;Beard
+beard2;beard2;X;Beard
+beard3;beard3;X;Beard
+beard4;beard4;X;Beard
+beard5;beard5;X;Beard
+beard6;beard6;X;Beard
+beard7;beard7;X;Beard
+beard8;beard8;X;Beard

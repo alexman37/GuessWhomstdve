@@ -5,16 +5,18 @@ using UnityEngine;
 //
 public class Character
 {
-    //Demographics: they are physical, undeniable descriptions of a person that can be discovered simply by seeing / meeting them.
+    //Demographics: CPDs, values that exist on every character and may be part of the game as well.
     public int rosterId; // Where in the roster list of known characters (and sprites) this person is.
     public ulong simulatedId; // The unique ID from (0 - rosterSize - 1) that contains all this character's constrainable CPD values
                      // All other (cosmetic) random values generated using this simulatedId as a seed
     Dictionary<CPD_Type, CPD_Variant> createdCharacteristics; // Once we create a character we can assign them data in here
 
 
-    //Attributes
+    //Attributes - purely cosmetic characteristics that don't really work as a CPD
     string firstName;
     string lastName;
+
+    public OptionalTraits optionalTraits = new OptionalTraits { hasMoustache = false, hasBeard = false };
 
     // Use this when you need a random number that doesn't really matter in the grand scheme of things
     float magicNumber;
@@ -46,27 +48,44 @@ public class Character
         // There are some other traits we want to give our characters here
         // We can still get away with using "random" traits, since the randomSeed was set to a predictable value in unpackSimulationID
         // and will not be reset until we call it again.
+        (ulong workingSeed, float _) = CharRandomValue.Random(simulatedId);
 
         bool isMale = true;
-        ulong workingSeed = simulatedId;
+        bool eligibleForFacialHair = true;
         if(createdCharacteristics.ContainsKey(CPD_Type.Gender))
         {
             int gender = createdCharacteristics[CPD_Type.Gender].cpdID;
             if (gender < 2) isMale = gender == 0;
             else
             {
-                (ulong s, int v) nbName = CharRandomValue.RangedSeedRandomizer(simulatedId, 0, 2);
+                (ulong s, int v) nbName = CharRandomValue.RangedSeedRandomizer(workingSeed, 0, 2);
                 workingSeed = nbName.s;
                 isMale = nbName.v == 0;
             }
+            eligibleForFacialHair = gender == 0;
         }
-        Debug.Log("Will use male name: " + isMale);
         (ulong s, string f, string l) fullName = CharRandomValue.CRV_randomName(workingSeed, isMale);
         firstName = fullName.f;
         lastName = fullName.l;
+        ulong finalSeed = fullName.s;
 
-        (ulong finalSeed, float mn) = CharRandomValue.Random(fullName.s);
-        this.magicNumber = mn;
+        // Moustache and beard aren't CPDs, just decorations for male characters
+        if (eligibleForFacialHair)
+        {
+            (ulong facial1s, float mChance) = CharRandomValue.Random(fullName.s);
+            (ulong facial2s, float bChance) = CharRandomValue.Random(facial1s);
+            if(mChance < 0.3f)
+            {
+                optionalTraits.hasMoustache = true;
+            } if(bChance < 0.2f)
+            {
+                optionalTraits.hasBeard = true;
+            }
+
+            finalSeed = facial2s;
+        }
+
+        this.magicNumber = (float)((double) fullName.s / (double) ulong.MaxValue);
     }
 
     /// <summary>
@@ -150,4 +169,10 @@ public class Character
             "Hair: " + hairStyle + "," + hairColor + "\n";*/
         return str;
     }
+}
+
+public struct OptionalTraits
+{
+    public bool hasMoustache;
+    public bool hasBeard;
 }

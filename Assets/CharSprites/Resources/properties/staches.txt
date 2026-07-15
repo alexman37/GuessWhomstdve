@@ -1,0 +1,22 @@
+###[int id], string filename, string name, float probability, string generalDescription(s)
+
+stache1;stache1;X;Moustache
+stache2;stache2;X;Moustache
+stache3;stache3;X;Moustache
+stache4;stache4;X;Moustache
+stache5;stache5;X;Moustache
+stache6;stache6;X;Moustache
+stache7;stache7;X;Moustache
+stache8;stache8;X;Moustache
+stache9;stache9;X;Moustache
+stache10;stache10;X;Moustache
+stache11;stache11;X;Moustache
+stache12;stache12;X;Moustache
+stache13;stache13;X;Moustache
+stache14;stache14;X;Moustache
+stache15;stache15;X;Moustache
+stache16;stache16;X;Moustache
+stache17;stache17;X;Moustache
+stache18;stache18;X;Moustache
+stache19;stache19;X;Moustache
+stache20;stache20;X;Moustache

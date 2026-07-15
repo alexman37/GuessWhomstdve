@@ -17,6 +17,7 @@ static float4 C_BODY_BASE = float4(0,1,0,1);
 static float4 C_BODY_OUTLINE = float4(0,0.6,0,1);
 
 static float4 C_EYE_BASE = float4(0,1,1,1);
+static float4 C_EYE_OUTLINE = float4(0,0.8,0.8,1);
 
 static float epsilon = 0.01;
 
@@ -79,8 +80,6 @@ float4 Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, floa
 			Colored = ColorSwap_float(Colored, C_SKIN_OUTLINE, SkinColor * 0.8f);
 		}
 
-		Colored = ColorSwap_float(Colored, C_EYE_BASE, EyeColor);
-
 		if(Uncolored.g > epsilon) {
 			Colored = ColorSwap_float(Colored, C_BODY_BASE, BodyColor);
 			Colored = ColorSwap_float(Colored, C_BODY_OUTLINE, BodyColor * 0.8f);
@@ -91,6 +90,9 @@ float4 Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, floa
 			Colored = ColorSwap_float(Colored, C_HAIR_OUTLINE, HairColor * 0.8f);
 			Colored = ColorSwap_float(Colored, C_HAIR_SHADOW, HairColor * 0.6f);
 			Colored = ColorSwap_float(Colored, C_HAIR_BACK, HairColor * 0.4f);
+
+			Colored = ColorSwap_float(Colored, C_EYE_BASE, EyeColor);
+			Colored = ColorSwap_float(Colored, C_EYE_OUTLINE, EyeColor * 0.6);
 		}
 		return Colored;
 	}
