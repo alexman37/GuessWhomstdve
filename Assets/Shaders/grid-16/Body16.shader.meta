@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6a7765d3b53391f488a1c79787398704
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - T2DR_Bodies: {fileID: 18700000, guid: 3641504cb2bb960448d29b3dd586dab0, type: 3}
+  - T2DR_Heads: {fileID: 18700000, guid: 989606445f064ef4694a5dcfa531d9c2, type: 3}
+  - T2DR_Faces: {fileID: 18700000, guid: 5db836fff5baafa4da7634c0162b7d38, type: 3}
+  - T2DR_Hair: {fileID: 18700000, guid: dbf83a597bb7abc4c8269f79a1632a14, type: 3}
+  - MainTexProp: {fileID: 2800000, guid: ffcca5a06164fd442ac6b128fe77eaef, type: 3}
+  - unity_Lightmaps: {instanceID: 0}
+  - unity_LightmapsInd: {instanceID: 0}
+  - unity_ShadowMasks: {instanceID: 0}
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

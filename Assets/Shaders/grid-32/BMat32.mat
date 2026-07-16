@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BMat32
+  m_Shader: {fileID: 4800000, guid: ae67785d2d2ac72479405eadc82a83e8, type: 3}
+  m_ShaderKeywords: ETC1_EXTERNAL_ALPHA
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - MainTexProp:
+        m_Texture: {fileID: 2800000, guid: ffcca5a06164fd442ac6b128fe77eaef, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Backgrounds_Simple:
+        m_Texture: {fileID: 18700000, guid: 5956c35a4b2681d469a909e463cbebfb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Beards:
+        m_Texture: {fileID: 18700000, guid: ba3863560182ba44b8772213fd053b85, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Bodies:
+        m_Texture: {fileID: 18700000, guid: 4a049d3fb3044294caf798bb1e6df76f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Faces:
+        m_Texture: {fileID: 18700000, guid: 5026c215e58d08b4daab585f07a3f650, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Hair_L:
+        m_Texture: {fileID: 18700000, guid: fdf09f9d4e698f14ba4c9eeaf14cf140, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Hair_M:
+        m_Texture: {fileID: 18700000, guid: a9e91757fd43f08489f36f9e4391ef45, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Hair_S:
+        m_Texture: {fileID: 18700000, guid: 492e4d2a03cd5b64fb81f0129cab796b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Heads:
+        m_Texture: {fileID: 18700000, guid: c68866f036ab4084594cd0ce9e3954d0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Jobs:
+        m_Texture: {fileID: 18700000, guid: e066a404d3e72534bbdde5ca1a1df6fe, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Staches:
+        m_Texture: {fileID: 18700000, guid: 297c322cfff472640a98bf6447eb8656, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _Background_Idx: 0
+    - _Background_MoveDir: 0.5
+    - _Background_MoveRot: 15
+    - _Background_MoveSpeed: 0.5
+    - _Background_MoveTile: 3
+    - _FaceIdx: 0
+    - _HairIdx: 0
+    - _HairLength: 0
+    - _HeadIdx: 0
+    - _Height: 0
+    - _JobIdx: 0
+    - _Weight: 0
+    m_Colors:
+    - _BodyColor: {r: 0.3490566, g: 0.21239765, b: 0.21239765, a: 1}
+    - _EyeColor: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 1}
+    - _HairColor: {r: 0.20392154, g: 0.5647059, b: 0.2175242, a: 1}
+    - _OPT_Beard: {r: 0, g: 0, b: 0, a: 0}
+    - _OPT_Stache: {r: 0, g: 0, b: 0, a: 0}
+    - _SkinColor: {r: 0.6037736, g: 0.56674975, b: 0.56674975, a: 1}
+  m_BuildTextureStacks: []
