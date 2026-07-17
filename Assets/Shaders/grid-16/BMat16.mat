@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BMat16
+  m_Shader: {fileID: 4800000, guid: 6a7765d3b53391f488a1c79787398704, type: 3}
+  m_ShaderKeywords: ETC1_EXTERNAL_ALPHA
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - MainTexProp:
+        m_Texture: {fileID: 2800000, guid: ffcca5a06164fd442ac6b128fe77eaef, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Bodies:
+        m_Texture: {fileID: 18700000, guid: 141c98eee121f9b498032d4c30b38d68, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Hair:
+        m_Texture: {fileID: 18700000, guid: 488ee6eada9c5ef429b6a426fd8fbf27, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - T2DR_Jobs:
+        m_Texture: {fileID: 18700000, guid: 13724323f77ef924a87cb9a541c4f089, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Tex_Beard:
+        m_Texture: {fileID: 2800000, guid: 0109cc0d717b5784eb60c8a40bf4c3b2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Tex_Face:
+        m_Texture: {fileID: 2800000, guid: a9d8f7717d1398b4282dc7c3fc9f2383, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Tex_Head:
+        m_Texture: {fileID: 2800000, guid: 41390e081ecbe584f83eb5228c38d862, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Tex_Stache:
+        m_Texture: {fileID: 2800000, guid: 91d4cd2699e5f6e409d87967e31ddd6b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _HairLength: 0
+    - _Height: 0
+    - _JobIdx: 0
+    - _Weight: 0
+    m_Colors:
+    - _BodyColor: {r: 0.41509432, g: 0.08419366, b: 0.08419366, a: 1}
+    - _EyeColor: {r: 0.3301887, g: 0.28502136, b: 0.28502136, a: 1}
+    - _HairColor: {r: 0.41509432, g: 0.26824492, b: 0.26824492, a: 1}
+    - _OPT_Beard: {r: 0, g: 0, b: 0, a: 0}
+    - _OPT_Stache: {r: 0, g: 0, b: 0, a: 0}
+    - _SkinColor: {r: 0.8773585, g: 0.71595764, b: 0.71595764, a: 1}
+  m_BuildTextureStacks: []

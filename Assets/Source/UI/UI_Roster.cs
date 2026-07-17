@@ -168,6 +168,7 @@ public class UI_Roster : MonoBehaviour
                 startingY - Mathf.Floor(i / entriesPerRow) * (cardHeight + cardOffsetH), 0);
             newCard.gameObject.SetActive(true);
 
+            // character card -> other character card types
             CharacterCard charCard = newCard.gameObject.GetComponent<CharacterCard>();
             charCard.characterId = c.simulatedId;
             charCard.SetMaterialParams(c);
@@ -202,6 +203,7 @@ public class UI_Roster : MonoBehaviour
 
                 // TODO roster.shownRosterSprites
 
+                // character card -> other char card types
                 CharacterCard charCard = newCard.GetComponent<CharacterCard>();
                 charCard.characterId = c.simulatedId;
                 charCard.SetMaterialParams(c);

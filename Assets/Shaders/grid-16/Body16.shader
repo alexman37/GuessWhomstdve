@@ -7,6 +7,10 @@ Shader "Unlit/Body16"
         [NoScaleOffset]T2DR_Jobs("T2DR_Jobs", 2DArray) = "" {}
 
         //[NoScaleOffset]T2DR_Backgrounds_Simple("T2DR_Backgrounds_Simple", 2DArray) = "" {}
+        [NoScaleOffset]Tex_Head("Tex_Head", 2D) = "white" {}
+        [NoScaleOffset]Tex_Face("Tex_Face", 2D) = "white" {}
+        [NoScaleOffset]Tex_Stache("Tex_Stache", 2D) = "white" {}
+        [NoScaleOffset]Tex_Beard("Tex_Beard", 2D) = "white" {}
         [NoScaleOffset]MainTexProp("MainTex", 2D) = "white" {}
         
         // Specifics
@@ -243,6 +247,14 @@ Shader "Unlit/Body16"
         SAMPLER(samplerT2DR_Backgrounds_Simple);*/
         TEXTURE2D(MainTexProp);
         SAMPLER(samplerMainTexProp);
+        TEXTURE2D(Tex_Head);
+        SAMPLER(samplerTex_Head);
+        TEXTURE2D(Tex_Face);
+        SAMPLER(samplerTex_Face);
+        TEXTURE2D(Tex_Stache);
+        SAMPLER(samplerTex_Stache);
+        TEXTURE2D(Tex_Beard);
+        SAMPLER(samplerTex_Beard);
         SAMPLER(SamplerState_Linear_Repeat);
 
             // Graph Functions
@@ -313,43 +325,26 @@ Shader "Unlit/Body16"
             // Height of character
             float2 FullBodyOffset;
             float HeightOffset = 0.3 - (0.15 * _Height);
-            float HorzOffset = 0;
+            float HorzOffset = -0.05;
             Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), float2 (HorzOffset, HeightOffset), FullBodyOffset);
-
-            // Hair-specific offset
-            float2 HairOffset;
-            Unity_TilingAndOffset_float(FullBodyOffset, float2 (1, 1), float2 (0, -0.2), HairOffset);
 
             // Offsets for tall items (may extend above given 64x64 range)
             float2 TallOffset;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (0.6667, 0.6667), float2 (0.166667, 0.2 - (0.1 * _Height)), TallOffset);
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (0.6667, 0.6667), float2 (-0.033333 + 0.166667, 0.2 - (0.1 * _Height)), TallOffset);
 
             // Create main portrait
             UnityTexture2DArray T2DR_Bodies_Arr = UnityBuildTexture2DArrayStruct(T2DR_Bodies);
             float4 BodyChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Bodies_Arr.tex, T2DR_Bodies_Arr.samplerstate, FullBodyOffset, _Weight);
 
-            UnityTexture2DArray T2DR_Heads_Arr = UnityBuildTexture2DArrayStruct(T2DR_Heads);
-            float4 HeadChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Heads_Arr.tex, T2DR_Heads_Arr.samplerstate, FullBodyOffset, _HeadIdx);
+            float4 HeadChoice = SAMPLE_TEXTURE2D(Tex_Head, samplerTex_Head, FullBodyOffset);
 
-            UnityTexture2DArray T2DR_Faces_Arr = UnityBuildTexture2DArrayStruct(T2DR_Faces);
-            float4 FaceChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Faces_Arr.tex, T2DR_Faces_Arr.samplerstate, FullBodyOffset, _FaceIdx);
+            float4 FaceChoice = SAMPLE_TEXTURE2D(Tex_Face, samplerTex_Face, FullBodyOffset);
 
             UnityTexture2DArray T2DR_Jobs_Arr = UnityBuildTexture2DArrayStruct(T2DR_Jobs);
             float4 JobChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Jobs_Arr.tex, T2DR_Jobs_Arr.samplerstate, TallOffset, _JobIdx);
 
-            UnityTexture2DArray T2DR_Hair_Arr;
-            float4 HairChoice;
-
-            if(_HairLength == 0) {
-                T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_S);
-                HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
-            } else if(_HairLength == 1) {
-                T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_M);
-                HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
-            } else {
-                T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_L);
-                HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
-            }
+            UnityTexture2DArray T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair);
+            float4 HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, FullBodyOffset, _HairLength);
 
             // Main components - head, body, hair etc.
             float4 OverlayStep1 = Overlay_float(BodyChoice, HeadChoice);
@@ -359,24 +354,21 @@ Shader "Unlit/Body16"
 
             // Optional components, like facial hair
             if(_OPT_Stache.x) {
-                UnityTexture2DArray T2DR_Stache_Arr = UnityBuildTexture2DArrayStruct(T2DR_Staches);
-                float4 StacheChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Stache_Arr.tex, T2DR_Stache_Arr.samplerstate, FullBodyOffset, _OPT_Stache.y);
+                float4 StacheChoice = SAMPLE_TEXTURE2D(Tex_Stache, samplerTex_Stache, FullBodyOffset);
                 MainBuild = Overlay_float(MainBuild, StacheChoice);
             }
             if(_OPT_Beard.x) {
-                UnityTexture2DArray T2DR_Beard_Arr = UnityBuildTexture2DArrayStruct(T2DR_Beards);
-                float4 BeardChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Beard_Arr.tex, T2DR_Beard_Arr.samplerstate, FullBodyOffset, _OPT_Beard.y);
+                float4 BeardChoice = SAMPLE_TEXTURE2D(Tex_Beard, samplerTex_Beard, FullBodyOffset);
                 MainBuild = Overlay_float(MainBuild, BeardChoice);
             }
             
             float4 Colorized;
-            // TODO replace consts with actual variables
             Colorized = Colorize_float(MainBuild, _SkinColor, _HairColor, _BodyColor, _EyeColor);
             float4 Finalized = Colorized;
 
             // Apply a simple background to the finalized character
-            float4 Background = SimpleBackground_float(IN.uv0.xy);
-            Finalized = Overlay_float(Background, Finalized);
+            //float4 Background = SimpleBackground_float(IN.uv0.xy);
+            //Finalized = Overlay_float(Background, Finalized);
 
             surface.BaseColor = (Finalized.xyz);
             surface.Alpha = 1;
