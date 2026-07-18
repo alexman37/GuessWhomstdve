@@ -4,11 +4,17 @@ using UnityEngine;
 using System;
 using TMPro;
 
-public class CharCard32 : CharacterCard
+public class CharCard64 : CharacterCard
 {
     [SerializeField] SpriteRenderer portraitFrame;
     [SerializeField] SpriteRenderer portrait;
     [SerializeField] Material drawMat;
+    [SerializeField] SpriteRenderer flag;
+
+    [SerializeField] SpriteRenderer[] simpleIndexBadges;
+    [SerializeField] CPD_Type[] simpleIndexOrder;
+
+    [SerializeField] TextMeshProUGUI cityAbbrText;
 
     public static event Action<ulong> charCardClicked = (_) => { };
 
@@ -28,6 +34,7 @@ public class CharCard32 : CharacterCard
     // You will need different versions of this for different LODs...
     public override void SetMaterialParams(Character c)
     {
+        cityAbbrText.enabled = false;
         drawMat = portrait.material;
 
         ulong startingSeed = c.simulatedId;
@@ -62,6 +69,36 @@ public class CharCard32 : CharacterCard
         drawMat.SetColor("_BodyColor", crv8.v);
 
         ulong workingSeed = crv8.s;
+
+        // Locations
+        switch (drawMat.GetInt("_LLOD"))
+        {
+            case 1:
+                int city = c.getCategoryIndexofCharacteristic(CPD_Type.City_L1);
+                drawMat.SetInt("_CityIdx_l1", city);
+                break;
+            case 2:
+                string[] locName = c.getVariantNameofCharacteristic(CPD_Type.City_L2).Split('_');
+
+                string cityAbbr = locName[0].Substring(0, 3).ToUpper();
+                cityAbbrText.enabled = true;
+                cityAbbrText.text = cityAbbr;
+
+                int flagCode = CountryMap.instance.getCode(locName[1]);
+                flag.material.SetFloat("Ref_MatIndex", flagCode);
+                break;
+            default:
+                break;
+        }
+
+        // Simple index mats
+        if (simpleIndexBadges.Length == simpleIndexOrder.Length)
+        {
+            for (int i = 0; i < simpleIndexBadges.Length; i++)
+            {
+                simpleIndexBadges[i].material.SetFloat("Ref_MatIndex", c.getCategoryIndexofCharacteristic(simpleIndexOrder[i]));
+            }
+        }
 
         // Optionals
         if (c.optionalTraits.hasMoustache)

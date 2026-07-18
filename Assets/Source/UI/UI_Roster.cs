@@ -10,7 +10,13 @@ using TMPro;
 public class UI_Roster : MonoBehaviour
 {
     // How many characters should we display at a time?
-    public const uint CHARACTERS_TO_SHOW = 32;
+    public const uint MAX_CHARACTERS_TO_SHOW = 512;
+    public uint currCharactersToShow = 32;
+    public ushort rosterLOD = 2;
+    private ulong[] lodCutoffs = new ulong[]
+    {
+        1000, 1000000
+    };
 
     public static UI_Roster instance;
 
@@ -23,7 +29,7 @@ public class UI_Roster : MonoBehaviour
     [SerializeField] private Image filteredButton;
 
     // Roster cards are sprites now, so canvas terms not used anymore
-    public GameObject characterCardTemplate;
+    public GameObject[] characterCardTemplate;
     public TextMeshProUGUI suspectsRemaining;
 
     private GameObject container;
@@ -35,7 +41,7 @@ public class UI_Roster : MonoBehaviour
         if (instance == null) instance = this;
         else Destroy(gameObject);
 
-        createdCards = new GameObject[CHARACTERS_TO_SHOW];
+        createdCards = new GameObject[MAX_CHARACTERS_TO_SHOW];
     }
 
     private void OnEnable()
@@ -64,7 +70,7 @@ public class UI_Roster : MonoBehaviour
         container.name = "RosterContainer";
 
         // TODO set position and such
-        container.transform.position = new Vector3(-14, 3.5f, 0);
+        container.transform.position = new Vector3(-15.5f, 3.5f, 0);
     }
 
     void setRoster(Roster rost)
@@ -72,7 +78,7 @@ public class UI_Roster : MonoBehaviour
         roster = rost;
 
         // assume this also means we want to generate cards
-        generateAllCharCards();
+        generateAllCharCards(rosterLOD);
     }
 
     public void enableCommonMode()
@@ -97,7 +103,7 @@ public class UI_Roster : MonoBehaviour
     public void toggleRosterWindow()
     {
         bool newVal = gameObject.activeInHierarchy;
-        if (newVal == true) generateAllCharCards();
+        if (newVal == true) generateAllCharCards(rosterLOD);
         else
         {
             Destroy(container);
@@ -113,6 +119,25 @@ public class UI_Roster : MonoBehaviour
     /// </summary>
     public void updateRosterCount(ulong newCount)
     {
+        bool foundCutoff = false;
+        ushort newLOD = 999;
+        for(ushort c = 0; !foundCutoff && c < lodCutoffs.Length; c++)
+        {
+            if (newCount < lodCutoffs[c])
+            {
+                newLOD = c;
+                foundCutoff = true;
+            }
+        }
+        if (!foundCutoff)
+        {
+            newLOD = (ushort)lodCutoffs.Length;
+        }
+        if(newLOD != rosterLOD)
+        {
+            generateAllCharCards(newLOD);
+        }
+        rosterLOD = newLOD;
         suspectsRemaining.text = commafy(newCount) + " Suspects Remaining";
     }
 
@@ -143,29 +168,23 @@ public class UI_Roster : MonoBehaviour
     /// <summary>
     /// Generate all character cards for the first time
     /// </summary>
-    public void generateAllCharCards()
+    public void generateAllCharCards(int lod)
     {
         createContainer();
 
-        int entriesPerRow = 8;
-        float startingX = 0;
-        float startingY = 0;
-        float cardWidth = 2.4f;
-        float cardHeight = 3.2f;
-        float cardOffsetW = cardWidth / 10f;
-        float cardOffsetH = cardHeight / 10f;
+        GridViewStats GVS = CharacterCard.GetGridViewStats(lod);
+        currCharactersToShow = GVS.charactersToShow;
 
-
-        for (int i = 0; i < CHARACTERS_TO_SHOW; i++)
+        for (int i = 0; i < currCharactersToShow; i++)
         {
             Character c = roster.shownRoster[i];
 
             //instantiate card in correct position
-            GameObject newCard = GameObject.Instantiate(characterCardTemplate);
+            GameObject newCard = GameObject.Instantiate(characterCardTemplate[lod]);
             newCard.transform.SetParent(container.transform);
             newCard.transform.localPosition = new Vector3(
-                startingX + Mathf.Floor(i % entriesPerRow) * (cardWidth + cardOffsetW), 
-                startingY - Mathf.Floor(i / entriesPerRow) * (cardHeight + cardOffsetH), 0);
+                GVS.startingX + Mathf.Floor(i % GVS.entriesPerRow) * (GVS.cardWidth + GVS.cardOffsetW),
+                GVS.startingY - Mathf.Floor(i / GVS.entriesPerRow) * (GVS.cardHeight + GVS.cardOffsetH), 0);
             newCard.gameObject.SetActive(true);
 
             // character card -> other character card types
@@ -179,18 +198,23 @@ public class UI_Roster : MonoBehaviour
             
 
             //set portrait and name
-            newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
+            if(lod <= 1)
+            {
+                newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
+            }
 
             createdCards[i] = newCard.gameObject;
         }
     }
 
     // TODO - fancier animations for this - one day.
-    public void regenerateCharCards(ulong newNumber)
+    public void regenerateCharCards(ulong newNumber, int lod)
     {
-        if(roster != null)
+        GridViewStats GVS = CharacterCard.GetGridViewStats(lod);
+
+        if (roster != null)
         {
-            int numPortraits = (int)Mathf.Min(newNumber, CHARACTERS_TO_SHOW);
+            int numPortraits = (int)Mathf.Min(newNumber, currCharactersToShow);
             for (int i = 0; i < numPortraits; i++)
             {
                 createdCards[i].SetActive(true);
@@ -209,9 +233,10 @@ public class UI_Roster : MonoBehaviour
                 charCard.SetMaterialParams(c);
 
                 //set portrait and name
-                newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
+                if (lod <= 1)
+                    newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
             }
-            for(int i = numPortraits; i < CHARACTERS_TO_SHOW; i++)
+            for(int i = numPortraits; i < currCharactersToShow; i++)
             {
                 createdCards[i].SetActive(false);
             }
@@ -247,7 +272,7 @@ public class UI_Roster : MonoBehaviour
                 break;
         }
 
-        roster.redrawRosterVis();
+        roster.redrawRosterVis(currCharactersToShow);
     }
 
     /// <summary>

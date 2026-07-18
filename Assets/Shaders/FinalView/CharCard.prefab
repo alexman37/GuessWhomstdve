@@ -397,7 +397,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5904885760073724499}
   - component: {fileID: 5904885760073724498}
-  - component: {fileID: -1104124437146518764}
+  - component: {fileID: -5505717581687595869}
   m_Layer: 0
   m_Name: CharCard
   m_TagString: Untagged
@@ -472,7 +472,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-1104124437146518764
+--- !u!114 &-5505717581687595869
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -481,7 +481,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5904885760073724497}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1784599a80e57b4699f7e3d25f44927, type: 3}
+  m_Script: {fileID: 11500000, guid: 3415c1114a2d4b54a99e39d41f1e63c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   characterId: 0
@@ -492,7 +492,7 @@ MonoBehaviour:
   simpleIndexBadges:
   - {fileID: 5793767788003645080}
   - {fileID: 8464378057291298401}
-  simpleIndexOrder: 0700000008000000
+  simpleIndexOrder: 0800000009000000
   cityAbbrText: {fileID: 1634072323824104782}
 --- !u!1 &5904885760587388922
 GameObject:

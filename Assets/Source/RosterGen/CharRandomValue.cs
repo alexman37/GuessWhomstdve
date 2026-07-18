@@ -31,9 +31,7 @@ public static class CharRandomValue
     //If male or female, use only provided names, if nonbinary use a name from either list
     public static (ulong, string, string) CRV_randomName(ulong seed, bool isMale)
     {
-        Debug.Log("Entering namegen with seed " + seed);
         (ulong s, int v) firstNameIdx = isMale ? RangedSeedRandomizer(seed, 0, firstNamesMSize) : RangedSeedRandomizer(seed, 0, firstNamesFSize);
-        Debug.Log("Leaving namegen with first name # " + firstNameIdx);
         (ulong s, int v) lastNameIdx = RangedSeedRandomizer(firstNameIdx.s, 0, lastNamesSize);
         return (lastNameIdx.s, isMale ? firstNamesM[firstNameIdx.v] : firstNamesF[firstNameIdx.v], lastNames[lastNameIdx.v]);
     }

@@ -2,10 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharCard16 : MonoBehaviour
+public class CharCard16 : CharacterCard
 {
-    public ulong characterId;
-
     [SerializeField] SpriteRenderer portrait;
     [SerializeField] Material drawMat;
 
@@ -23,7 +21,7 @@ public class CharCard16 : MonoBehaviour
     }
 
     // You will need different versions of this for different LODs...
-    public void SetMaterialParams(Character c)
+    public override void SetMaterialParams(Character c)
     {
         drawMat = portrait.material;
 
@@ -37,7 +35,7 @@ public class CharCard16 : MonoBehaviour
         drawMat.SetInt("_Height", c.getCategoryIndexofCharacteristic(CPD_Type.Height));
         drawMat.SetInt("_Weight", weight);
 
-        drawMat.SetInt("_JobIdx", c.getVariantIndexofCharacteristic(CPD_Type.Job) + (weight * 64));
+        drawMat.SetInt("_JobIdx", c.getCategoryIndexofCharacteristic(CPD_Type.Job) + (weight * 12));
 
         int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
         drawMat.SetInt("_HairLength", Hairlen);
@@ -57,10 +55,10 @@ public class CharCard16 : MonoBehaviour
         if (c.optionalTraits.hasMoustache)
         {
             drawMat.SetVector("_OPT_Stache", new Vector4(1, 0, 0, 0));
-        }
+        } else drawMat.SetVector("_OPT_Stache", new Vector4(0, 0, 0, 0));
         if (c.optionalTraits.hasBeard)
         {
             drawMat.SetVector("_OPT_Beard", new Vector4(1, 0, 0, 0));
-        }
+        } else drawMat.SetVector("_OPT_Beard", new Vector4(0, 0, 0, 0));
     }
 }

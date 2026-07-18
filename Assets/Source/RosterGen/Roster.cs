@@ -129,7 +129,7 @@ public class Roster
 
         simulatedCurrentRosterSize = simulatedTotalRosterSize;
 
-        createRoster();
+        createRoster(UI_Roster.MAX_CHARACTERS_TO_SHOW);
     }
 
     ~Roster()
@@ -140,7 +140,7 @@ public class Roster
     /// <summary>
     /// Called each time you start a new game.
     /// </summary>
-    public void createRoster()
+    public void createRoster(uint howMany)
     {
         rosterSeedOffset = UnityEngine.Random.Range(0, TOTAL_ROSTER_PERMUTATIONS);
         if (shownRoster != null)
@@ -155,7 +155,7 @@ public class Roster
         applyConstraints(RosterConstraints.NO_CONSTRAINTS);
 
         // First list generation
-        for (int i = 0; i <= UI_Roster.CHARACTERS_TO_SHOW; i++)
+        for (int i = 0; i <= howMany; i++)
         {
             ulong simId = SimulatedID.getRandomSimulatedID(RosterConstraints.NO_CONSTRAINTS, currentRosterIDs, simulatedCurrentRosterSize);
 
@@ -187,7 +187,7 @@ public class Roster
             // TODO PlayerSelf
             applyConstraints(TurnDriver.instance.playersInOrder[0].rosterConstraints);
         }
-        redrawRosterVis();
+        redrawRosterVis(UI_Roster.instance.currCharactersToShow);
     }
 
     /// <summary>
@@ -216,7 +216,7 @@ public class Roster
     /// <summary>
     /// Redraw the roster with new characters meeting constraints
     /// </summary>
-    public void redrawRosterVis()
+    public void redrawRosterVis(uint howMany)
     {
         RosterConstraints currConstraints;
         if (withCommonConstraints)
@@ -231,13 +231,13 @@ public class Roster
         applyConstraints(currConstraints);
         
         List<Character> newShownRoster = new List<Character>();
-        int size = (int) Mathf.Min(UI_Roster.CHARACTERS_TO_SHOW, simulatedCurrentRosterSize);
+        int size = (int) Mathf.Min(howMany, simulatedCurrentRosterSize);
 
         // Characters to show: first, choose any from the currently shown roster we'd like to keep.
         int count = 0;
         currentRosterIDs.Clear();
         currentRosterIDs = new HashSet<ulong>(charactersGuessedAsTarget);
-        for (int i = 0; i < Mathf.Min(UI_Roster.CHARACTERS_TO_SHOW, shownRoster.Count) && count < size; i++)
+        for (int i = 0; i < Mathf.Min(howMany, shownRoster.Count) && count < size; i++)
         {
             // If we already guessed this character, do not allow it to be added to the roster view again
             if (charactersGuessedAsTarget.Contains(shownRoster[i].simulatedId))
@@ -288,7 +288,7 @@ public class Roster
         savedCPD = 0;
         savedMod = 0;
 
-        UI_Roster.instance.regenerateCharCards(simulatedCurrentRosterSize);
+        UI_Roster.instance.regenerateCharCards(simulatedCurrentRosterSize, UI_Roster.instance.rosterLOD);
     }
 
     /// <summary>
@@ -351,7 +351,7 @@ public class Roster
     {
         // TODO if wrong
         charactersGuessedAsTarget.Add(guessId);
-        redrawRosterVis();
+        redrawRosterVis(UI_Roster.instance.currCharactersToShow);
         guessedWrongCharacter.Invoke(guessId);
     }
 
