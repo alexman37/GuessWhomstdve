@@ -237,7 +237,8 @@ public class Roster
         int count = 0;
         currentRosterIDs.Clear();
         currentRosterIDs = new HashSet<ulong>(charactersGuessedAsTarget);
-        for (int i = 0; i < Mathf.Min(howMany, shownRoster.Count) && count < size; i++)
+        int m = Mathf.Min((int)howMany, shownRoster.Count);
+        for (int i = 0; i < m && count < size; i++)
         {
             // If we already guessed this character, do not allow it to be added to the roster view again
             if (charactersGuessedAsTarget.Contains(shownRoster[i].simulatedId))

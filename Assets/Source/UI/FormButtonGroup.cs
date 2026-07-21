@@ -94,7 +94,6 @@ public class FormButtonGroup : MonoBehaviour
 
     private void onOtherGroupUnconfirmed(CPD_Type group)
     {
-        Debug.Log(cpdType + ": Group #" + group + " unconfirmed; looking for match with " + dependency);
         if ((int)group == dependency)
         {
             blockGroup();

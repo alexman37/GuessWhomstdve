@@ -18,6 +18,8 @@ public class UI_Roster : MonoBehaviour
         1000, 1000000
     };
 
+    private static bool forcedGenAll = false;
+
     public static UI_Roster instance;
 
     private Roster roster;
@@ -135,6 +137,7 @@ public class UI_Roster : MonoBehaviour
         }
         if(newLOD != rosterLOD)
         {
+            forcedGenAll = true;
             generateAllCharCards(newLOD);
         }
         rosterLOD = newLOD;
@@ -212,6 +215,12 @@ public class UI_Roster : MonoBehaviour
     {
         GridViewStats GVS = CharacterCard.GetGridViewStats(lod);
 
+        if(forcedGenAll)
+        {
+            forcedGenAll = false;
+            return;
+        }
+
         if (roster != null)
         {
             int numPortraits = (int)Mathf.Min(newNumber, currCharactersToShow);
@@ -223,10 +232,6 @@ public class UI_Roster : MonoBehaviour
                 //instantiate card in correct position
                 GameObject newCard = createdCards[i];
 
-                //roster.shownRosterSprites[i].name = i.ToString();
-
-                // TODO roster.shownRosterSprites
-
                 // character card -> other char card types
                 CharacterCard charCard = newCard.GetComponent<CharacterCard>();
                 charCard.characterId = c.simulatedId;
@@ -236,7 +241,7 @@ public class UI_Roster : MonoBehaviour
                 if (lod <= 1)
                     newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
             }
-            for(int i = numPortraits; i < currCharactersToShow; i++)
+            for (int i = numPortraits; i < currCharactersToShow; i++)
             {
                 createdCards[i].SetActive(false);
             }
