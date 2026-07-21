@@ -8,9 +8,39 @@ public class CharacterCard : MonoBehaviour
 {
     public ulong characterId;
 
+    private static float redrawDelay = 1f;
+    private static float flipTime = 0.4f;
+    private static float waitTime = 0.4f;
+
+
+    public void RedrawInPlace(Character c, float uvCoord)
+    {
+        StartCoroutine(flipAndRedraw(c, uvCoord * redrawDelay));
+    }
+
+    private IEnumerator flipAndRedraw(Character c, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        for(float i = 0; i < flipTime; i += Time.deltaTime)
+        {
+            yield return transform.localRotation = Quaternion.Euler(0, (i / flipTime) * -180, 0);
+        }
+        transform.localRotation = Quaternion.Euler(0, -180, 0);
+        for (float i = 0; i < waitTime; i += Time.deltaTime)
+        {
+            yield return null;
+        }
+        SetMaterialParams(c);
+        for (float i = 0; i < flipTime; i += Time.deltaTime)
+        {
+            yield return transform.localRotation = Quaternion.Euler(0, (i / flipTime) * -180 - 180, 0);
+        }
+        transform.localRotation = Quaternion.Euler(0, 0, 0);
+    }
+
     public virtual void SetMaterialParams(Character c)
     {
-
+        Debug.LogWarning("If this function ever runs, there's a problem");
     }
 
     public static GridViewStats GetGridViewStats(int lod)

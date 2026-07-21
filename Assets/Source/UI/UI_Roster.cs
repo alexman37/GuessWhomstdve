@@ -224,6 +224,7 @@ public class UI_Roster : MonoBehaviour
         if (roster != null)
         {
             int numPortraits = (int)Mathf.Min(newNumber, currCharactersToShow);
+            float entriesPerColumn = numPortraits / GVS.entriesPerRow;
             for (int i = 0; i < numPortraits; i++)
             {
                 createdCards[i].SetActive(true);
@@ -235,7 +236,10 @@ public class UI_Roster : MonoBehaviour
                 // character card -> other char card types
                 CharacterCard charCard = newCard.GetComponent<CharacterCard>();
                 charCard.characterId = c.simulatedId;
-                charCard.SetMaterialParams(c);
+                
+                float uvCoord = ((float)(i % GVS.entriesPerRow) / (float)(GVS.entriesPerRow - 1.0f)) +
+                    ((float)(int)(i / GVS.entriesPerRow) / entriesPerColumn);
+                charCard.RedrawInPlace(c, uvCoord / 2.0f);
 
                 //set portrait and name
                 if (lod <= 1)
