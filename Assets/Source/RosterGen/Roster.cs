@@ -43,7 +43,6 @@ public class Roster
 
     // Actions
     public static event Action rosterReady;
-    public static event Action<ulong> constrainedResult;
     public static event Action clearAllConstraints;
     public static event Action<ulong> guessedWrongCharacter;
 
@@ -60,7 +59,6 @@ public class Roster
     // Most of this is first-time setup only
     public Roster()
     {
-        if (constrainedResult == null) constrainedResult += (_) => { };
         if (rosterReady == null) rosterReady += () => { };
         if (clearAllConstraints == null) clearAllConstraints += () => { };
         if (guessedWrongCharacter == null) guessedWrongCharacter += (_) => { };
@@ -155,7 +153,7 @@ public class Roster
         applyConstraints(RosterConstraints.NO_CONSTRAINTS);
 
         // First list generation
-        for (int i = 0; i <= howMany; i++)
+        for (int i = 0; i < howMany; i++)
         {
             ulong simId = SimulatedID.getRandomSimulatedID(RosterConstraints.NO_CONSTRAINTS, currentRosterIDs, simulatedCurrentRosterSize);
 
@@ -187,7 +185,7 @@ public class Roster
             // TODO PlayerSelf
             applyConstraints(TurnDriver.instance.playersInOrder[0].rosterConstraints);
         }
-        redrawRosterVis(UI_Roster.instance.currCharactersToShow);
+        redrawRosterVis();
     }
 
     /// <summary>
@@ -216,7 +214,7 @@ public class Roster
     /// <summary>
     /// Redraw the roster with new characters meeting constraints
     /// </summary>
-    public void redrawRosterVis(uint howMany)
+    public void redrawRosterVis()
     {
         RosterConstraints currConstraints;
         if (withCommonConstraints)
@@ -228,9 +226,11 @@ public class Roster
             currConstraints = TurnDriver.instance.playersInOrder[0].rosterConstraints;
         }
 
+        // Must apply constraints first to determine desired size of list.
         applyConstraints(currConstraints);
-        
-        List<Character> newShownRoster = new List<Character>();
+        uint howMany = UI_Roster.instance.currCharactersToShow;
+
+        HashSet<int> replaceIndices = new HashSet<int>();
         int size = (int) Mathf.Min(howMany, simulatedCurrentRosterSize);
 
         // Characters to show: first, choose any from the currently shown roster we'd like to keep.
@@ -249,47 +249,48 @@ public class Roster
             else if (SimulatedID.idMeetsConstraints(shownRoster[i].simulatedId, currConstraints))
             {
                 currentRosterIDs.Add(shownRoster[i].simulatedId);
-                newShownRoster.Add(shownRoster[i]);
                 count++;
             } 
             // If the character no longer meets constraints, remove it
             else
             {
                 currentRosterIDs.Remove(shownRoster[i].simulatedId);
+                replaceIndices.Add(i);
             }
         }
 
-        shownRoster = newShownRoster;
-        for (int i = count; i < size; i++)
+        shownRoster = shownRoster.GetRange(0, Mathf.Max(size, shownRoster.Count));
+        Debug.Log("Size is " + size);
+        for (int i = 0; i < size; i++)
         {
-            try
+            if(replaceIndices.Contains(i))
             {
-                ulong simId = SimulatedID.getRandomSimulatedID(currConstraints, currentRosterIDs, simulatedCurrentRosterSize);
+                try
+                {
+                    ulong simId = SimulatedID.getRandomSimulatedID(currConstraints, currentRosterIDs, simulatedCurrentRosterSize);
 
-                shownRoster.Add(new Character(i, simId));
-                currentRosterIDs.Add(simId);
+                    shownRoster[i] = new Character(i, simId);
+                    currentRosterIDs.Add(simId);
+                }
+                // When targets have been manually guessed, we don't show them anymore
+                // If a guessed target still meets all constraints, it will pass all checks but we don't want to show it.
+                // This leads to getRandomSimulatedID failing to find the final characters and returning -1
+                // It always short circuits when all other possibilities are exhausted - so we know just how many failed.
+                catch (ArithmeticException)
+                {
+                    simulatedCurrentRosterSize = (ulong)i;
+                    Debug.LogWarning("Shortened size is now " + simulatedCurrentRosterSize);
+                    UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize);
+                    break;
+                }
             }
-            // When targets have been manually guessed, we don't show them anymore
-            // If a guessed target still meets all constraints, it will pass all checks but we don't want to show it.
-            // This leads to getRandomSimulatedID failing to find the final characters and returning -1
-            // It always short circuits when all other possibilities are exhausted - so we know just how many failed.
-            catch (ArithmeticException)
-            {
-                simulatedCurrentRosterSize = (ulong) i;
-                Debug.LogWarning("Shortened size is now " + simulatedCurrentRosterSize);
-                constrainedResult.Invoke(simulatedCurrentRosterSize);
-                break;
-            }
-            
-
-            
         }
 
         lastResortSearch = false;
         savedCPD = 0;
         savedMod = 0;
 
-        UI_Roster.instance.regenerateCharCards(simulatedCurrentRosterSize, UI_Roster.instance.rosterLOD);
+        UI_Roster.instance.regenerateCharCards(simulatedCurrentRosterSize, UI_Roster.instance.rosterLOD, replaceIndices);
     }
 
     /// <summary>
@@ -299,7 +300,7 @@ public class Roster
     {
         simulatedCurrentRosterSize = getNewRosterSizeFromConstraints(constraints);
 
-        constrainedResult.Invoke(simulatedCurrentRosterSize);
+        UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize);
     }
 
     /// <summary>
@@ -352,7 +353,7 @@ public class Roster
     {
         // TODO if wrong
         charactersGuessedAsTarget.Add(guessId);
-        redrawRosterVis(UI_Roster.instance.currCharactersToShow);
+        redrawRosterVis();
         guessedWrongCharacter.Invoke(guessId);
     }
 
