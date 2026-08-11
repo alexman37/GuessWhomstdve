@@ -260,7 +260,6 @@ public class Roster
         }
 
         shownRoster = shownRoster.GetRange(0, Mathf.Max(size, shownRoster.Count));
-        Debug.Log("Size is " + size);
         for (int i = 0; i < size; i++)
         {
             if(replaceIndices.Contains(i))

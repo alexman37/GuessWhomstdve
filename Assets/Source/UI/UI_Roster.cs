@@ -176,10 +176,8 @@ public class UI_Roster : MonoBehaviour
         currCharactersToShow = GVS.charactersToShow;
 
         uint maxCharactersCanBeDrawn = downsizing ? currCharactersToShow : (uint)roster.shownRoster.Count;
-        Debug.Log("CurrChars = " + currCharactersToShow + ", ShownRoster = " + roster.shownRoster.Count);
         for (int i = 0; i < maxCharactersCanBeDrawn; i++)
         {
-            Debug.Log("Drawing " + i);
             Character c = roster.shownRoster[i];
 
             //instantiate card in correct position
@@ -207,7 +205,6 @@ public class UI_Roster : MonoBehaviour
         // Just buy time. Use empty / default portraits, regenerate will be called afterwards and fill them all in.
         for (uint i = maxCharactersCanBeDrawn; i < currCharactersToShow; i++)
         {
-            Debug.Log("Also Drawing " + i);
             GameObject newCard = GameObject.Instantiate(characterCardTemplate[lod]);
             newCard.transform.SetParent(container.transform);
             newCard.transform.localPosition = new Vector3(
