@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class BotPlayer : Player
+public class BotPlayer : GD_Player
 {
     // Tracks all relevant info this CPU would need to make decisions.
     // public CPUInfoTracker infoTracker;

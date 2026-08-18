@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class HumanPlayer : Player
+public class HumanPlayer : GD_Player
 {
     public static event Action<int> playerUpdateProgress = (_) => { };
 

@@ -9,7 +9,7 @@ public class TurnDriver : MonoBehaviour
 {
     public static TurnDriver instance;
 
-    public List<Player> playersInOrder = new List<Player>();
+    public List<GD_Player> playersInOrder = new List<GD_Player>();
 
     public Roster currentRoster;
 

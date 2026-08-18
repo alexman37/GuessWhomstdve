@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public abstract class Player
+public abstract class GD_Player
 {
     public int id;
     public string agentName;
