@@ -30,6 +30,7 @@ public class MultiplayerSetup : MonoBehaviour
     Unity.Services.Lobbies.Models.Lobby activeLobby;
 
     private IEnumerator lobbyWaitingCo;
+    private string lobbyIdCache;
 
     // Start is called before the first frame update
     async void Start()
@@ -60,6 +61,7 @@ public class MultiplayerSetup : MonoBehaviour
 
     public void LeaveLobby()
     {
+        NetworkManager.Singleton.Shutdown();
         LeaveLobby(LobbyManager.instance.partOfLobby, me.Id);
     }
 
@@ -70,16 +72,31 @@ public class MultiplayerSetup : MonoBehaviour
         NetworkManager.Singleton.StartHost();
     }
 
+    private async void UpdateLobbyInstance()
+    {
+        try
+        {
+            LobbyManager.instance.partOfLobby = await Lobbies.Instance.GetLobbyAsync(lobbyIdCache);
+        } catch (System.Exception e)
+        {
+            // TODO
+            Debug.LogError("Lobby connection issues..." + e.ToString());
+        }
+    }
+
     public IEnumerator UpdateLobbyInfo()
     {
         // TODO need more formal check
         while(true)
         {
+            // If the async method does not complete in time, it's no big deal since it will just update itself the next cycle.
+            UpdateLobbyInstance();
+
             for (int i = playerBaseRoot.transform.childCount - 1; i >= 0; i--)
             {
                 Destroy(playerBaseRoot.transform.GetChild(i).gameObject);
             }
-
+            
             Debug.Log("How many active players? " + LobbyManager.instance.partOfLobby.Players.Count);
             foreach (Player p in LobbyManager.instance.partOfLobby.Players)
             {
@@ -173,6 +190,8 @@ public class MultiplayerSetup : MonoBehaviour
     private void OnCreatedOrJoinedLobby(Lobby lob)
     {
         LobbyManager.instance.partOfLobby = lob;
+        lobbyIdCache = lob.Id;
+
         lobbyWaitingCo = UpdateLobbyInfo();
         StartCoroutine(lobbyWaitingCo);
 

@@ -17,7 +17,11 @@ public class MenuItemAdjustor : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        currIndex.Value = startIndex;
+        if(IsHost)
+        {
+            currIndex.Value = startIndex;
+        }
+        
         display.text = availableValues[currIndex.Value].ToString();
         currIndex.OnValueChanged += OnNetworkVarChanged_ClientRpc;
     }
@@ -42,14 +46,13 @@ public class MenuItemAdjustor : NetworkBehaviour
     [ClientRpc]
     public void OnNetworkVarChanged_ClientRpc(int prev, int curr)
     {
-        UpdateDisplay();
+        UpdateDisplay(curr);
     }
 
     // Should be called when network variable is updated
-    public void UpdateDisplay()
+    private void UpdateDisplay(int newVal)
     {
-        Debug.Log("RPC CALL");
-        display.text = availableValues[currIndex.Value];
+        display.text = availableValues[newVal];
     }
 
     public ulong getRealValue()
