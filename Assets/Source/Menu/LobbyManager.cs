@@ -4,6 +4,10 @@ using UnityEngine;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 
+/// <summary>
+/// For everything related to creation and management of lobbies themselves
+/// (not necessarily players' interactions with them.)
+/// </summary>
 public class LobbyManager : MonoBehaviour
 {
     const int maxLobbiesToShow = 50;
