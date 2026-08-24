@@ -2,14 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NavButton : MonoBehaviour
+namespace GW.MainMenu
 {
-    [SerializeField] private GameObject currPanel;
-    [SerializeField] private GameObject nextPanel;
-
-    public void switchPanel()
+    public class NavButton : MonoBehaviour
     {
-        currPanel.SetActive(false);
-        nextPanel.SetActive(true);
+        [SerializeField] private GameObject currPanel;
+        [SerializeField] private GameObject nextPanel;
+
+        public void switchPanel()
+        {
+            currPanel.SetActive(false);
+            nextPanel.SetActive(true);
+        }
     }
 }

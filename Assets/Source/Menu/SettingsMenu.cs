@@ -3,37 +3,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class SettingsMenu : MonoBehaviour
+namespace GW.MainMenu
 {
-    // inputs
-    [SerializeField] private GameObject inputField;
-
-    // results
-    public static PlayerConfigData confData = new PlayerConfigData()
+    public class SettingsMenu : MonoBehaviour
     {
-        name = "Anonymous"
-    };
+        // inputs
+        [SerializeField] private GameObject inputField;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+        // results
+        public static PlayerConfigData confData = new PlayerConfigData()
+        {
+            name = "Anonymous"
+        };
+
+        // Start is called before the first frame update
+        void Start()
+        {
+
+        }
+
+        public void UpdateFields()
+        {
+            string tp = inputField.GetComponent<TMP_InputField>().text;
+            tp = tp.Substring(0, Mathf.Min(tp.Length, 16));
+
+            if (tp != "") confData.name = tp;
+            else confData.name = "Anonymous";
+
+            Debug.Log("PLayer name is now " + confData.name);
+            MultiplayerSetup.instance.UpdateName(confData.name);
+        }
     }
 
-    public void UpdateFields()
+    public struct PlayerConfigData
     {
-        string tp = inputField.GetComponent<TMP_InputField>().text;
-        tp = tp.Substring(0, Mathf.Min(tp.Length, 16));
-
-        if (tp != "") confData.name = tp;
-        else confData.name = "Anonymous";
-
-        Debug.Log("PLayer name is now " + confData.name);
-        MultiplayerSetup.instance.UpdateName(confData.name);
+        public string name;
     }
-}
-
-public struct PlayerConfigData
-{
-    public string name;
 }

@@ -4,59 +4,62 @@ using UnityEngine;
 using TMPro;
 using Unity.Netcode;
 
-public class MenuItemAdjustor : NetworkBehaviour
+namespace GW.MainMenu
 {
-    [SerializeField] private string[] availableValues;
-    [SerializeField] private ulong[] actualValues;
-
-    [SerializeField] private int startIndex;
-    public NetworkVariable<int> currIndex = new NetworkVariable<int>(0);
-
-    [SerializeField] private TextMeshProUGUI display;
-
-    public override void OnNetworkSpawn()
+    public class MenuItemAdjustor : NetworkBehaviour
     {
-        base.OnNetworkSpawn();
-        if(IsHost)
+        [SerializeField] private string[] availableValues;
+        [SerializeField] private ulong[] actualValues;
+
+        [SerializeField] private int startIndex;
+        public NetworkVariable<int> currIndex = new NetworkVariable<int>(0);
+
+        [SerializeField] private TextMeshProUGUI display;
+
+        public override void OnNetworkSpawn()
         {
-            currIndex.Value = startIndex;
-        }
-        
-        display.text = availableValues[currIndex.Value].ToString();
-        currIndex.OnValueChanged += OnNetworkVarChanged_ClientRpc;
-    }
+            base.OnNetworkSpawn();
+            if (IsHost)
+            {
+                currIndex.Value = startIndex;
+            }
 
-    public void MoveUp()
-    {
-        if (IsHost)
+            display.text = availableValues[currIndex.Value].ToString();
+            currIndex.OnValueChanged += OnNetworkVarChanged_ClientRpc;
+        }
+
+        public void MoveUp()
         {
-            currIndex.Value = (int)Mathf.Min(currIndex.Value + 1, availableValues.Length - 1);
-            Debug.Log("Host increases value to " + currIndex.Value);
+            if (IsHost)
+            {
+                currIndex.Value = (int)Mathf.Min(currIndex.Value + 1, availableValues.Length - 1);
+                Debug.Log("Host increases value to " + currIndex.Value);
+            }
         }
-    }
 
-    public void MoveDown()
-    {
-        if (IsHost)
+        public void MoveDown()
         {
-            currIndex.Value = (int)Mathf.Max(currIndex.Value - 1, 0);
+            if (IsHost)
+            {
+                currIndex.Value = (int)Mathf.Max(currIndex.Value - 1, 0);
+            }
         }
-    }
 
-    [ClientRpc]
-    public void OnNetworkVarChanged_ClientRpc(int prev, int curr)
-    {
-        UpdateDisplay(curr);
-    }
+        [ClientRpc]
+        public void OnNetworkVarChanged_ClientRpc(int prev, int curr)
+        {
+            UpdateDisplay(curr);
+        }
 
-    // Should be called when network variable is updated
-    private void UpdateDisplay(int newVal)
-    {
-        display.text = availableValues[newVal];
-    }
+        // Should be called when network variable is updated
+        private void UpdateDisplay(int newVal)
+        {
+            display.text = availableValues[newVal];
+        }
 
-    public ulong getRealValue()
-    {
-        return actualValues[currIndex.Value];
+        public ulong getRealValue()
+        {
+            return actualValues[currIndex.Value];
+        }
     }
 }
