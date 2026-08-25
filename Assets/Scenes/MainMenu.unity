@@ -3337,6 +3337,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 738126864}
+  - component: {fileID: 738126865}
   - component: {fileID: 738126863}
   m_Layer: 0
   m_Name: GameManagerSc
@@ -3371,6 +3372,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &738126865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738126862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3142268157
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &754582122
 GameObject:
   m_ObjectHideFlags: 0
@@ -7062,7 +7083,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9e94d885aec7e54c995c3fe72cfac4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partOfRelay: 
   lobbyInfoTemplate: {fileID: 3889151916176255761, guid: 081df3eef4019d846acdc2707afea67f, type: 3}
   lobbyInfoRoot: {fileID: 1500997780}
 --- !u!1 &1287541103

@@ -11,6 +11,7 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine.SceneManagement;
+using Unity.Collections;
 
 namespace GW.MainMenu
 {
@@ -23,7 +24,7 @@ namespace GW.MainMenu
         public static MultiplayerSetup instance;
 
         Player me;
-        List<PlayerSetupInfo> playerbase = new List<PlayerSetupInfo>();
+        PlayerSetupInfo[] playerbase = new PlayerSetupInfo[8];
         private object playerbaseLock = new object();
 
         [SerializeField] private GameObject panel1;
@@ -111,11 +112,12 @@ namespace GW.MainMenu
                     {
                         Destroy(playerBaseRoot.transform.GetChild(i).gameObject);
                     }
-                    playerbase.Clear();
 
                     Debug.Log("How many active players? " + LobbyManager.instance.partOfLobby.Players.Count);
-                    foreach (Player p in LobbyManager.instance.partOfLobby.Players)
+                    List<Player> lobbyList = LobbyManager.instance.partOfLobby.Players;
+                    for (int i = 0; i < lobbyList.Count; i++)
                     {
+                        Player p = lobbyList[i];
                         GameObject go = GameObject.Instantiate(playerBaseTemplate, playerBaseRoot.transform);
                         // The host cannot be kicked.
                         go.GetComponent<PlayerInfo>().setPlayerInfo(p, p.Id == LobbyManager.instance.partOfLobby.HostId, IsHost);
@@ -124,7 +126,10 @@ namespace GW.MainMenu
                         {
                             lock(playerbaseLock)
                             {
-                                playerbase.Add(new PlayerSetupInfo_Human(p.Data["Name"].Value));
+                                playerbase[i] = new PlayerSetupInfo { 
+                                    type = PlayerSetupType.Human, 
+                                    name = p.Data["Name"].Value 
+                                };
                             }
                         }
                     }
@@ -293,10 +298,6 @@ namespace GW.MainMenu
         // - End the lobby (but keep relay)
         public void StartGame()
         {
-            SceneManager.LoadSceneAsync(1);
-
-            // Set Game data
-            Debug.Log("Trying to set the game here.");
             GameManagerSc.instance.SetGameParameters(new MainGameParameters
             {
                 playerSetupInfo = playerbase,
@@ -322,28 +323,26 @@ namespace GW.MainMenu
         public bool priv;
     }
 }
-public abstract class PlayerSetupInfo
+
+public enum PlayerSetupType
 {
-    public string name;
-    public Sprite img;
+    None,
+    Human,
+    Bot
 }
 
-public class PlayerSetupInfo_Human : PlayerSetupInfo
+public struct PlayerSetupInfo : INetworkSerializable
 {
-    public int winTotal;
+    public PlayerSetupType type;
+    public FixedString32Bytes name;
+    //public ulong img;
+    public int critNum; // for human: win total, for bot: difficulty level
 
-    public PlayerSetupInfo_Human(string n)
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
-        name = n;
-    }
-}
-
-public class PlayerSetupInfo_Bot : PlayerSetupInfo
-{
-    public int difficulty;
-
-    public PlayerSetupInfo_Bot(string n)
-    {
-        name = n;
+        Debug.Log("Serialize, for some reason or other");
+        serializer.SerializeValue(ref name);
+        serializer.SerializeValue(ref critNum);
+        serializer.SerializeValue(ref type);
     }
 }

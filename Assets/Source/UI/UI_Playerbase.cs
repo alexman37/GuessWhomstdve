@@ -16,15 +16,18 @@ public class UI_Playerbase : MonoBehaviour
         else Destroy(this);
     }
 
-    public void redrawPlayerbase(List<PlayerSetupInfo> psi)
+    public void redrawPlayerbase(PlayerSetupInfo[] psi)
     {
         for (int i = playerbaseContainer.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(playerbaseContainer.transform.GetChild(i));
         }
 
-        for (int i = 0; i < psi.Count; i++)
+        for (int i = 0; i < psi.Length; i++)
         {
+            // Assumes the list will be ordered...a safe assumption?
+            if (psi[i].type == PlayerSetupType.None)
+                break;
             GameObject go = GameObject.Instantiate(playerbaseEntry, playerbaseContainer.transform);
             go.GetComponent<UI_PlayerbaseEntry>().SetParams(psi[i]);
         }

@@ -16,6 +16,6 @@ public class UI_PlayerbaseEntry : MonoBehaviour
 
     public void SetParams(PlayerSetupInfo psi)
     {
-        title.text = psi.name;
+        title.text = psi.name.ToString();
     }
 }
