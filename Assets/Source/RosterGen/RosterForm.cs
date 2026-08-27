@@ -39,7 +39,10 @@ public class RosterForm : MonoBehaviour
         else Destroy(gameObject);
 
         self = this.GetComponent<RectTransform>();
+    }
 
+    public void Setup()
+    {
         // Since this depends on the roster being created first, we actually want to instantiate a RosterForm object
         // within Roster, once we know it's at least finished gathering all the CPD lists together.
         formFields = Roster.cpdConstrainables.ToArray();

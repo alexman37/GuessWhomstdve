@@ -16,6 +16,8 @@ public class GameManagerSc : NetworkBehaviour
         roundsToWin = 1
     });
 
+    private bool rosterReady = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,6 +25,21 @@ public class GameManagerSc : NetworkBehaviour
         else Destroy(this);
 
         DontDestroyOnLoad(this.gameObject);
+    }
+
+    private void OnEnable()
+    {
+        Roster.rosterReady += SetRosterReady;
+    }
+
+    private void OnDisable()
+    {
+        Roster.rosterReady -= SetRosterReady;
+    }
+
+    private void SetRosterReady()
+    {
+        rosterReady = true;
     }
 
     // Set up game parameters established in the main menu, and wait for all components to be set up
@@ -45,18 +62,40 @@ public class GameManagerSc : NetworkBehaviour
         Debug.Log("In co " + OwnerClientId);
         SceneManager.LoadSceneAsync(1);
 
+        while (!rosterReady)
+            yield return null;
+
         while (UI_Playerbase.instance == null)
             yield return null;
         UI_Playerbase.instance.redrawPlayerbase(gameParameters.Value.playerSetupInfo);
 
-        //SceneManager.UnloadSceneAsync(0);
+        while (InfoBar.instance == null)
+            yield return null;
+        while (TurnDriver.instance == null)
+            yield return null;
+        while (AnswerKey.instance == null)
+            yield return null;
+
+        // TODO - we have the player names, just gotta use them
+        HumanPlayer.self = new HumanPlayer("TestPlayer");
+
+        while (UI_Roster.instance == null)
+            yield return null;
+
+        while (RosterForm.instance == null)
+            yield return null;
+        RosterForm.instance.Setup();
+
+        //TODO what we really need here is to track when everyone is finished their stuff
         KickOff();
     }
 
     // When everything has been loaded, begin the game for real
+    [ContextMenu("Kickoff")]
     public void KickOff()
     {
         Debug.Log("Let the game begin.");
+        TurnDriver.instance.BeginGame();
     }
 }
 

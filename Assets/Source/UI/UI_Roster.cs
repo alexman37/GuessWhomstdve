@@ -68,7 +68,7 @@ public class UI_Roster : MonoBehaviour
         container.name = "RosterContainer";
 
         // TODO set position and such
-        container.transform.position = new Vector3(-15.5f, 3.5f, 0);
+        container.transform.position = new Vector3(-9.1f, 3.5f, 0);
     }
 
     void setRoster(Roster rost)
@@ -274,15 +274,15 @@ public class UI_Roster : MonoBehaviour
         {
             case FormButtonState.Unknown:
                 // TODO PlayerSelf
-                TurnDriver.instance.playersInOrder[0].rosterConstraints.removeConstraint(cpdType, value);
+                HumanPlayer.self.rosterConstraints.removeConstraint(cpdType, value);
                 break;
             case FormButtonState.Eliminated:
                 // TODO PlayerSelf
-                TurnDriver.instance.playersInOrder[0].rosterConstraints.addConstraint(cpdType, value, false);
+                HumanPlayer.self.rosterConstraints.addConstraint(cpdType, value, false);
                 break;
             case FormButtonState.Confirmed:
                 // TODO PlayerSelf
-                TurnDriver.instance.playersInOrder[0].rosterConstraints.onlyConstraint(cpdType, value);
+                HumanPlayer.self.rosterConstraints.onlyConstraint(cpdType, value);
                 break;
         }
 
@@ -299,6 +299,6 @@ public class UI_Roster : MonoBehaviour
 
     public void handleReset(CPD_Type cpdType)
     {
-        TurnDriver.instance.playersInOrder[0].rosterConstraints.clearConstraints(cpdType, true);
+        HumanPlayer.self.rosterConstraints.clearConstraints(cpdType, true);
     }
 }

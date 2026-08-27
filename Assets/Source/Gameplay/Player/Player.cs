@@ -17,11 +17,25 @@ public abstract class GD_Player
 
     public bool isHuman = false;
 
+    public List<(CPD_Type cpd, string cat)> currentInvestigation = new List<(CPD_Type cpd, string cat)>();
+
 
     /// <summary>
     /// It's your turn.
     /// </summary>
     public abstract void markAsReady();
+
+    public abstract void addToInvestigation((CPD_Type cpdType, string cat) entry);
+
+    public virtual void removeFromInvestigation((CPD_Type cpdType, string cat) entry)
+    {
+        currentInvestigation.Remove(entry);
+    }
+
+    public virtual void resetInvestigation()
+    {
+        currentInvestigation.Clear();
+    }
 
     /// <summary>
     /// Guess the target outright

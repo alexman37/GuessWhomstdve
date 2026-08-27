@@ -64,8 +64,8 @@ public class CharacterCard : MonoBehaviour
             case 2:
                 return new GridViewStats
                 {
-                    charactersToShow = 512,
-                    entriesPerRow = 32,
+                    charactersToShow = 384,
+                    entriesPerRow = 24,
                     startingX = 0,
                     startingY = 0,
                     cardWidth = 0.75f,

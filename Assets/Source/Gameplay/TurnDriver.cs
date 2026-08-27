@@ -9,7 +9,7 @@ public class TurnDriver : MonoBehaviour
 {
     public static TurnDriver instance;
 
-    public List<GD_Player> playersInOrder = new List<GD_Player>();
+    public TurnDriverPhase currentPhase = TurnDriverPhase.PlayerTurns;
 
     public Roster currentRoster;
 
@@ -29,37 +29,62 @@ public class TurnDriver : MonoBehaviour
     private void OnEnable()
     {
         RosterGen.rosterCreationDone += onRosterCreation;
+        InfoBar.timerFinished += TimedPhaseCycle;
     }
 
     private void OnDisable()
     {
         RosterGen.rosterCreationDone -= onRosterCreation;
+        InfoBar.timerFinished -= TimedPhaseCycle;
     }
 
     private void onRosterCreation(Roster rost)
     {
         currentRoster = rost;
-        generatePlayers();
         roundSetup();
     }
 
-    private void generatePlayers()
+    public void BeginGame()
     {
-        HumanPlayer playerHuman = new HumanPlayer();
-        playersInOrder.Add(playerHuman);
-
-        BotPlayer playerBot1 = new BotPlayer(1, "Heathers");
-        playersInOrder.Add(playerBot1);
+        // This gets us started on the first phase
+        currentPhase = TurnDriverPhase.PassiveInfo;
+        TimedPhaseCycle();
     }
 
-
-
-
+    // Go to the next phase, do all necessary steps.
+    public void TimedPhaseCycle()
+    {
+        switch (currentPhase)
+        {
+            case TurnDriverPhase.PlayerTurns:
+                currentPhase = TurnDriverPhase.ServerResponse;
+                InfoBar.instance.setReadout("Server response phase");
+                InfoBar.instance.setTimer(5);
+                break;
+            case TurnDriverPhase.ServerResponse:
+                currentPhase = TurnDriverPhase.PassiveInfo;
+                InfoBar.instance.setReadout("PassiveInfo Phase");
+                InfoBar.instance.setTimer(5);
+                break;
+            case TurnDriverPhase.PassiveInfo:
+                currentPhase = TurnDriverPhase.PlayerTurns;
+                InfoBar.instance.setReadout("Turn phase");
+                InfoBar.instance.setTimer(15);
+                break;
+        }
+    }
 
 
     // TODO: Start everyone's turn. Not just the first.
     private void roundSetup()
     {
-        playersInOrder[0].markAsReady();
+        
     }
+}
+
+public enum TurnDriverPhase
+{
+    PlayerTurns,
+    ServerResponse,
+    PassiveInfo
 }

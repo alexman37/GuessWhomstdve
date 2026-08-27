@@ -183,7 +183,7 @@ public class Roster
         } else
         {
             // TODO PlayerSelf
-            applyConstraints(TurnDriver.instance.playersInOrder[0].rosterConstraints);
+            applyConstraints(HumanPlayer.self.rosterConstraints);
         }
         redrawRosterVis();
     }
@@ -223,7 +223,7 @@ public class Roster
         } else
         {
             // TODO PlayerSelf
-            currConstraints = TurnDriver.instance.playersInOrder[0].rosterConstraints;
+            currConstraints = HumanPlayer.self.rosterConstraints;
         }
 
         // Must apply constraints first to determine desired size of list.
@@ -337,11 +337,11 @@ public class Roster
     {
         CPD cpd = cpdByType[onType];
         // TODO PlayerSelf
-        TurnDriver.instance.playersInOrder[0].rosterConstraints.clearConstraints(cpd, false);
+        HumanPlayer.self.rosterConstraints.clearConstraints(cpd, false);
         foreach(string exclude in buttonsAreOff)
         {
             // TODO PlayerSelf
-            TurnDriver.instance.playersInOrder[0].rosterConstraints.addConstraint(cpd.cpdType, exclude, false);
+            HumanPlayer.self.rosterConstraints.addConstraint(cpd.cpdType, exclude, false);
         }
     }
 

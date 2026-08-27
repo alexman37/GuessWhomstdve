@@ -32,6 +32,14 @@ public class BotPlayer : GD_Player
 
     }
 
+    public override void addToInvestigation((CPD_Type cpdType, string cat) entry)
+    {
+        if (currentInvestigation.Count < AnswerKey.instance.maxGuesses)
+        {
+            currentInvestigation.Add(entry);
+        }
+    }
+
     public override void guessTarget(ulong characterId)
     {
         bool correct = TurnDriver.instance.currentRoster.targetId == characterId;

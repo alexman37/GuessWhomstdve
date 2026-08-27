@@ -2,15 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System;
 
 public class InfoBar : MonoBehaviour
 {
     public static InfoBar instance;
 
     public TextMeshProUGUI infoReadout;
+    [SerializeField] TextMeshProUGUI timerText;
 
-    private Coroutine activeCo = null;
+    private Coroutine readoutCo = null;
+    private Coroutine timerCo = null;
 
+    public static event Action timerFinished = () => { };
+
+    // CONFIG
     // How long to type out the info bar text?
     float typeTime = 1f;
 
@@ -22,11 +28,20 @@ public class InfoBar : MonoBehaviour
 
     public void setReadout(string toText)
     {
-        if(activeCo != null)
+        if(readoutCo != null)
         {
-            StopCoroutine(activeCo);
+            StopCoroutine(readoutCo);
         }
-        activeCo = StartCoroutine(readoutTypeText(toText));
+        readoutCo = StartCoroutine(readoutTypeText(toText));
+    }
+
+    public void setTimer(float maxTime)
+    {
+        if (timerCo != null)
+        {
+            StopCoroutine(timerCo);
+        }
+        timerCo = StartCoroutine(startTimer(maxTime));
     }
 
     IEnumerator readoutTypeText(string toText)
@@ -62,5 +77,17 @@ public class InfoBar : MonoBehaviour
             yield return null;
         }
         infoReadout.text = toText;
+    }
+
+    IEnumerator startTimer(float maxTime)
+    {
+        float runningClock = maxTime;
+        while(runningClock > 0)
+        {
+            runningClock -= Time.deltaTime;
+            timerText.text = ((int)runningClock).ToString();
+            yield return null;
+        }
+        timerFinished.Invoke();
     }
 }

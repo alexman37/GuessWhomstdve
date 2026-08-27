@@ -5,12 +5,15 @@ using System;
 
 public class HumanPlayer : GD_Player
 {
+    // Each connected client differs on this
+    public static HumanPlayer self;
+
     public static event Action<int> playerUpdateProgress = (_) => { };
 
-    public HumanPlayer()
+    public HumanPlayer(string playerName)
     {
         // TODO player's name
-        agentName = "Player";
+        agentName = playerName;
 
         id = 0;
 
@@ -31,6 +34,14 @@ public class HumanPlayer : GD_Player
     public override void markAsReady()
     {
         Debug.Log("It's the player's turn.");
+    }
+
+    public override void addToInvestigation((CPD_Type cpdType, string cat) entry)
+    {
+        if(currentInvestigation.Count < AnswerKey.instance.maxGuesses)
+        {
+            currentInvestigation.Add(entry);
+        }
     }
 
     // When a target has been guessed, do these actions
