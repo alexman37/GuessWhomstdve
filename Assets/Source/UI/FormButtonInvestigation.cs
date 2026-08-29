@@ -26,14 +26,15 @@ public class FormButtonInvestigation : MonoBehaviour
         } else
         {
             HumanPlayer.self.removeFromInvestigation((formButton.cpdType, formButton.category));
-            back.color = Color.clear;
+            back.color = Color.gray;
         }
     }
 
+    // TODO call through an action
     public void ResetInvestigation()
     {
         investigating = false;
         HumanPlayer.self.clearConstraints();
-        back.color = Color.clear;
+        back.color = Color.gray;
     }
 }

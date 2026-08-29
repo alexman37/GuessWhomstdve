@@ -94,7 +94,7 @@ public class RosterForm : MonoBehaviour
     }
 
     // Decide if the current form has any errors
-    public bool VerifyForm()
+    /*public bool VerifyForm()
     {
         Character target = TurnDriver.instance.currentRoster.getTargetAsCharacter();
         foreach(FormButtonGroup group in formGroups)
@@ -106,7 +106,7 @@ public class RosterForm : MonoBehaviour
             }
         }
         return true;
-    }
+    }*/
 
     // Assumes Unknowns filtered out
     private bool buttonStateAsBool(FormButtonState state)

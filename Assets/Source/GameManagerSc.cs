@@ -53,14 +53,17 @@ public class GameManagerSc : NetworkBehaviour
     [ClientRpc]
     private void ShipAndSetup_ClientRpc()
     {
-        Debug.Log("Begin setup task for the player " + OwnerClientId);
+        Debug.Log("Begin setup task for the player ");
         StartCoroutine(SetupTask());
     }
     
     private IEnumerator SetupTask()
     {
-        Debug.Log("In co " + OwnerClientId);
-        SceneManager.LoadSceneAsync(1);
+        Debug.Log("In co ");
+        if (NetworkManager.LocalClientId == 0)
+        {
+            NetworkManager.SceneManager.LoadScene("GW_Main", LoadSceneMode.Single);
+        }
 
         while (!rosterReady)
             yield return null;
@@ -73,8 +76,19 @@ public class GameManagerSc : NetworkBehaviour
             yield return null;
         while (TurnDriver.instance == null)
             yield return null;
+
         while (AnswerKey.instance == null)
             yield return null;
+        Debug.Log("Local client ID is " + NetworkManager.LocalClientId);
+        if (NetworkManager.LocalClientId == 0)
+        {
+            Debug.Log("I'm the host, so I create answer key instance here");
+            //AnswerKey.instance.GetComponent<NetworkObject>().Spawn();
+
+            while (AnswerKey.readyToUse == false)
+                yield return null;
+            AnswerKey.instance.SetAnswerKey(Roster.instance.simulatedTotalRosterSize);
+        }
 
         // TODO - we have the player names, just gotta use them
         HumanPlayer.self = new HumanPlayer("TestPlayer");

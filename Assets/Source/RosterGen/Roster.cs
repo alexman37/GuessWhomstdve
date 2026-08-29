@@ -10,6 +10,8 @@ using System;
 /// </summary>
 public class Roster
 {
+    public static Roster instance;
+
     const int TOTAL_ROSTER_PERMUTATIONS = 999999; // How many different rosters can there be?
     private int rosterSeedOffset;                 // offset every random seed by this amount. It makes each new game unique.
 
@@ -34,9 +36,6 @@ public class Roster
     protected static List<ulong> cpdCounts; // optimization for simulated ID unpacking
     protected static List<ulong> simIDtourGuide; // the first CPD should be multiplied by index 0...the second by index 1...etc. to get sim ID.
 
-    public ulong targetId; // the simulated ID of the person everyone wants to find
-    private Character targetAsChar;
-
     // You can sort the roster by common constraints that all players have, or just your own.
     public RosterConstraints commonConstraints = new RosterConstraints();
     public bool withCommonConstraints = true;
@@ -59,6 +58,9 @@ public class Roster
     // Most of this is first-time setup only
     public Roster()
     {
+        if (instance == null) instance = this;
+        else Debug.LogError("A second roster instance prematurely created");
+
         if (rosterReady == null) rosterReady += () => { };
         if (clearAllConstraints == null) clearAllConstraints += () => { };
         if (guessedWrongCharacter == null) guessedWrongCharacter += (_) => { };
@@ -167,10 +169,6 @@ public class Roster
         savedCPD = 0;
         savedMod = 0;
 
-        // TODO!!!! This is probably doing some shit wrong!!
-        targetId = (ulong)UnityEngine.Random.Range(0, simulatedTotalRosterSize - 1);
-        targetAsChar = new Character(-1, targetId);
-
         rosterReady.Invoke();
     }
 
@@ -186,28 +184,6 @@ public class Roster
             applyConstraints(HumanPlayer.self.rosterConstraints);
         }
         redrawRosterVis();
-    }
-
-    /// <summary>
-    /// Return a list of all the target's CPD stuff
-    /// </summary>
-    /// <returns></returns>
-    public List<CPD_Variant> getTargetAsCPDs()
-    {
-        return SimulatedID.unpackSimulatedID(targetId);
-    }
-
-    /// <summary>
-    /// Return a list of the target as a Character instance
-    /// </summary>
-    public Character getTargetAsCharacter()
-    {
-        return targetAsChar;
-    }
-
-    public bool targetHasProperty(CPD_Type cpdType, string cat)
-    {
-        return targetAsChar.getCategoryofCharacteristic(cpdType) == cat;
     }
 
 

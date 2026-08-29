@@ -40,12 +40,25 @@ public class BotPlayer : GD_Player
         }
     }
 
-    public override void guessTarget(ulong characterId)
+    public override void investigation_Send()
     {
-        bool correct = TurnDriver.instance.currentRoster.targetId == characterId;
+        throw new NotImplementedException();
+    }
 
-        // TODO obv. gotta do more than just click/respond
-        if (correct)
+    public override void investigation_Receive(int numHits)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void guessTarget_Send(ulong characterId)
+    {
+        // TODO requestor ID
+        AnswerKey.instance.targetIdMatchOne(characterId, 999);
+    }
+
+    public override void guessTarget_Receive(bool success)
+    {
+        if (success)
         {
             Debug.Log("CPU WINS!");
             // TODO
