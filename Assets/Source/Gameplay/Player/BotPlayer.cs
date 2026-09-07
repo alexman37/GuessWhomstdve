@@ -50,6 +50,11 @@ public class BotPlayer : GD_Player
         throw new NotImplementedException();
     }
 
+    public override void investigationPI_Receive(ulong fromPlayerIndex, NetCpdCategory[] questions, int numHits)
+    {
+        throw new NotImplementedException();
+    }
+
     public override void guessTarget_Send(ulong characterId)
     {
         // TODO requestor ID

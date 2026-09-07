@@ -17,6 +17,8 @@ public class AnswerKey : NetworkBehaviour
     private NetworkVariable<ulong> answerId = new NetworkVariable<ulong>(0, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
     private Character answerChar;
 
+    private NetworkVariable<ulong> passiveInfoOffset = new NetworkVariable<ulong>(0, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
+
     private void Start()
     {
         if (instance == null) instance = this;
@@ -32,6 +34,17 @@ public class AnswerKey : NetworkBehaviour
         else Debug.Log("Answer key, coming in from the CLIENT");
 
         readyToUse = true;
+    }
+
+    public void SetPassiveInfoOffset(ulong newOffset)
+    {
+        SetPassiveInfoOffset_ServerRpc(newOffset);
+    }
+
+    [ServerRpc]
+    private void SetPassiveInfoOffset_ServerRpc(ulong newOffset)
+    {
+        passiveInfoOffset.Value = newOffset;
     }
 
     public void SetAnswerKey(ulong simulatedRosterSize)
@@ -124,6 +137,7 @@ public class AnswerKey : NetworkBehaviour
     /// </summary>
     public void processInvestigation(HashSet<(CPD_Type cpdType, string cat)> questions, ulong requestorId)
     {
+        Debug.Log(NetworkManager.Singleton.LocalClientId + " IN INVESTIGATION");
         NetCpdCategory[] processedQs = new NetCpdCategory[questions.Count];
         int count = 0;
         foreach((CPD_Type cpdType, string cat) quest in questions)
@@ -159,12 +173,34 @@ public class AnswerKey : NetworkBehaviour
                 TargetClientIds = new ulong[] {rpcParams.Receive.SenderClientId}
             }
         });
+        Debug.Log("Passive info offset is " + passiveInfoOffset.Value);
+        if(passiveInfoOffset.Value != 0)
+        {
+            ulong idToSend = (rpcParams.Receive.SenderClientId + passiveInfoOffset.Value) % (ulong)TurnDriverServer.instance.humanAndBotCount;
+            Debug.Log("Send Passive info to this ID: " + idToSend);
+            processInvestigationPI_ClientRpc(rpcParams.Receive.SenderClientId, questions, count, new ClientRpcParams
+            {
+                Send =
+            {
+                TargetClientIds = new ulong[] {
+                    idToSend
+                }
+            }
+            });
+        }
     }
 
     [ClientRpc]
     private void processInvestigation_ClientRpc(int count, ClientRpcParams rpcParams)
     {
         HumanPlayer.self.investigation_Receive(count);
+    }
+
+    // Passive info: Players also learn what others guessed, occasionally
+    [ClientRpc]
+    private void processInvestigationPI_ClientRpc(ulong fromPlayerIndex, NetCpdCategory[] questions, int count, ClientRpcParams rpcParams)
+    {
+        HumanPlayer.self.investigationPI_Receive(fromPlayerIndex, questions, count);
     }
 }
 

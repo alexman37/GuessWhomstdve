@@ -24,16 +24,16 @@ public class HumanPlayer : GD_Player
         rosterConstraints.clearAllConstraints(true);
 
         Roster.clearAllConstraints += clearConstraints;
-        TurnDriver.dispatchInvestigations += investigation_Send;
-        TurnDriver.resetInvestigations += resetInvestigation;
+        TurnDriverClient.dispatchInvestigations += investigation_Send;
+        TurnDriverClient.resetInvestigations += resetInvestigation;
         //Roster.guessedWrongCharacter += guessTarget;
     }
 
     ~HumanPlayer()
     {
         Roster.clearAllConstraints -= clearConstraints;
-        TurnDriver.dispatchInvestigations -= investigation_Send;
-        TurnDriver.resetInvestigations -= resetInvestigation;
+        TurnDriverClient.dispatchInvestigations -= investigation_Send;
+        TurnDriverClient.resetInvestigations -= resetInvestigation;
         //Roster.guessedWrongCharacter -= guessTarget;
     }
 
@@ -53,6 +53,7 @@ public class HumanPlayer : GD_Player
 
     public override void investigation_Send()
     {
+        Debug.Log(NetworkManager.Singleton.LocalClientId + " SENDS INVESTIGATION");
         AnswerKey.instance.processInvestigation(currentInvestigation, NetworkManager.Singleton.LocalClientId);
     }
 
@@ -60,6 +61,16 @@ public class HumanPlayer : GD_Player
     {
         Debug.Log("[RESP] Found " + numHits + " hits.");
         investigationReceived = true;
+    }
+
+    public override void investigationPI_Receive(ulong fromPlayerIndex, NetCpdCategory[] questions, int numHits)
+    {
+        Debug.Log("[PI] Found " + numHits + " hits.");
+        UI_PassiveInfoPopup.instance.showAndUpdateText(
+            fromPlayerIndex.ToString(),
+            questions,
+            numHits
+        );
     }
 
     public override void resetInvestigation()

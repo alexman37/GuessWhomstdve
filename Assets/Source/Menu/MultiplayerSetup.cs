@@ -26,6 +26,7 @@ namespace GW.MainMenu
         Player me;
         PlayerSetupInfo[] playerbase = new PlayerSetupInfo[8];
         private object playerbaseLock = new object();
+        private ushort humanPlayerCt = 0;
 
         [SerializeField] private GameObject panel1;
         [SerializeField] private GameObject panel2;
@@ -56,8 +57,8 @@ namespace GW.MainMenu
 
             PlayerDataObject pdoName = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, SettingsMenu.confData.name);
             me = new Player(id: AuthenticationService.Instance.PlayerId, data: new Dictionary<string, PlayerDataObject> {
-            { "Name", pdoName }
-        });
+                { "Name", pdoName }
+            });
 
             NetworkManager.Singleton.OnClientConnectedCallback += onClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += onClientDisconnected;
@@ -112,6 +113,7 @@ namespace GW.MainMenu
                     {
                         Destroy(playerBaseRoot.transform.GetChild(i).gameObject);
                     }
+                    humanPlayerCt = 0;
 
                     Debug.Log("How many active players? " + LobbyManager.instance.partOfLobby.Players.Count);
                     List<Player> lobbyList = LobbyManager.instance.partOfLobby.Players;
@@ -130,6 +132,7 @@ namespace GW.MainMenu
                                     type = PlayerSetupType.Human, 
                                     name = p.Data["Name"].Value 
                                 };
+                                humanPlayerCt++;
                             }
                         }
                     }
@@ -301,9 +304,11 @@ namespace GW.MainMenu
             GameManagerSc.instance.SetGameParameters(new MainGameParameters
             {
                 playerSetupInfo = playerbase,
+                humanPlayerCount = humanPlayerCt,
                 rosterSizeZeroes = stubs[0].getRealValue(),
                 roundsToWin = (ushort)stubs[1].getRealValue(),
             });
+            Debug.Log("HUM TOTAL " + humanPlayerCt);
 
             Lobbies.Instance.DeleteLobbyAsync(lobbyIdCache);
         }

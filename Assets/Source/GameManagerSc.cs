@@ -12,9 +12,12 @@ public class GameManagerSc : NetworkBehaviour
     public static GameManagerSc instance;
     NetworkVariable<MainGameParameters> gameParameters = new NetworkVariable<MainGameParameters>(value: new MainGameParameters {
         playerSetupInfo = new PlayerSetupInfo[8],
+        humanPlayerCount = 0,
         rosterSizeZeroes = 3,
         roundsToWin = 1
     });
+
+    NetworkVariable<ushort> connectedHumanPlayersCt = new NetworkVariable<ushort>(0);
 
     private bool rosterReady = false;
 
@@ -62,6 +65,7 @@ public class GameManagerSc : NetworkBehaviour
         Debug.Log("In co ");
         if (NetworkManager.LocalClientId == 0)
         {
+            WaitForAllPlayersToSetup_ServerRpc();
             NetworkManager.SceneManager.LoadScene("GW_Main", LoadSceneMode.Single);
         }
 
@@ -70,24 +74,32 @@ public class GameManagerSc : NetworkBehaviour
 
         while (UI_Playerbase.instance == null)
             yield return null;
-        UI_Playerbase.instance.redrawPlayerbase(gameParameters.Value.playerSetupInfo);
+        (int humanAndBotPlayers, int humanPlayers) pc = UI_Playerbase.instance.redrawPlayerbase(gameParameters.Value.playerSetupInfo);
 
         while (InfoBar.instance == null)
             yield return null;
-        while (TurnDriver.instance == null)
+        while (TurnDriverClient.instance == null)
             yield return null;
 
         while (AnswerKey.instance == null)
             yield return null;
-        Debug.Log("Local client ID is " + NetworkManager.LocalClientId);
         if (NetworkManager.LocalClientId == 0)
         {
-            Debug.Log("I'm the host, so I create answer key instance here");
+            // No need - it should happen on the server automatically, if set up correctly
             //AnswerKey.instance.GetComponent<NetworkObject>().Spawn();
 
             while (AnswerKey.readyToUse == false)
                 yield return null;
             AnswerKey.instance.SetAnswerKey(Roster.instance.simulatedTotalRosterSize);
+        }
+
+        while (TurnDriverServer.instance == null)
+            yield return null;
+        Debug.Log("Local client ID is " + NetworkManager.LocalClientId);
+        if (NetworkManager.LocalClientId == 0)
+        {
+            Debug.Log("I'm the host, so I create TurnDriverServer instance here");
+            TurnDriverServer.instance.InitPassiveInfoSystem(pc.humanAndBotPlayers, pc.humanPlayers);
         }
 
         // TODO - we have the player names, just gotta use them
@@ -100,28 +112,52 @@ public class GameManagerSc : NetworkBehaviour
             yield return null;
         RosterForm.instance.Setup();
 
-        //TODO what we really need here is to track when everyone is finished their stuff
+        Debug.Log("Reached near end of setup");
+        MarkPlayerAsConnected_ServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void MarkPlayerAsConnected_ServerRpc()
+    {
+        Debug.Log("Server RPC calling ownership: " + NetworkManager.Singleton.LocalClientId);
+        connectedHumanPlayersCt.Value += 1;
+    }
+
+    [ServerRpc]
+    private void WaitForAllPlayersToSetup_ServerRpc()
+    {
+        StartCoroutine(WaitForAllPlayersToSetup());
+    }
+
+    private IEnumerator WaitForAllPlayersToSetup()
+    {
+        while(connectedHumanPlayersCt.Value < gameParameters.Value.humanPlayerCount)
+        {
+            Debug.Log("Not all players connected yet... " + connectedHumanPlayersCt.Value + "/" + gameParameters.Value.humanPlayerCount);
+            yield return new WaitForSeconds(1);
+        }
         KickOff();
     }
 
     // When everything has been loaded, begin the game for real
-    [ContextMenu("Kickoff")]
-    public void KickOff()
+    private void KickOff()
     {
         Debug.Log("Let the game begin.");
-        TurnDriver.instance.BeginGame();
+        TurnDriverServer.instance.BeginGame();
     }
 }
 
 public struct MainGameParameters : INetworkSerializable
 {
     public PlayerSetupInfo[] playerSetupInfo;
+    public ushort humanPlayerCount;
     public ulong rosterSizeZeroes;
     public ushort roundsToWin;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref rosterSizeZeroes);
+        serializer.SerializeValue(ref humanPlayerCount);
         serializer.SerializeValue(ref roundsToWin);
         serializer.SerializeValue(ref playerSetupInfo);
     }

@@ -16,20 +16,27 @@ public class UI_Playerbase : MonoBehaviour
         else Destroy(this);
     }
 
-    public void redrawPlayerbase(PlayerSetupInfo[] psi)
+    /// <summary>
+    /// Return the number of (human or bot players, human players) in-game
+    /// </summary>
+    public (int, int) redrawPlayerbase(PlayerSetupInfo[] psi)
     {
         for (int i = playerbaseContainer.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(playerbaseContainer.transform.GetChild(i));
         }
 
+        int humanCount = 0;
         for (int i = 0; i < psi.Length; i++)
         {
             // Assumes the list will be ordered...a safe assumption?
             if (psi[i].type == PlayerSetupType.None)
-                break;
+                return (i, humanCount);
+            else if (psi[i].type == PlayerSetupType.Human)
+                humanCount++;
             GameObject go = GameObject.Instantiate(playerbaseEntry, playerbaseContainer.transform);
             go.GetComponent<UI_PlayerbaseEntry>().SetParams(psi[i]);
         }
+        return (psi.Length, humanCount);
     }
 }

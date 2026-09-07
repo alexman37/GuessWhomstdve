@@ -39,6 +39,7 @@ public abstract class GD_Player
 
     public abstract void investigation_Send();
     public abstract void investigation_Receive(int numHits);
+    public abstract void investigationPI_Receive(ulong fromPlayerIndex, NetCpdCategory[] questions, int numHits);
 
     /// <summary>
     /// Guess the target. Since clients don't store this information, you must ask the server
