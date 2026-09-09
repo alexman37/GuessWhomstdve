@@ -16,19 +16,19 @@ public class CharCard64 : CharacterCard
 
     [SerializeField] TextMeshProUGUI cityAbbrText;
 
-    public static event Action<ulong> charCardClicked = (_) => { };
-
     // Start is called before the first frame update
     void Start()
     {
     }
 
-    private void OnEnable()
+    private new void OnEnable()
     {
+        base.OnEnable();
     }
 
-    private void OnDisable()
+    private new void OnDisable()
     {
+        base.OnDisable();
     }
 
     // You will need different versions of this for different LODs...
@@ -124,9 +124,9 @@ public class CharCard64 : CharacterCard
         OnClick();
     }
 
-    public void OnClick()
+    public override void OnClick()
     {
+        base.OnClick();
         Debug.Log("Click " + characterId);
-        charCardClicked.Invoke(characterId);
     }
 }

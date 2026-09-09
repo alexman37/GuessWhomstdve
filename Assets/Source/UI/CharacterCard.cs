@@ -6,12 +6,29 @@ using TMPro;
 
 public class CharacterCard : MonoBehaviour
 {
+    [SerializeField] private SpriteRenderer coloredBorder;
+    private bool selected;
+    public static bool acceptingInput = true;
+
     public ulong characterId;
 
     private static float redrawDelay = 1f;
     private static float flipTime = 0.4f;
     private static float waitTime = 0.4f;
 
+    public static event Action<ulong> charCardClicked = (_) => { };
+
+    protected void OnEnable()
+    {
+        PlayerTurnProcessor.switchedAction += OnActionSwitch;
+        TurnDriverClient.resetInvestigations += ResetAllSelections;
+    }
+
+    protected void OnDisable()
+    {
+        PlayerTurnProcessor.switchedAction -= OnActionSwitch;
+        TurnDriverClient.resetInvestigations -= ResetAllSelections;
+    }
 
     public void RedrawInPlace(Character c, float uvCoord)
     {
@@ -88,6 +105,44 @@ public class CharacterCard : MonoBehaviour
                     cardOffsetH = 0.3f
                 };
         }
+    }
+
+    public virtual void OnClick()
+    {
+        if(acceptingInput)
+        {
+            selected = HumanPlayer.self.addToTargetsList(characterId);
+
+            if (selected)
+            {
+                PlayerTurnProcessor.instance.ProcessActionChange(PlayerTurnAction.TargetGuess, true);
+                charCardClicked.Invoke(characterId);
+                coloredBorder.color = Color.cyan;
+            }
+            else
+            {
+                PlayerTurnProcessor.instance.ProcessActionChange(PlayerTurnAction.TargetGuess, false);
+                coloredBorder.color = Color.gray;
+            }
+        }
+    }
+
+    private void OnActionSwitch(PlayerTurnAction switchToAction)
+    {
+        if(switchToAction != PlayerTurnAction.TargetGuess)
+        {
+            ResetAllSelections();
+        }
+    }
+
+    private void ResetAllSelections()
+    {
+        coloredBorder.color = Color.gray;
+        if (selected)
+        {
+            HumanPlayer.self.removeFromTargetsList(characterId);
+        }
+        selected = false;
     }
 }
 

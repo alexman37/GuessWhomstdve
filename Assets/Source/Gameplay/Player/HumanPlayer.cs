@@ -24,7 +24,6 @@ public class HumanPlayer : GD_Player
         rosterConstraints.clearAllConstraints(true);
 
         Roster.clearAllConstraints += clearConstraints;
-        TurnDriverClient.dispatchInvestigations += investigation_Send;
         TurnDriverClient.resetInvestigations += resetInvestigation;
         //Roster.guessedWrongCharacter += guessTarget;
     }
@@ -32,7 +31,6 @@ public class HumanPlayer : GD_Player
     ~HumanPlayer()
     {
         Roster.clearAllConstraints -= clearConstraints;
-        TurnDriverClient.dispatchInvestigations -= investigation_Send;
         TurnDriverClient.resetInvestigations -= resetInvestigation;
         //Roster.guessedWrongCharacter -= guessTarget;
     }
@@ -43,12 +41,14 @@ public class HumanPlayer : GD_Player
         Debug.Log("It's the player's turn.");
     }
 
-    public override void addToInvestigation((CPD_Type cpdType, string cat) entry)
+    public override bool addToInvestigation((CPD_Type cpdType, string cat) entry)
     {
         if(currentInvestigation.Count < AnswerKey.instance.maxGuesses)
         {
             currentInvestigation.Add(entry);
+            return true;
         }
+        return false;
     }
 
     public override void investigation_Send()
@@ -81,12 +81,19 @@ public class HumanPlayer : GD_Player
 
     // When a target has been guessed, do these actions
     // Some are performed only if it's your turn
-    public override void guessTarget_Send(ulong characterId)
+    public override void guessTargets_Send()
     {
-        AnswerKey.instance.targetIdMatchOne(characterId, NetworkManager.Singleton.LocalClientId);
+        ulong[] characterIds = new ulong[currentTargetSelections.Count];
+        int count = 0;
+        foreach(ulong charId in currentTargetSelections)
+        {
+            characterIds[count] = charId;
+            count++;
+        }
+        AnswerKey.instance.targetIdMatchAny(characterIds, NetworkManager.Singleton.LocalClientId);
     }
 
-    public override void guessTarget_Receive(bool success)
+    public override void guessTargets_Receive(bool success)
     {
         if (success)
         {

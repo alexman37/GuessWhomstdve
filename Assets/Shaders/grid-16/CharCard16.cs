@@ -12,12 +12,14 @@ public class CharCard16 : CharacterCard
     {
     }
 
-    private void OnEnable()
+    private new void OnEnable()
     {
+        base.OnEnable();
     }
 
-    private void OnDisable()
+    private new void OnDisable()
     {
+        base.OnDisable();
     }
 
     // You will need different versions of this for different LODs...
@@ -60,5 +62,16 @@ public class CharCard16 : CharacterCard
         {
             drawMat.SetVector("_OPT_Beard", new Vector4(1, 0, 0, 0));
         } else drawMat.SetVector("_OPT_Beard", new Vector4(0, 0, 0, 0));
+    }
+
+    private void OnMouseDown()
+    {
+        OnClick();
+    }
+
+    public override void OnClick()
+    {
+        base.OnClick();
+        Debug.Log("Click " + characterId);
     }
 }

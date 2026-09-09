@@ -8,6 +8,8 @@ public class FormButtonInvestigation : MonoBehaviour
     [SerializeField] FormButton formButton;
     [SerializeField] Image back;
 
+    public static bool acceptingInput = true;
+
     private bool investigating;
 
     // Start is called before the first frame update
@@ -16,17 +18,36 @@ public class FormButtonInvestigation : MonoBehaviour
         
     }
 
+    private void OnEnable()
+    {
+        PlayerTurnProcessor.switchedAction += OnActionSwitch;
+    }
+
+    private void OnDisable()
+    {
+        PlayerTurnProcessor.switchedAction -= OnActionSwitch;
+    }
+
     public void AddToInvestigation()
     {
-        investigating = !investigating;
-        if(investigating)
+        if(acceptingInput)
         {
-            HumanPlayer.self.addToInvestigation((formButton.cpdType, formButton.category));
-            back.color = Color.cyan;
-        } else
-        {
-            HumanPlayer.self.removeFromInvestigation((formButton.cpdType, formButton.category));
-            back.color = Color.gray;
+            investigating = !investigating;
+            if (investigating)
+            {
+                bool success = HumanPlayer.self.addToInvestigation((formButton.cpdType, formButton.category));
+                if (success)
+                {
+                    back.color = Color.cyan;
+                    PlayerTurnProcessor.instance.ProcessActionChange(PlayerTurnAction.Investigation, true);
+                }
+            }
+            else
+            {
+                HumanPlayer.self.removeFromInvestigation((formButton.cpdType, formButton.category));
+                PlayerTurnProcessor.instance.ProcessActionChange(PlayerTurnAction.Investigation, false);
+                back.color = Color.gray;
+            }
         }
     }
 
@@ -34,7 +55,15 @@ public class FormButtonInvestigation : MonoBehaviour
     public void ResetInvestigation()
     {
         investigating = false;
-        HumanPlayer.self.clearConstraints();
         back.color = Color.gray;
     }
+
+    private void OnActionSwitch(PlayerTurnAction action)
+    {
+        if(action != PlayerTurnAction.Investigation)
+        {
+            ResetInvestigation();
+        }
+    }
+
 }

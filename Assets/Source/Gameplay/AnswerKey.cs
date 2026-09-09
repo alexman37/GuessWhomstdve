@@ -78,7 +78,7 @@ public class AnswerKey : NetworkBehaviour
     [ClientRpc]
     private void targetIdMatchOne_ClientRpc(bool matched, ClientRpcParams rpcParams)
     {
-        HumanPlayer.self.guessTarget_Receive(matched);
+        HumanPlayer.self.guessTargets_Receive(matched);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -104,7 +104,7 @@ public class AnswerKey : NetworkBehaviour
     [ClientRpc]
     private void targetIdMatchAny_ClientRpc(bool matched, ClientRpcParams rpcParams)
     {
-        HumanPlayer.self.guessTarget_Receive(matched);
+        HumanPlayer.self.guessTargets_Receive(matched);
     }
 
     [ServerRpc(RequireOwnership = false)]

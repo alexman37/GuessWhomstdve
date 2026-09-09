@@ -13,7 +13,6 @@ public class TurnDriverClient : MonoBehaviour
 {
     public static TurnDriverClient instance;
 
-    public static event Action dispatchInvestigations = () => { };
     public static event Action resetInvestigations = () => { };
 
 
@@ -50,22 +49,43 @@ public class TurnDriverClient : MonoBehaviour
                 InfoBar.instance.setTimer(5);
                 break;
             case TurnDriverPhase.InvestigationDispatch:
-                dispatchInvestigations.Invoke();
+                lockActions();
+                commitAction();
                 InfoBar.instance.setReadout("Investigating...");
                 InfoBar.instance.setTimer(2);
                 break;
             // Players all shown info: Show them what other players learned also
             case TurnDriverPhase.PassiveInfo:
+                resetInvestigations.Invoke();
                 InfoBar.instance.setReadout("PassiveInfo Phase");
                 InfoBar.instance.setTimer(5);
                 break;
             // Shown what other players learned: REPEAT
             case TurnDriverPhase.PlayerTurns:
-                resetInvestigations.Invoke();
+                unlockActions();
                 InfoBar.instance.setReadout("Turn phase");
                 InfoBar.instance.setTimer(15);
                 break;
         }
+    }
+
+    // Can't really do this thru actions because it's very important it all happens before processing the turn
+    private void lockActions()
+    {
+        FormButtonInvestigation.acceptingInput = false;
+        CharacterCard.acceptingInput = false;
+    }
+
+    private void unlockActions()
+    {
+        FormButtonInvestigation.acceptingInput = true;
+        CharacterCard.acceptingInput = true;
+    }
+
+    // The player completes their action. PlayerTurnProcessor should do most of the work
+    private void commitAction()
+    {
+        PlayerTurnProcessor.instance.CommitAction();
     }
 
     // Send a message to server, saying this player is done 

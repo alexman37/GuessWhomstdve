@@ -90,10 +90,8 @@ public class TurnDriverServer : NetworkBehaviour
     {
         while(receivedUpdatesFrom.Count < humanAndBotCount)
         {
-            Debug.Log("Not all players have finished the phase. Awaiting completion...");
             yield return new WaitForSeconds(1);
         }
-        Debug.Log("Waiting complete!");
         // When we're done waiting, the cycle renews again
         TimedPhaseCycle();
     }

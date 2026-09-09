@@ -32,12 +32,14 @@ public class BotPlayer : GD_Player
 
     }
 
-    public override void addToInvestigation((CPD_Type cpdType, string cat) entry)
+    public override bool addToInvestigation((CPD_Type cpdType, string cat) entry)
     {
         if (currentInvestigation.Count < AnswerKey.instance.maxGuesses)
         {
             currentInvestigation.Add(entry);
+            return true;
         }
+        return false;
     }
 
     public override void investigation_Send()
@@ -55,13 +57,12 @@ public class BotPlayer : GD_Player
         throw new NotImplementedException();
     }
 
-    public override void guessTarget_Send(ulong characterId)
+    public override void guessTargets_Send()
     {
-        // TODO requestor ID
-        AnswerKey.instance.targetIdMatchOne(characterId, 999);
+        throw new NotImplementedException();
     }
 
-    public override void guessTarget_Receive(bool success)
+    public override void guessTargets_Receive(bool success)
     {
         if (success)
         {

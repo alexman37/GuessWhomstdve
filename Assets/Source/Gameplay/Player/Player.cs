@@ -9,7 +9,8 @@ public abstract class GD_Player
     public string agentName;
     public Sprite portrait;
 
-    public int maxActionCardCount = 5;
+    public int investigationCount = 3;
+    public int targetGuessCount = 1;
     // TODO inventory system?
     //public List<ClueCard> inventory = new List<ClueCard>();
 
@@ -18,6 +19,7 @@ public abstract class GD_Player
     public bool isHuman = false;
 
     public HashSet<(CPD_Type cpd, string cat)> currentInvestigation = new HashSet<(CPD_Type cpd, string cat)>();
+    public HashSet<ulong> currentTargetSelections = new HashSet<ulong>();
 
 
     /// <summary>
@@ -25,11 +27,31 @@ public abstract class GD_Player
     /// </summary>
     public abstract void markAsReady();
 
-    public abstract void addToInvestigation((CPD_Type cpdType, string cat) entry);
+    /// <summary>
+    /// Return true if succeeded in adding to investigation
+    /// </summary>
+    public abstract bool addToInvestigation((CPD_Type cpdType, string cat) entry);
 
     public virtual void removeFromInvestigation((CPD_Type cpdType, string cat) entry)
     {
         currentInvestigation.Remove(entry);
+    }
+
+    public virtual bool addToTargetsList(ulong targetId)
+    {
+        if(currentTargetSelections.Contains(targetId))
+        {
+            return false;
+        } else
+        {
+            currentTargetSelections.Add(targetId);
+            return true;
+        }
+    }
+
+    public virtual void removeFromTargetsList(ulong targetId)
+    {
+        currentTargetSelections.Remove(targetId);
     }
 
     public virtual void resetInvestigation()
@@ -44,12 +66,12 @@ public abstract class GD_Player
     /// <summary>
     /// Guess the target. Since clients don't store this information, you must ask the server
     /// </summary>
-    public abstract void guessTarget_Send(ulong characterId);
+    public abstract void guessTargets_Send();
 
     /// <summary>
     /// Get a response back from the server on above target guess
     /// </summary>
-    public abstract void guessTarget_Receive(bool success);
+    public abstract void guessTargets_Receive(bool success);
 
     public virtual void clearConstraints()
     {
