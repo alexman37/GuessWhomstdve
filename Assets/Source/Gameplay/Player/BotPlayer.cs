@@ -72,13 +72,7 @@ public class BotPlayer : GD_Player
         else
         {
             Debug.Log("Wrong guy!");
-            endOfTurn();
         }
-    }
-
-    public override void endOfTurn()
-    {
-        Debug.Log("The CPU " + agentName + "'s turn has ended.");
     }
 
 
@@ -90,6 +84,5 @@ public class BotPlayer : GD_Player
     public void skipTurn()
     {
         Debug.Log("Skipping CPU " + agentName + "'s turn.");
-        endOfTurn();
     }
 }

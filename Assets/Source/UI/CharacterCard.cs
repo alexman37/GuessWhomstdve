@@ -7,6 +7,10 @@ using TMPro;
 public class CharacterCard : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer coloredBorder;
+    [SerializeField] protected Material drawMat;
+
+    public const int NUM_JOB_PORTRAITS = 64;
+
     private bool selected;
     public static bool acceptingInput = true;
 
@@ -32,7 +36,10 @@ public class CharacterCard : MonoBehaviour
 
     public void RedrawInPlace(Character c, float uvCoord)
     {
-        StartCoroutine(flipAndRedraw(c, uvCoord * redrawDelay));
+        if(!float.IsNaN(uvCoord))
+            StartCoroutine(flipAndRedraw(c, uvCoord * redrawDelay));
+        else
+            StartCoroutine(flipAndRedraw(c, 0));
     }
 
     private IEnumerator flipAndRedraw(Character c, float delay)
@@ -47,6 +54,7 @@ public class CharacterCard : MonoBehaviour
         {
             yield return null;
         }
+        Debug.Log(c.simulatedId + " has eye color " + c.getVariantNameofCharacteristic(CPD_Type.EyeColor));
         SetMaterialParams(c);
         for (float i = 0; i < flipTime; i += Time.deltaTime)
         {
@@ -143,6 +151,60 @@ public class CharacterCard : MonoBehaviour
             HumanPlayer.self.removeFromTargetsList(characterId);
         }
         selected = false;
+    }
+
+
+    // Helper methods for setting parameter values
+    protected int SetIntFieldAndAdvance(Character c, CPD_Type cpdType, string propName, int additional = 0)
+    {
+        if (CPD.registry.ContainsKey(cpdType))
+        {
+            int v = c.getCategoryIndexofCharacteristic(cpdType) + additional;
+            drawMat.SetInt(propName, v);
+            return v;
+        }
+        else return -1;
+    }
+
+    protected ulong SetColorFieldAndAdvance_R(Character c, ulong inputSeed, CPD_Type cpdType, string propName)
+    {
+        if (CPD.registry.ContainsKey(cpdType))
+        {
+            (ulong s, Color v) crv = c.getColorField(inputSeed, cpdType);
+            drawMat.SetColor(propName, crv.v);
+            return crv.s;
+        }
+        else return inputSeed;
+    }
+
+    // Hairstyle can depend on what gender the character is (if defined). Otherwise just assume male...
+    protected ulong SetGenderedHair_R(Character c, ulong inputSeed)
+    {
+        bool hasHairlen = CPD.registry.ContainsKey(CPD_Type.HairStyle);
+        bool hasGender  = CPD.registry.ContainsKey(CPD_Type.Gender);
+        // Case 1: Both hair len and gender used
+        if (hasHairlen && hasGender)
+        {
+            int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
+            int gender = c.getCategoryIndexofCharacteristic(CPD_Type.Gender);
+            drawMat.SetInt("_HairLength", Hairlen);
+            (ulong s, int v) crv = CharRandomValue.randomHairIndex(inputSeed, Hairlen, gender);
+            drawMat.SetInt("_HairIdx", crv.v);
+            return crv.s;
+        }
+        // Case 2: Just hair len used, assume male
+        else if (hasHairlen)
+        {
+            int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
+            int gender = 0;
+            drawMat.SetInt("_HairLength", Hairlen);
+            (ulong s, int v) crv = CharRandomValue.randomHairIndex(inputSeed, Hairlen, gender);
+            drawMat.SetInt("_HairIdx", crv.v);
+            return crv.s;
+        }
+        // Case 3: Just gender used, assume default hairstyle
+        // Case 4: Neither, do nothing
+        else return inputSeed;
     }
 }
 

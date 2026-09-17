@@ -9,6 +9,8 @@ using Unity.Netcode;
 // And manager of the highest-level problems in the game
 public class GameManagerSc : NetworkBehaviour
 {
+    public const int MAX_PLAYER_CT = 8;
+
     public static GameManagerSc instance;
     NetworkVariable<MainGameParameters> gameParameters = new NetworkVariable<MainGameParameters>(value: new MainGameParameters {
         playerSetupInfo = new PlayerSetupInfo[8],
@@ -16,6 +18,10 @@ public class GameManagerSc : NetworkBehaviour
         rosterSizeZeroes = 3,
         roundsToWin = 1
     });
+
+    NetworkList<int> winsPerPlayer;
+
+    public NetworkList<ulong> winnersThisRound;
 
     NetworkVariable<ushort> connectedHumanPlayersCt = new NetworkVariable<ushort>(0);
 
@@ -28,6 +34,19 @@ public class GameManagerSc : NetworkBehaviour
         else Destroy(this);
 
         DontDestroyOnLoad(this.gameObject);
+
+        winsPerPlayer = new NetworkList<int>();
+        winnersThisRound = new NetworkList<ulong>();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        Debug.Log("GameManagerSC has been spawned on the network.");
+        for(int i = 0; i < 8; i++)
+        {
+            winsPerPlayer.Add(0);
+        }
     }
 
     private void OnEnable()
@@ -127,6 +146,68 @@ public class GameManagerSc : NetworkBehaviour
     private void WaitForAllPlayersToSetup_ServerRpc()
     {
         StartCoroutine(WaitForAllPlayersToSetup());
+    }
+
+    public void MarkPlayerAsWinner(ulong idOfRoundWinner)
+    {
+        MarkWinner_ServerRpc(idOfRoundWinner);
+    }
+
+    [ServerRpc]
+    private void MarkWinner_ServerRpc(ulong idOfRoundWinner)
+    {
+        winnersThisRound.Add(idOfRoundWinner);
+    }
+
+    [ServerRpc]
+    private void ProcessWinners_ServerRpc()
+    {
+        // Give those who won the round +1 wins for the game
+        if(winnersThisRound.Count > 0)
+        {
+            ulong[] temp = new ulong[winnersThisRound.Count];
+            int count = 0;
+            foreach (ulong id in winnersThisRound)
+            {
+                winsPerPlayer[(int)id] += 1;
+                temp[count++] = id;
+            }
+
+            // If anyone meets the win total, they win the game
+            ulong[] idsOfGameWinners = new ulong[8];
+            int numGameWinners = 0;
+            for (int i = 0; i < winsPerPlayer.Count; i++)
+            {
+                if (winsPerPlayer[i] >= gameParameters.Value.roundsToWin)
+                {
+                    idsOfGameWinners[numGameWinners] = (ulong)i;
+                    numGameWinners++;
+                }
+            }
+
+            // If anyone won the game, end it
+            if (numGameWinners > 0)
+            {
+                EndGame_ClientRpc(idsOfGameWinners);
+            }
+            else
+            {
+                EndRound_ClientRpc(temp);
+            }
+            winnersThisRound.Clear();
+        }
+    }
+
+    [ClientRpc]
+    private void EndRound_ClientRpc(ulong[] idsOfRoundWinners)
+    {
+        UI_RoundOverPopup.instance.ShowEndOfRound(idsOfRoundWinners);
+    }
+
+    [ClientRpc]
+    private void EndGame_ClientRpc(ulong[] idsOfGameWinners)
+    {
+        UI_RoundOverPopup.instance.ShowEndOfGame(idsOfGameWinners);
     }
 
     private IEnumerator WaitForAllPlayersToSetup()

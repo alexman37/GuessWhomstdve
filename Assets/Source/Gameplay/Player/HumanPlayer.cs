@@ -22,7 +22,6 @@ public class HumanPlayer : GD_Player
 
         rosterConstraints = new RosterConstraints();
         rosterConstraints.clearAllConstraints(true);
-
         Roster.clearAllConstraints += clearConstraints;
         TurnDriverClient.resetInvestigations += resetInvestigation;
         //Roster.guessedWrongCharacter += guessTarget;
@@ -61,6 +60,7 @@ public class HumanPlayer : GD_Player
     {
         Debug.Log("[RESP] Found " + numHits + " hits.");
         investigationReceived = true;
+        TurnDriverClient.instance.FinishCurrentPhase();
     }
 
     public override void investigationPI_Receive(ulong fromPlayerIndex, NetCpdCategory[] questions, int numHits)
@@ -98,19 +98,14 @@ public class HumanPlayer : GD_Player
         if (success)
         {
             Debug.Log("YOU WIN!");
-            // TODO
+            // Wait until the server confirms the players' win is counted
+            TurnDriverClient.instance.FinishCurrentPhase(PhaseFinishStatusUpdate.PlayerWon);
         }
         else
         {
             Debug.Log("Wrong guy!");
-            endOfTurn();
+            TurnDriverClient.instance.FinishCurrentPhase();
         }
-    }
-
-    // When turn is over do these actions
-    public override void endOfTurn()
-    {
-        Debug.Log("The player's turn has ended.");
     }
 
     // CPU handles their constraints locally.

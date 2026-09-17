@@ -18,6 +18,8 @@ public class TurnDriverServer : NetworkBehaviour
     private ulong[] passiveInfoOffsets;
     private int turnCount = 0;
 
+    bool waitingComplete = false; // used for waiting coroutines
+
     void Start()
     {
         if (instance == null) instance = this;
@@ -92,7 +94,20 @@ public class TurnDriverServer : NetworkBehaviour
         {
             yield return new WaitForSeconds(1);
         }
-        // When we're done waiting, the cycle renews again
+
+        // When we're done waiting, the cycle renews again...except in specific cases
+
+        // In Server Response phase, check for any players who won (thus breaking the cycle)
+        if(currentPhase.Value == TurnDriverPhase.InvestigationDispatch)
+        {
+            // if anyone correctly guessed target, end cycle
+            if(GameManagerSc.instance.winnersThisRound.Count > 0)
+            {
+                yield break;
+            }
+        }
+
+        // Else, cycle renews
         TimedPhaseCycle();
     }
 
@@ -101,6 +116,29 @@ public class TurnDriverServer : NetworkBehaviour
     /// </summary>
     public void ReceivePlayerStatusUpdate(ulong fromWho)
     {
+        ReceivePlayerStatusUpdate_ServerRpc(new ServerRpcParams { Receive = { SenderClientId = fromWho } });
+    }
+
+    public void ReceivePlayerStatusUpdate(ulong fromWho, PhaseFinishStatusUpdate specialStatus)
+    {
+        if(specialStatus == PhaseFinishStatusUpdate.PlayerWon)
+        {
+            GameManagerSc.instance.MarkPlayerAsWinner(fromWho);
+            // Need to wait for server to acknowledge player's win
+            StartCoroutine(WaitForServerUpdate(fromWho));
+        } else
+        {
+            ReceivePlayerStatusUpdate_ServerRpc(new ServerRpcParams { Receive = { SenderClientId = fromWho } });
+        }
+    }
+
+    private IEnumerator WaitForServerUpdate(ulong fromWho)
+    {
+        while(!waitingComplete)
+        {
+            yield return new WaitForSeconds(1);
+        }
+        waitingComplete = false;
         ReceivePlayerStatusUpdate_ServerRpc(new ServerRpcParams { Receive = { SenderClientId = fromWho } });
     }
 

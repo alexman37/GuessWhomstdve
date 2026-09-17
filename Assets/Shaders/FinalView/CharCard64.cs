@@ -8,7 +8,6 @@ public class CharCard64 : CharacterCard
 {
     [SerializeField] SpriteRenderer portraitFrame;
     [SerializeField] SpriteRenderer portrait;
-    [SerializeField] Material drawMat;
     [SerializeField] SpriteRenderer flag;
 
     [SerializeField] SpriteRenderer[] simpleIndexBadges;
@@ -40,52 +39,48 @@ public class CharCard64 : CharacterCard
         ulong startingSeed = c.simulatedId;
 
         // Main portrait
+        int w = SetIntFieldAndAdvance(c, CPD_Type.Weight, "_Weight");
+        SetIntFieldAndAdvance(c, CPD_Type.Height, "_Height");
+        SetIntFieldAndAdvance(c, CPD_Type.Job, "_JobIdx", w * NUM_JOB_PORTRAITS);
+
+        startingSeed = SetGenderedHair_R(c, startingSeed);
+
+        startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.HairColor, "_HairColor");
+        startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.SkinTone, "_SkinColor");
+        startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.EyeColor, "_EyeColor");
+        startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.FavoriteColor, "_BodyColor");
+
+        // Non-critical
         (ulong s, int v) crv1 = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 3);
         drawMat.SetInt("_BodyIdx", crv1.v);
         (ulong s, int v) crv2 = CharRandomValue.RangedSeedRandomizer(crv1.s, 0, 8);
         drawMat.SetInt("_HeadIdx", crv2.v);
         (ulong s, int v) crv3 = CharRandomValue.RangedSeedRandomizer(crv2.s, 0, 14);
         drawMat.SetInt("_FaceIdx", crv3.v);
-
-        int weight = c.getCategoryIndexofCharacteristic(CPD_Type.Weight);
-        drawMat.SetInt("_Height", c.getCategoryIndexofCharacteristic(CPD_Type.Height));
-        drawMat.SetInt("_Weight", weight);
-
-        drawMat.SetInt("_JobIdx", c.getVariantIndexofCharacteristic(CPD_Type.Job) + (weight * 64));
-
-        int Hairlen = c.getCategoryIndexofCharacteristic(CPD_Type.HairStyle);
-        int gender = c.getCategoryIndexofCharacteristic(CPD_Type.Gender);
-        drawMat.SetInt("_HairLength", Hairlen);
-        (ulong s, int v) crv4 = CharRandomValue.randomHairIndex(crv3.s, Hairlen, gender);
-        drawMat.SetInt("_HairIdx", crv4.v);
-
-        (ulong s, Color v) crv5 = c.getColorField(crv4.s, CPD_Type.HairColor);
-        drawMat.SetColor("_HairColor", crv5.v);
-        (ulong s, Color v) crv6 = c.getColorField(crv5.s, CPD_Type.SkinTone);
-        drawMat.SetColor("_SkinColor", crv6.v);
-        (ulong s, Color v) crv7 = c.getColorField(crv6.s, CPD_Type.EyeColor);
-        drawMat.SetColor("_EyeColor", crv7.v);
-        (ulong s, Color v) crv8 = c.getColorField(crv7.s, CPD_Type.FavoriteColor);
-        drawMat.SetColor("_BodyColor", crv8.v);
-
-        ulong workingSeed = crv8.s;
+        startingSeed = crv3.s;
 
         // Locations
         switch (drawMat.GetInt("_LLOD"))
         {
             case 1:
-                int city = c.getCategoryIndexofCharacteristic(CPD_Type.City_L1);
-                drawMat.SetInt("_CityIdx_l1", city);
+                if(CPD.registry.ContainsKey(CPD_Type.City_L1))
+                {
+                    int city = c.getCategoryIndexofCharacteristic(CPD_Type.City_L1);
+                    drawMat.SetInt("_CityIdx_l1", city);
+                }
                 break;
             case 2:
-                string[] locName = c.getVariantNameofCharacteristic(CPD_Type.City_L2).Split('_');
+                if(CPD.registry.ContainsKey(CPD_Type.Region_L2))
+                {
+                    string[] locName = c.getVariantNameofCharacteristic(CPD_Type.City_L2).Split('_');
 
-                string cityAbbr = locName[0].Substring(0, 3).ToUpper();
-                cityAbbrText.enabled = true;
-                cityAbbrText.text = cityAbbr;
+                    string cityAbbr = locName[0].Substring(0, 3).ToUpper();
+                    cityAbbrText.enabled = true;
+                    cityAbbrText.text = cityAbbr;
 
-                int flagCode = CountryMap.instance.getCode(locName[1]);
-                flag.material.SetFloat("Ref_MatIndex", flagCode);
+                    int flagCode = CountryMap.instance.getCode(locName[1]);
+                    flag.material.SetFloat("Ref_MatIndex", flagCode);
+                }
                 break;
             default:
                 break;
@@ -96,22 +91,28 @@ public class CharCard64 : CharacterCard
         {
             for (int i = 0; i < simpleIndexBadges.Length; i++)
             {
-                simpleIndexBadges[i].material.SetFloat("Ref_MatIndex", c.getCategoryIndexofCharacteristic(simpleIndexOrder[i]));
+                if(CPD.registry.ContainsKey(simpleIndexOrder[i])) {
+                    simpleIndexBadges[i].color = Color.white;
+                    simpleIndexBadges[i].material.SetFloat("Ref_MatIndex", c.getCategoryIndexofCharacteristic(simpleIndexOrder[i]));
+                } else
+                {
+                    simpleIndexBadges[i].color = Color.clear;
+                }
             }
         }
 
         // Optionals
         if (c.optionalTraits.hasMoustache)
         {
-            (ulong s, int v) opt_moustache = CharRandomValue.RangedSeedRandomizer(workingSeed, 0, 20);
+            (ulong s, int v) opt_moustache = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 20);
             drawMat.SetVector("_OPT_Stache", new Vector4(1, opt_moustache.v, 0, 0));
-            workingSeed = opt_moustache.s;
+            startingSeed = opt_moustache.s;
         } else drawMat.SetVector("_OPT_Stache", new Vector4(0, 0, 0, 0));
         if (c.optionalTraits.hasBeard)
         {
-            (ulong s, int v) opt_beard = CharRandomValue.RangedSeedRandomizer(workingSeed, 0, 8);
+            (ulong s, int v) opt_beard = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 8);
             drawMat.SetVector("_OPT_Beard", new Vector4(1, opt_beard.v, 0, 0));
-            workingSeed = opt_beard.s;
+            startingSeed = opt_beard.s;
         } else drawMat.SetVector("_OPT_Beard", new Vector4(0, 0, 0, 0));
 
         // Background

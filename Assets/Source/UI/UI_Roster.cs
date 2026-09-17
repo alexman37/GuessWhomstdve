@@ -74,6 +74,7 @@ public class UI_Roster : MonoBehaviour
     void setRoster(Roster rost)
     {
         roster = rost;
+        rosterLOD = getNewRosterLOD(roster.simulatedTotalRosterSize);
 
         // assume this also means we want to generate cards
         generateAllCharCards(rosterLOD, true);
@@ -115,11 +116,23 @@ public class UI_Roster : MonoBehaviour
     /// <summary>
     /// Change the display at the top of the roster to show a new number
     /// </summary>
-    public void updateRosterCount(ulong newCount)
+    public void updateRosterCount(ulong newCount, bool regenShownSprites)
+    {
+        ushort newLOD = getNewRosterLOD(newCount);
+        if(regenShownSprites && newLOD != rosterLOD)
+        {
+            generateAllCharCards(newLOD, newLOD < rosterLOD);
+            // regenerate will run later. Just need to do this to re-create the container.
+        }
+        rosterLOD = newLOD;
+        suspectsRemaining.text = commafy(newCount) + " Suspects Remaining";
+    }
+
+    private ushort getNewRosterLOD(ulong newCount)
     {
         bool foundCutoff = false;
         ushort newLOD = 999;
-        for(ushort c = 0; !foundCutoff && c < lodCutoffs.Length; c++)
+        for (ushort c = 0; !foundCutoff && c < lodCutoffs.Length; c++)
         {
             if (newCount < lodCutoffs[c])
             {
@@ -131,13 +144,7 @@ public class UI_Roster : MonoBehaviour
         {
             newLOD = (ushort)lodCutoffs.Length;
         }
-        if(newLOD != rosterLOD)
-        {
-            generateAllCharCards(newLOD, newLOD < rosterLOD);
-            // regenerate will run later. Just need to do this to re-create the container.
-        }
-        rosterLOD = newLOD;
-        suspectsRemaining.text = commafy(newCount) + " Suspects Remaining";
+        return newLOD;
     }
 
     private string commafy(ulong num)
@@ -229,7 +236,8 @@ public class UI_Roster : MonoBehaviour
             float entriesPerColumn = numPortraits / GVS.entriesPerRow;
             for (int i = 0; i < numPortraits; i++)
             {
-                if (!replaceIndices.Contains(i))
+                // Do not draw if card is actively showing somebody new.
+                if (!replaceIndices.Contains(i) && createdCards[i].activeInHierarchy)
                     continue;
 
                 createdCards[i].SetActive(true);
@@ -249,6 +257,7 @@ public class UI_Roster : MonoBehaviour
                 //set portrait and name
                 if (lod <= 1)
                     newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
+                newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.simulatedId.ToString();
             }
             for (int i = numPortraits; i < currCharactersToShow; i++)
             {

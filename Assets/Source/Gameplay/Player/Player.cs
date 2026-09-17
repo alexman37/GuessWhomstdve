@@ -82,6 +82,4 @@ public abstract class GD_Player
             rosterConstraints.clearConstraints(cpd, true);
         }
     }
-
-    public abstract void endOfTurn();
 }

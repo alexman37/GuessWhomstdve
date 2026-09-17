@@ -75,18 +75,18 @@ public class Roster
                 new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones", -1),
                 new CPD_Color(CPD_Type.FavoriteColor, true, "properties/faveColors", -1),
                 new CPD_Color(CPD_Type.EyeColor, true, "properties/eyeColors", -1),
-                new CPD_SimpleIndex(CPD_Type.Gender, true, "properties/gender", -1),
+                /*new CPD_SimpleIndex(CPD_Type.Gender, true, "properties/gender", -1),
                 new CPD_SimpleIndex(CPD_Type.Height, true, "properties/heights", -1),
                 new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights", -1),
                 new CPD_SimpleIndex(CPD_Type.BloodType, true, "properties/bloodtypes2", -1),
                 new CPD_SimpleIndex(CPD_Type.Zodiac, true, "properties/zodiacs", -1),
-                new CPD_SimpleIndex(CPD_Type.Job, true, "properties/jobs", -1),
+                new CPD_SimpleIndex(CPD_Type.Job, true, "properties/jobs", -1),*/
 
                 // Locations
                 //new CPD_SimpleIndex(CPD_Type.City_L1, true, "properties/cities_l1", -1),
 
-                new CPD_SimpleIndex(CPD_Type.Region_L2, true, "properties/regions_l2", -1),
-                new CPD_SimpleIndex(CPD_Type.City_L2, true, "properties/cities_l2", (int) CPD_Type.Region_L2),
+                /*new CPD_SimpleIndex(CPD_Type.Region_L2, true, "properties/regions_l2", -1),
+                new CPD_SimpleIndex(CPD_Type.City_L2, true, "properties/cities_l2", (int) CPD_Type.Region_L2),*/
 
                 new CPD_SimpleIndex(CPD_Type.BodyType, false, "properties/bodyTypes", -1),
                 new CPD_SimpleIndex(CPD_Type.Face, false, "properties/faceTypes", -1),
@@ -137,6 +137,11 @@ public class Roster
 
     }
 
+    private void getRosterCPDs()
+    {
+
+    }
+
     /// <summary>
     /// Called each time you start a new game.
     /// </summary>
@@ -152,7 +157,7 @@ public class Roster
         }
 
         clearAllConstraints.Invoke();
-        applyConstraints(RosterConstraints.NO_CONSTRAINTS);
+        applyConstraints(RosterConstraints.NO_CONSTRAINTS, false);
 
         // First list generation
         for (int i = 0; i < howMany; i++)
@@ -177,11 +182,11 @@ public class Roster
         withCommonConstraints = withCommon;
         if(withCommon)
         {
-            applyConstraints(commonConstraints);
+            applyConstraints(commonConstraints, true);
         } else
         {
             // TODO PlayerSelf
-            applyConstraints(HumanPlayer.self.rosterConstraints);
+            applyConstraints(HumanPlayer.self.rosterConstraints, true);
         }
         redrawRosterVis();
     }
@@ -203,15 +208,15 @@ public class Roster
         }
 
         // Must apply constraints first to determine desired size of list.
-        applyConstraints(currConstraints);
+        applyConstraints(currConstraints, true);
         uint howMany = UI_Roster.instance.currCharactersToShow;
 
         HashSet<int> replaceIndices = new HashSet<int>();
         int size = (int) Mathf.Min(howMany, simulatedCurrentRosterSize);
+        Debug.Log("[RS] New roster size should be " + size);
 
         // Characters to show: first, choose any from the currently shown roster we'd like to keep.
         int count = 0;
-        currentRosterIDs.Clear();
         currentRosterIDs = new HashSet<ulong>(charactersGuessedAsTarget);
         int m = Mathf.Min((int)howMany, shownRoster.Count);
         for (int i = 0; i < m && count < size; i++)
@@ -224,7 +229,13 @@ public class Roster
             // If the character is unguessed and still meets constraints, keep it around
             else if (SimulatedID.idMeetsConstraints(shownRoster[i].simulatedId, currConstraints))
             {
-                currentRosterIDs.Add(shownRoster[i].simulatedId);
+                // Don't add a character to currentRosterIDs if you're at a higher index than existing characters next draw
+                // Ex: Next frame you show 24/40 characters. Anyone past 24 can't show up in "taken", so that they can replace
+                //     other characters within the first 24
+                if(i < size)
+                {
+                    currentRosterIDs.Add(shownRoster[i].simulatedId);
+                }
                 count++;
             } 
             // If the character no longer meets constraints, remove it
@@ -233,16 +244,22 @@ public class Roster
                 currentRosterIDs.Remove(shownRoster[i].simulatedId);
                 replaceIndices.Add(i);
             }
+            Debug.Log("Stopped at " + i);
         }
+
+        Debug.Log("[RS] Designated " + replaceIndices.Count + " characters for replacement");
+        Debug.Log("[RS] Size of do not use list: " + currentRosterIDs.Count);
 
         shownRoster = shownRoster.GetRange(0, Mathf.Max(size, shownRoster.Count));
         for (int i = 0; i < size; i++)
         {
             if(replaceIndices.Contains(i))
             {
+                Debug.Log("[RS] Replacing " + i);
                 try
                 {
                     ulong simId = SimulatedID.getRandomSimulatedID(currConstraints, currentRosterIDs, simulatedCurrentRosterSize);
+                    Debug.Log("Replacement success with simId " + simId);
 
                     shownRoster[i] = new Character(i, simId);
                     currentRosterIDs.Add(simId);
@@ -255,7 +272,7 @@ public class Roster
                 {
                     simulatedCurrentRosterSize = (ulong)i;
                     Debug.LogWarning("Shortened size is now " + simulatedCurrentRosterSize);
-                    UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize);
+                    UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize, false);
                     break;
                 }
             }
@@ -271,11 +288,11 @@ public class Roster
     /// <summary>
     /// Apply new constraints to the constraints list
     /// </summary>
-    public void applyConstraints(RosterConstraints constraints)
+    public void applyConstraints(RosterConstraints constraints, bool regenShownSprites)
     {
         simulatedCurrentRosterSize = getNewRosterSizeFromConstraints(constraints);
 
-        UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize);
+        UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize, regenShownSprites);
     }
 
     /// <summary>
@@ -412,9 +429,10 @@ public class Roster
             //   - If we have failed multiple times, we assume the constrained list is too crowded,
             //          so we resort to iterating through all possible constrained IDs; in order, until finding one that works.
             //   - Optimization: if the roster size is below a certain threshold, automatically resort to iterating through all IDs.
-            if (currentRosterSize > 20)
+            if (!lastResortSearch && currentRosterSize > 20)
             {
-                for (int attempt = 0; attempt < 5; attempt++)
+                int attempt = 0;
+                for (; attempt < 5; attempt++)
                 {
                     ulong workingID = 0;
                     for (int c = 0; c < cpdConstrainables.Count; c++)
@@ -439,10 +457,15 @@ public class Roster
                         return workingID;
                     }
                 }
+                if(attempt >= 5)
+                {
+                    lastResortSearch = true;
+                }
             }
 
             // Worst case scenario: Resort to iteration through all possible IDs. Return the first success.
-            for(int cpdIndex = savedCPD; cpdIndex < cpdConstrainables.Count; cpdIndex++)
+            Debug.Log("Trying to find characters thru EXHAUSTIVE SEARCH");
+            for (int cpdIndex = savedCPD; cpdIndex < cpdConstrainables.Count; cpdIndex++)
             {
                 CPD currCpd = cpdConstrainables[cpdIndex];
 
@@ -450,8 +473,10 @@ public class Roster
                 List<ulong> currSimIdModifiers = currCpd.getAllConstrainedIndicies(constraints.allCurrentConstraints[currCpd.cpdType]);
                 for(int i = 0; i < currSimIdModifiers.Count; i++)
                 {
+                    // currSimIdModifiers = All indices of valid cats for this CPD * this CPD's magic number
                     currSimIdModifiers[i] = magicNumber * currSimIdModifiers[i];
                 }
+                // Catzeroes is the sum of all categories if the first one available is chosen every time.
                 ulong catZeroes = 0;
                 for(int i = cpdIndex + 1; i < cpdConstrainables.Count; i++)
                 {
@@ -461,10 +486,12 @@ public class Roster
 
                 if (savedCPD == 0)
                 {
+                    // allSimIdModifiers = 
                     allSimIdModifiers = new List<ulong>();
                 }
                 if (savedMod == 0)
                 {
+                    // newSimIdModifiers = 
                     newSimIdModifiers = new List<ulong>();
                 }
                 // First pass
@@ -472,6 +499,7 @@ public class Roster
                 {
                     for (int l = 0; l < currSimIdModifiers.Count; l++)
                     {
+                        Debug.Log("[RSXX-1] Pass " + l);
                         ulong aNewModifier = currSimIdModifiers[l];
                         ulong aNewIndex = aNewModifier + catZeroes;
                         newSimIdModifiers.Add(aNewModifier);
@@ -495,6 +523,9 @@ public class Roster
                             if (takenIDs == null || !takenIDs.Contains(aNewIndex))
                             {
                                 return aNewIndex;
+                            } else if(takenIDs.Contains(aNewIndex))
+                            {
+                                Debug.Log("ID " + aNewIndex + " TAKEN! IGNORE");
                             }
                         }
                         savedMod++;

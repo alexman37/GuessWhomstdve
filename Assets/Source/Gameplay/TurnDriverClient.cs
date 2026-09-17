@@ -52,7 +52,6 @@ public class TurnDriverClient : MonoBehaviour
                 lockActions();
                 commitAction();
                 InfoBar.instance.setReadout("Investigating...");
-                InfoBar.instance.setTimer(2);
                 break;
             // Players all shown info: Show them what other players learned also
             case TurnDriverPhase.PassiveInfo:
@@ -93,4 +92,15 @@ public class TurnDriverClient : MonoBehaviour
     {
         TurnDriverServer.instance.ReceivePlayerStatusUpdate(NetworkManager.Singleton.LocalClientId);
     }
+
+    public void FinishCurrentPhase(PhaseFinishStatusUpdate specialUpdate)
+    {
+        TurnDriverServer.instance.ReceivePlayerStatusUpdate(NetworkManager.Singleton.LocalClientId, specialUpdate);
+    }
+}
+
+public enum PhaseFinishStatusUpdate
+{
+    Nothing,
+    PlayerWon
 }

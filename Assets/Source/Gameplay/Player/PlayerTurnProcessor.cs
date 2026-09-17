@@ -58,6 +58,7 @@ public class PlayerTurnProcessor : MonoBehaviour
         {
             case PlayerTurnAction.Nothing:
                 Debug.Log("[PTPF] The player did nothing this turn");
+                TurnDriverClient.instance.FinishCurrentPhase();
                 break;
             case PlayerTurnAction.Investigation:
                 Debug.Log("[PTPF] The player chose to make investigations");
