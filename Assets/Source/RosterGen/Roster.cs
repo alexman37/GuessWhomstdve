@@ -71,11 +71,11 @@ public class Roster
             cpdInstances = new List<CPD>
             {
                 new CPD_SimpleIndex(CPD_Type.HairStyle, true, "properties/hairStyles", -1),
-                new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones", -1),
+                /*new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones", -1),
                 new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones", -1),
                 new CPD_Color(CPD_Type.FavoriteColor, true, "properties/faveColors", -1),
                 new CPD_Color(CPD_Type.EyeColor, true, "properties/eyeColors", -1),
-                /*new CPD_SimpleIndex(CPD_Type.Gender, true, "properties/gender", -1),
+                new CPD_SimpleIndex(CPD_Type.Gender, true, "properties/gender", -1),
                 new CPD_SimpleIndex(CPD_Type.Height, true, "properties/heights", -1),
                 new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights", -1),
                 new CPD_SimpleIndex(CPD_Type.BloodType, true, "properties/bloodtypes2", -1),
@@ -129,7 +129,7 @@ public class Roster
 
         simulatedCurrentRosterSize = simulatedTotalRosterSize;
 
-        createRoster(UI_Roster.MAX_CHARACTERS_TO_SHOW);
+        createRoster((ushort)Mathf.Min(UI_Roster.MAX_CHARACTERS_TO_SHOW, simulatedTotalRosterSize));
     }
 
     ~Roster()
@@ -208,7 +208,17 @@ public class Roster
         }
 
         // Must apply constraints first to determine desired size of list.
+        ulong oldSize = simulatedCurrentRosterSize;
         applyConstraints(currConstraints, true);
+
+        // If screen is not entirely full of characters and we're "re-enabling" previously deactivated ones,
+        // We have to replace each of them with a new character to prevent duplicates. Ask me how I know...
+        bool increasingAndReactivating = false;
+        if(oldSize < simulatedCurrentRosterSize && oldSize < (ulong)shownRoster.Count)
+        {
+            Debug.Log("Special case hit - increasing and reactivating");
+            increasingAndReactivating = true;
+        }
         uint howMany = UI_Roster.instance.currCharactersToShow;
 
         HashSet<int> replaceIndices = new HashSet<int>();
@@ -225,6 +235,12 @@ public class Roster
             if (charactersGuessedAsTarget.Contains(shownRoster[i].simulatedId))
             {
                 // pass
+            }
+            // If we're reactivating an old portrait, replace whoever it was no matter what
+            else if(increasingAndReactivating && i >= (int) oldSize)
+            {
+                currentRosterIDs.Remove(shownRoster[i].simulatedId);
+                replaceIndices.Add(i);
             }
             // If the character is unguessed and still meets constraints, keep it around
             else if (SimulatedID.idMeetsConstraints(shownRoster[i].simulatedId, currConstraints))
@@ -244,22 +260,16 @@ public class Roster
                 currentRosterIDs.Remove(shownRoster[i].simulatedId);
                 replaceIndices.Add(i);
             }
-            Debug.Log("Stopped at " + i);
         }
-
-        Debug.Log("[RS] Designated " + replaceIndices.Count + " characters for replacement");
-        Debug.Log("[RS] Size of do not use list: " + currentRosterIDs.Count);
 
         shownRoster = shownRoster.GetRange(0, Mathf.Max(size, shownRoster.Count));
         for (int i = 0; i < size; i++)
         {
             if(replaceIndices.Contains(i))
             {
-                Debug.Log("[RS] Replacing " + i);
                 try
                 {
                     ulong simId = SimulatedID.getRandomSimulatedID(currConstraints, currentRosterIDs, simulatedCurrentRosterSize);
-                    Debug.Log("Replacement success with simId " + simId);
 
                     shownRoster[i] = new Character(i, simId);
                     currentRosterIDs.Add(simId);
@@ -499,7 +509,6 @@ public class Roster
                 {
                     for (int l = 0; l < currSimIdModifiers.Count; l++)
                     {
-                        Debug.Log("[RSXX-1] Pass " + l);
                         ulong aNewModifier = currSimIdModifiers[l];
                         ulong aNewIndex = aNewModifier + catZeroes;
                         newSimIdModifiers.Add(aNewModifier);
@@ -523,9 +532,6 @@ public class Roster
                             if (takenIDs == null || !takenIDs.Contains(aNewIndex))
                             {
                                 return aNewIndex;
-                            } else if(takenIDs.Contains(aNewIndex))
-                            {
-                                Debug.Log("ID " + aNewIndex + " TAKEN! IGNORE");
                             }
                         }
                         savedMod++;

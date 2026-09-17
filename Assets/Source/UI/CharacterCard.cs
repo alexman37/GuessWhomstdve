@@ -54,7 +54,6 @@ public class CharacterCard : MonoBehaviour
         {
             yield return null;
         }
-        Debug.Log(c.simulatedId + " has eye color " + c.getVariantNameofCharacteristic(CPD_Type.EyeColor));
         SetMaterialParams(c);
         for (float i = 0; i < flipTime; i += Time.deltaTime)
         {

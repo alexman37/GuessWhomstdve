@@ -182,6 +182,9 @@ public class UI_Roster : MonoBehaviour
         GridViewStats GVS = CharacterCard.GetGridViewStats(lod);
         currCharactersToShow = GVS.charactersToShow;
 
+        if (roster.simulatedTotalRosterSize < GVS.charactersToShow)
+            currCharactersToShow = (uint) roster.simulatedTotalRosterSize;
+
         uint maxCharactersCanBeDrawn = downsizing ? currCharactersToShow : (uint)roster.shownRoster.Count;
         for (int i = 0; i < maxCharactersCanBeDrawn; i++)
         {
@@ -257,7 +260,6 @@ public class UI_Roster : MonoBehaviour
                 //set portrait and name
                 if (lod <= 1)
                     newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.getDisplayName(true) + "\n (" + roster.shownRoster[i].simulatedId + ")";
-                newCard.GetComponentInChildren<TextMeshProUGUI>().text = c.simulatedId.ToString();
             }
             for (int i = numPortraits; i < currCharactersToShow; i++)
             {

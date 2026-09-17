@@ -76,7 +76,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Background_Idx: 0
+    - _Background_Idx: -1
     - _Background_MoveDir: 0.5
     - _Background_MoveRot: 15
     - _Background_MoveSpeed: 0.5
