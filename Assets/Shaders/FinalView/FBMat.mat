@@ -99,7 +99,7 @@ Material:
     - _FaceIdx: 0
     - _FlagIdx_l2: 0
     - _HairIdx: 0
-    - _HairLength: 0
+    - _HairLength: -1
     - _HeadIdx: 0
     - _Height: 1
     - _JobIdx: -1
@@ -107,9 +107,9 @@ Material:
     - _Weight: 1
     m_Colors:
     - SkinColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BodyColor: {r: 0.21698111, g: 0.21698111, b: 0.21698111, a: 1}
+    - _BodyColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _EyeColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HairColor: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 1}
+    - _HairColor: {r: 0, g: 0, b: 0, a: 0}
     - _OPT_Beard: {r: 0, g: 0, b: 0, a: 0}
     - _OPT_Stache: {r: 0, g: 0, b: 0, a: 0}
     - _SkinColor: {r: 1, g: 1, b: 1, a: 1}

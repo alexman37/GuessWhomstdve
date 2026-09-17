@@ -65,14 +65,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _HairLength: 0
-    - _Height: 0
-    - _JobIdx: 0
-    - _Weight: 0
+    - _Height: 1
+    - _JobIdx: -1
+    - _Weight: 1
     m_Colors:
-    - _BodyColor: {r: 0.41509432, g: 0.08419366, b: 0.08419366, a: 1}
-    - _EyeColor: {r: 0.3301887, g: 0.28502136, b: 0.28502136, a: 1}
-    - _HairColor: {r: 0.41509432, g: 0.26824492, b: 0.26824492, a: 1}
+    - _BodyColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _EyeColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HairColor: {r: 0, g: 0, b: 0, a: 0}
     - _OPT_Beard: {r: 0, g: 0, b: 0, a: 0}
     - _OPT_Stache: {r: 0, g: 0, b: 0, a: 0}
-    - _SkinColor: {r: 0.8773585, g: 0.71595764, b: 0.71595764, a: 1}
+    - _SkinColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

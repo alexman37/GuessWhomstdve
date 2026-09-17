@@ -358,28 +358,47 @@ Shader "Unlit/Body32"
             UnityTexture2DArray T2DR_Faces_Arr = UnityBuildTexture2DArrayStruct(T2DR_Faces);
             float4 FaceChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Faces_Arr.tex, T2DR_Faces_Arr.samplerstate, FullBodyOffset, _FaceIdx);
 
-            UnityTexture2DArray T2DR_Jobs_Arr = UnityBuildTexture2DArrayStruct(T2DR_Jobs);
-            float4 JobChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Jobs_Arr.tex, T2DR_Jobs_Arr.samplerstate, TallOffset, _JobIdx);
+            float4 JobChoice = -1;
+            if(_JobIdx > -1) {
+                UnityTexture2DArray T2DR_Jobs_Arr = UnityBuildTexture2DArrayStruct(T2DR_Jobs);
+                JobChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Jobs_Arr.tex, T2DR_Jobs_Arr.samplerstate, TallOffset, _JobIdx);
+            }
 
-            UnityTexture2DArray T2DR_Hair_Arr;
-            float4 HairChoice;
+            // We'll try to draw some sort of hair if either Hair Length or Hair Color (the two hair CPDs) are given
+            bool HasAnyHair = _HairLength > -1 || _HairColor.a > 0.01;
+            float4 HairChoice = -1;
+            if(HasAnyHair) {
+                // If hair length is defined (regardless of color) pick a style
+                if(_HairLength > -1) {
+                    UnityTexture2DArray T2DR_Hair_Arr;
+                    if(_HairLength == 0) {
+                        T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_S);
+                        HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
+                    } else if(_HairLength == 1) {
+                        T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_M);
+                        HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
+                    } else {
+                        T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_L);
+                        HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
+                    }
 
-            if(_HairLength == 0) {
-                T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_S);
-                HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
-            } else if(_HairLength == 1) {
-                T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_M);
-                HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
-            } else {
-                T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_L);
-                HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, _HairIdx);
+                    // If Hair color not defined, go with a generic gray
+                    if(_HairColor.a < 0.01) {
+                        _HairColor = float4(0.6,0.6,0.6,1);
+                    }
+                }
+                // If only color is defined, go with a generic default style
+                else {
+                    UnityTexture2DArray T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair_S);
+                    HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, HairOffset, 6);
+                }
             }
 
             // Main components - head, body, hair etc.
             float4 OverlayStep1 = Overlay_float(BodyChoice, HeadChoice);
             float4 OverlayStep2 = Overlay_float(OverlayStep1, FaceChoice);
-            float4 OverlayStep3 = OverlayHair_float(OverlayStep2, HairChoice);
-            float4 MainBuild = OverlayJob_float(OverlayStep3, JobChoice);
+            float4 OverlayStep3 = HairChoice > -1 ? OverlayHair_float(OverlayStep2, HairChoice) : OverlayStep2;
+            float4 MainBuild = JobChoice > -1 ? OverlayJob_float(OverlayStep3, JobChoice) : OverlayStep3;
 
             // Optional components, like facial hair
             if(_OPT_Stache.x) {
@@ -399,8 +418,10 @@ Shader "Unlit/Body32"
             float4 Finalized = Colorized;
 
             // Apply a simple background to the finalized character
-            float4 Background = SimpleBackground_float(IN.uv0.xy);
-            Finalized = Overlay_float(Background, Finalized);
+            if(_Background_Idx > -1) {
+                float4 Background = SimpleBackground_float(IN.uv0.xy);
+                Finalized = Overlay_float(Background, Finalized);
+            }
 
             surface.BaseColor = (Finalized.xyz);
             surface.Alpha = 1;

@@ -393,7 +393,7 @@ Shader "Unlit/FullBody"
 
                     // If Hair color not defined, go with a generic gray
                     if(_HairColor.a < 0.01) {
-                        _HairColor = float4(0.3,0.3,0.3,1);
+                        _HairColor = float4(0.6,0.6,0.6,1);
                     }
                 }
                 // If only color is defined, go with a generic default style

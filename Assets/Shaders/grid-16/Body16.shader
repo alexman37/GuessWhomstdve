@@ -340,17 +340,36 @@ Shader "Unlit/Body16"
 
             float4 FaceChoice = SAMPLE_TEXTURE2D(Tex_Face, samplerTex_Face, FullBodyOffset);
 
-            UnityTexture2DArray T2DR_Jobs_Arr = UnityBuildTexture2DArrayStruct(T2DR_Jobs);
-            float4 JobChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Jobs_Arr.tex, T2DR_Jobs_Arr.samplerstate, TallOffset, _JobIdx);
+            float4 JobChoice = -1;
+            if(_JobIdx > -1) {
+                UnityTexture2DArray T2DR_Jobs_Arr = UnityBuildTexture2DArrayStruct(T2DR_Jobs);
+                JobChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Jobs_Arr.tex, T2DR_Jobs_Arr.samplerstate, TallOffset, _JobIdx);
+            }
 
+            bool HasAnyHair = _HairLength > -1 || _HairColor.a > 0.01;
+            float4 HairChoice = -1;
             UnityTexture2DArray T2DR_Hair_Arr = UnityBuildTexture2DArrayStruct(T2DR_Hair);
-            float4 HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, FullBodyOffset, _HairLength);
+            if(HasAnyHair) {
+                HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, FullBodyOffset, _HairLength);
+
+                if(_HairLength > -1) {
+                    HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, FullBodyOffset, _HairLength);
+
+                    if(_HairColor.a < 0.01) {
+                        _HairColor = float4(0.6,0.6,0.6,1);
+                    }
+                }
+                else {
+                    HairChoice = SAMPLE_TEXTURE2D_ARRAY(T2DR_Hair_Arr.tex, T2DR_Hair_Arr.samplerstate, FullBodyOffset, 0);
+                }
+            }
+            
 
             // Main components - head, body, hair etc.
             float4 OverlayStep1 = Overlay_float(BodyChoice, HeadChoice);
             float4 OverlayStep2 = Overlay_float(OverlayStep1, FaceChoice);
-            float4 OverlayStep3 = OverlayHair_float(OverlayStep2, HairChoice);
-            float4 MainBuild = OverlayJob_float(OverlayStep3, JobChoice);
+            float4 OverlayStep3 = HairChoice > -1 ? OverlayHair_float(OverlayStep2, HairChoice) : OverlayStep2;
+            float4 MainBuild = JobChoice > -1 ? OverlayJob_float(OverlayStep3, JobChoice) : OverlayStep3;
 
             // Optional components, like facial hair
             if(_OPT_Stache.x) {
