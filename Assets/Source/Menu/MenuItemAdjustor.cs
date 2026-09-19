@@ -61,5 +61,10 @@ namespace GW.MainMenu
         {
             return actualValues[currIndex.Value];
         }
+
+        public int getIndexValue()
+        {
+            return currIndex.Value;
+        }
     }
 }

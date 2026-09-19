@@ -56,7 +56,7 @@ public class Roster
     protected static List<ulong> allSimIdModifiers;
 
     // Most of this is first-time setup only
-    public Roster()
+    public Roster(ushort sizeBracket)
     {
         if (instance == null) instance = this;
         else Debug.LogError("A second roster instance prematurely created");
@@ -68,30 +68,10 @@ public class Roster
         // No need to recreate CPDs on each load
         if(cpdInstances == null)
         {
-            cpdInstances = new List<CPD>
-            {
-                new CPD_SimpleIndex(CPD_Type.HairStyle, true, "properties/hairStyles", -1),
-                new CPD_Color(CPD_Type.HairColor, true, "properties/hairTones", -1),
-                new CPD_Color(CPD_Type.SkinTone, true, "properties/skinTones", -1),
-                new CPD_Color(CPD_Type.FavoriteColor, true, "properties/faveColors", -1),
-                new CPD_Color(CPD_Type.EyeColor, true, "properties/eyeColors", -1),
-                new CPD_SimpleIndex(CPD_Type.Gender, true, "properties/gender", -1),
-                new CPD_SimpleIndex(CPD_Type.Height, true, "properties/heights", -1),
-                new CPD_SimpleIndex(CPD_Type.Weight, true, "properties/weights", -1),
-                new CPD_SimpleIndex(CPD_Type.BloodType, true, "properties/bloodtypes2", -1),
-                new CPD_SimpleIndex(CPD_Type.Zodiac, true, "properties/zodiacs", -1),
-                //new CPD_SimpleIndex(CPD_Type.Job, true, "properties/jobs", -1),
+            // Which CPDs will be used in this game?
+            RosterSizeData rosterSizeData = RosterSizes.GetRosterSizeData(sizeBracket);
+            cpdInstances = rosterSizeData.instances;
 
-                // Locations
-                //new CPD_SimpleIndex(CPD_Type.City_L1, true, "properties/cities_l1", -1),
-
-                /*new CPD_SimpleIndex(CPD_Type.Region_L2, true, "properties/regions_l2", -1),
-                new CPD_SimpleIndex(CPD_Type.City_L2, true, "properties/cities_l2", (int) CPD_Type.Region_L2),*/
-
-                new CPD_SimpleIndex(CPD_Type.BodyType, false, "properties/bodyTypes", -1),
-                new CPD_SimpleIndex(CPD_Type.Face, false, "properties/faceTypes", -1),
-                new CPD_SimpleIndex(CPD_Type.HeadType, false, "properties/headTypes", -1),
-            };
             cpdConstrainables = new List<CPD>();
             cpdCounts = new List<ulong>();
             cpdByType = new Dictionary<CPD_Type, CPD>();
@@ -236,11 +216,19 @@ public class Roster
             {
                 // pass
             }
-            // If we're reactivating an old portrait, replace whoever it was no matter what
-            else if(increasingAndReactivating && i >= (int) oldSize)
+            // If we're starting at a small number of portraits and reactivating disabled ones, special actions are taken
+            else if(increasingAndReactivating)
             {
-                currentRosterIDs.Remove(shownRoster[i].simulatedId);
-                replaceIndices.Add(i);
+                // Portraits being re-enabled: Replace their content no matter what
+                if(i >= (int)oldSize)
+                {
+                    replaceIndices.Add(i);
+                }
+                // Portraits existing: Add them to taken list
+                else
+                {
+                    currentRosterIDs.Add(shownRoster[i].simulatedId);
+                }
             }
             // If the character is unguessed and still meets constraints, keep it around
             else if (SimulatedID.idMeetsConstraints(shownRoster[i].simulatedId, currConstraints))

@@ -9,6 +9,8 @@ using System;
 /// </summary>
 public class RosterGen : MonoBehaviour
 {
+    public static RosterGen instance;
+
     public int numberOfCharacters;
     Roster roster;
 
@@ -17,9 +19,14 @@ public class RosterGen : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //TODO i don't believe size should be passed in anymore. it should be determined only by constrainable CPDs
-        roster = new Roster();
-        //roster.DebugLogRoster();
+        if (instance == null) instance = this;
+        else Destroy(this);
+    }
+
+    public void createRoster(ushort sizeBracket)
+    {
+        roster = new Roster(sizeBracket);
+
         rosterCreationDone += (_) => { };
 
         rosterCreationDone.Invoke(roster);

@@ -88,6 +88,9 @@ public class GameManagerSc : NetworkBehaviour
             NetworkManager.SceneManager.LoadScene("GW_Main", LoadSceneMode.Single);
         }
 
+        while (RosterGen.instance == null)
+            yield return null;
+        RosterGen.instance.createRoster(gameParameters.Value.rosterSizeZeroes);
         while (!rosterReady)
             yield return null;
 
@@ -232,7 +235,7 @@ public struct MainGameParameters : INetworkSerializable
 {
     public PlayerSetupInfo[] playerSetupInfo;
     public ushort humanPlayerCount;
-    public ulong rosterSizeZeroes;
+    public ushort rosterSizeZeroes;
     public ushort roundsToWin;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter

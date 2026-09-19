@@ -305,7 +305,7 @@ namespace GW.MainMenu
             {
                 playerSetupInfo = playerbase,
                 humanPlayerCount = humanPlayerCt,
-                rosterSizeZeroes = stubs[0].getRealValue(),
+                rosterSizeZeroes = (ushort)stubs[0].getIndexValue(),
                 roundsToWin = (ushort)stubs[1].getRealValue(),
             });
             Debug.Log("HUM TOTAL " + humanPlayerCt);
