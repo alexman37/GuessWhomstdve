@@ -5,7 +5,7 @@ using System;
 
 public abstract class GD_Player
 {
-    public int id;
+    public int uniqueId;
     public string agentName;
     public Sprite portrait;
 

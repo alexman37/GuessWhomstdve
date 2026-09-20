@@ -12,7 +12,7 @@ public class BotPlayer : GD_Player
 
     public BotPlayer(int id, string name)
     {
-        this.id = id;
+        this.uniqueId = id;
         agentName = name;
 
         rosterConstraints = new RosterConstraints();

@@ -25,6 +25,7 @@ namespace GW.MainMenu
 
         Player me;
         PlayerSetupInfo[] playerbase = new PlayerSetupInfo[8];
+
         private object playerbaseLock = new object();
         private ushort humanPlayerCt = 0;
 
@@ -56,8 +57,9 @@ namespace GW.MainMenu
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
             PlayerDataObject pdoName = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, SettingsMenu.confData.name);
+            PlayerDataObject pdoClientId = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, NetworkManager.LocalClientId.ToString());
             me = new Player(id: AuthenticationService.Instance.PlayerId, data: new Dictionary<string, PlayerDataObject> {
-                { "Name", pdoName }
+                { "Name", pdoName }, { "LocalClientId", pdoClientId }
             });
 
             NetworkManager.Singleton.OnClientConnectedCallback += onClientConnected;
@@ -128,9 +130,11 @@ namespace GW.MainMenu
                         {
                             lock(playerbaseLock)
                             {
-                                playerbase[i] = new PlayerSetupInfo { 
-                                    type = PlayerSetupType.Human, 
-                                    name = p.Data["Name"].Value 
+                                playerbase[i] = new PlayerSetupInfo {
+                                    type = PlayerSetupType.Human,
+                                    name = p.Data["Name"].Value,
+                                    playerConnectionId = ulong.Parse(p.Data["LocalClientId"].Value),
+                                    orderedId = i
                                 };
                                 humanPlayerCt++;
                             }
@@ -308,7 +312,6 @@ namespace GW.MainMenu
                 rosterSizeZeroes = (ushort)stubs[0].getIndexValue(),
                 roundsToWin = (ushort)stubs[1].getRealValue(),
             });
-            Debug.Log("HUM TOTAL " + humanPlayerCt);
 
             Lobbies.Instance.DeleteLobbyAsync(lobbyIdCache);
         }
@@ -341,6 +344,8 @@ public struct PlayerSetupInfo : INetworkSerializable
     public PlayerSetupType type;
     public FixedString32Bytes name;
     //public ulong img;
+    public int orderedId;               // this player or bot's unique ID from 0-7
+    public ulong playerConnectionId;    // this player's network connection ID (for bot, -1)
     public int critNum; // for human: win total, for bot: difficulty level
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -348,6 +353,7 @@ public struct PlayerSetupInfo : INetworkSerializable
         Debug.Log("Serialize, for some reason or other");
         serializer.SerializeValue(ref name);
         serializer.SerializeValue(ref critNum);
+        serializer.SerializeValue(ref playerConnectionId);
         serializer.SerializeValue(ref type);
     }
 }

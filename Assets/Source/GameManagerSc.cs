@@ -71,6 +71,12 @@ public class GameManagerSc : NetworkBehaviour
         ShipAndSetup_ClientRpc();
     }
 
+    public void ResetRound()
+    {
+        connectedHumanPlayersCt.Value = 0;
+        ResetSetup_ClientRpc();
+    }
+
     // Ship all players off to the next scene and begin the game setup task for each player
     [ClientRpc]
     private void ShipAndSetup_ClientRpc()
@@ -78,10 +84,17 @@ public class GameManagerSc : NetworkBehaviour
         Debug.Log("Begin setup task for the player ");
         StartCoroutine(SetupTask());
     }
-    
+
+    [ClientRpc]
+    private void ResetSetup_ClientRpc()
+    {
+        Debug.Log("Begin reset task for the player ");
+        StartCoroutine(ResetTask());
+    }
+
+    // Make sure all essential components created before player is ready.
     private IEnumerator SetupTask()
     {
-        Debug.Log("In co ");
         if (NetworkManager.LocalClientId == 0)
         {
             WaitForAllPlayersToSetup_ServerRpc();
@@ -96,7 +109,7 @@ public class GameManagerSc : NetworkBehaviour
 
         while (UI_Playerbase.instance == null)
             yield return null;
-        (int humanAndBotPlayers, int humanPlayers) pc = UI_Playerbase.instance.redrawPlayerbase(gameParameters.Value.playerSetupInfo);
+        (int humanAndBotPlayers, int humanPlayers) pc = UI_Playerbase.instance.setupPlayerbase(gameParameters.Value.playerSetupInfo);
 
         while (InfoBar.instance == null)
             yield return null;
@@ -124,8 +137,23 @@ public class GameManagerSc : NetworkBehaviour
             TurnDriverServer.instance.InitPassiveInfoSystem(pc.humanAndBotPlayers, pc.humanPlayers);
         }
 
-        // TODO - we have the player names, just gotta use them
-        HumanPlayer.self = new HumanPlayer("TestPlayer");
+        int playerbaseIndex = -1;
+        for(int i = 0; i < gameParameters.Value.playerSetupInfo.Length; i++)
+        {
+            if(gameParameters.Value.playerSetupInfo[i].playerConnectionId == NetworkManager.Singleton.LocalClientId)
+            {
+                playerbaseIndex = i;
+                break;
+            }
+        }
+        if(playerbaseIndex == -1)
+        {
+            throw new PlayerPrefsException("Local player not found in game parameters list!");
+        } else
+        {
+            var playerInfo = gameParameters.Value.playerSetupInfo[playerbaseIndex];
+            HumanPlayer.self = new HumanPlayer(playerInfo.name.ToString(), playerInfo.orderedId, playerInfo.playerConnectionId);
+        }
 
         while (UI_Roster.instance == null)
             yield return null;
@@ -134,10 +162,36 @@ public class GameManagerSc : NetworkBehaviour
             yield return null;
         RosterForm.instance.Setup();
 
-        Debug.Log("Reached near end of setup");
         MarkPlayerAsConnected_ServerRpc();
     }
 
+    // Reset components after a round before we're ready to play.
+    private IEnumerator ResetTask()
+    {
+        // Assumes connectedPlayersCt has been reset to 0 before called
+        if (NetworkManager.LocalClientId == 0)
+        {
+            WaitForAllPlayersToSetup_ServerRpc();
+        }
+
+        Roster.instance.resetRound();
+        yield return null;
+
+        if (NetworkManager.LocalClientId == 0)
+        {
+            TurnDriverServer.instance.ResetRound();
+            AnswerKey.instance.SetAnswerKey(Roster.instance.simulatedTotalRosterSize);
+        }
+
+        HumanPlayer.self.rosterConstraints.clearAllConstraints(true);
+
+        // Finish by calling Server RPC to mark player as done the setup
+        MarkPlayerAsResetted_ServerRpc();
+    }
+
+    /// <summary>
+    /// Player has connected to the game for the first time, done setup, is ready to play.
+    /// </summary>
     [ServerRpc(RequireOwnership = false)]
     private void MarkPlayerAsConnected_ServerRpc()
     {
@@ -145,21 +199,69 @@ public class GameManagerSc : NetworkBehaviour
         connectedHumanPlayersCt.Value += 1;
     }
 
+    /// <summary>
+    /// Host waits for all players to connect and finish setup.
+    /// </summary>
     [ServerRpc]
     private void WaitForAllPlayersToSetup_ServerRpc()
     {
         StartCoroutine(WaitForAllPlayersToSetup());
     }
 
+    /// <summary>
+    /// Player finishes setup for a new round.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    private void MarkPlayerAsResetted_ServerRpc()
+    {
+        connectedHumanPlayersCt.Value += 1;
+    }
+
+    /// <summary>
+    /// Host waits for players indefinitely
+    /// </summary>
+    private IEnumerator WaitForAllPlayersToSetup()
+    {
+        while (connectedHumanPlayersCt.Value < gameParameters.Value.humanPlayerCount)
+        {
+            Debug.Log("Not all players connected yet... " + connectedHumanPlayersCt.Value + "/" + gameParameters.Value.humanPlayerCount);
+            yield return new WaitForSeconds(1);
+        }
+        KickOff();
+    }
+
+    /// <summary>
+    /// When everything has been loaded, begin the game for real
+    /// </summary>
+    private void KickOff()
+    {
+        Debug.Log("Let the game begin.");
+        TurnDriverServer.instance.BeginGame();
+    }
+
+
+
+    /// <summary>
+    /// Mark this player as a winner of the round (there may be others)
+    /// </summary>
     public void MarkPlayerAsWinner(ulong idOfRoundWinner)
     {
         MarkWinner_ServerRpc(idOfRoundWinner);
     }
 
+    /// <summary>
+    /// Mark this player as a winner of the round (there may be others)
+    /// </summary>
     [ServerRpc]
     private void MarkWinner_ServerRpc(ulong idOfRoundWinner)
     {
         winnersThisRound.Add(idOfRoundWinner);
+        TurnDriverServer.instance.FinishWaitingForServerUpdate(idOfRoundWinner);
+    }
+
+    public void EndAndCalculateWins()
+    {
+        ProcessWinners_ServerRpc();
     }
 
     [ServerRpc]
@@ -213,21 +315,9 @@ public class GameManagerSc : NetworkBehaviour
         UI_RoundOverPopup.instance.ShowEndOfGame(idsOfGameWinners);
     }
 
-    private IEnumerator WaitForAllPlayersToSetup()
+    public void ExitGame()
     {
-        while(connectedHumanPlayersCt.Value < gameParameters.Value.humanPlayerCount)
-        {
-            Debug.Log("Not all players connected yet... " + connectedHumanPlayersCt.Value + "/" + gameParameters.Value.humanPlayerCount);
-            yield return new WaitForSeconds(1);
-        }
-        KickOff();
-    }
-
-    // When everything has been loaded, begin the game for real
-    private void KickOff()
-    {
-        Debug.Log("Let the game begin.");
-        TurnDriverServer.instance.BeginGame();
+        // TODO
     }
 }
 

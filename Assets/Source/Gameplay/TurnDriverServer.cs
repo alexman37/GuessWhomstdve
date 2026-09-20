@@ -19,6 +19,7 @@ public class TurnDriverServer : NetworkBehaviour
     private int turnCount = 0;
 
     bool waitingComplete = false; // used for waiting coroutines
+    bool killSwitch = false; // set to true to stop the cycle for any reason
 
     void Start()
     {
@@ -53,10 +54,22 @@ public class TurnDriverServer : NetworkBehaviour
         StartCoroutine(waitForPlayersToCompletePhase());
     }
 
+    public void ResetRound()
+    {
+        ResetRound_ServerRpc();
+    }
+
+    [ServerRpc]
+    private void ResetRound_ServerRpc()
+    {
+        killSwitch = false;
+        receivedUpdatesFrom.Clear();
+        Debug.Log("[P] Resetting server turn driver");
+    }
+
     // Go to the next phase, do all necessary steps.
     public void TimedPhaseCycle()
     {
-        Debug.LogWarning("The Server is now updating state across all clients");
         switch (currentPhase.Value)
         {
             // Player turns end: Send requests to server and wait til everyone hears back
@@ -90,22 +103,20 @@ public class TurnDriverServer : NetworkBehaviour
     // TODO actually wait
     private IEnumerator waitForPlayersToCompletePhase()
     {
-        while(receivedUpdatesFrom.Count < humanAndBotCount)
+        Debug.Log("[P] Waiting for phase to end");
+        while (receivedUpdatesFrom.Count < humanAndBotCount)
         {
             yield return new WaitForSeconds(1);
         }
+        Debug.Log("[P] Done waiting");
 
         // When we're done waiting, the cycle renews again...except in specific cases
-
-        // In Server Response phase, check for any players who won (thus breaking the cycle)
-        if(currentPhase.Value == TurnDriverPhase.InvestigationDispatch)
+        // if anyone correctly guessed target, end cycle
+        if (killSwitch)
         {
-            // if anyone correctly guessed target, end cycle
-            if(GameManagerSc.instance.winnersThisRound.Count > 0)
-            {
-                yield break;
-            }
+            yield break;
         }
+        Debug.Log("[P] Continuing");
 
         // Else, cycle renews
         TimedPhaseCycle();
@@ -123,6 +134,9 @@ public class TurnDriverServer : NetworkBehaviour
     {
         if(specialStatus == PhaseFinishStatusUpdate.PlayerWon)
         {
+            // The turn cycle will stop, this round is over
+            OverrideCycle_ServerRpc(true);
+
             GameManagerSc.instance.MarkPlayerAsWinner(fromWho);
             // Need to wait for server to acknowledge player's win
             StartCoroutine(WaitForServerUpdate(fromWho));
@@ -132,14 +146,35 @@ public class TurnDriverServer : NetworkBehaviour
         }
     }
 
+    // Need to stop the cycle on the server
+    [ServerRpc(RequireOwnership = false)]
+    private void OverrideCycle_ServerRpc(bool swit)
+    {
+        killSwitch = swit;
+    }
+
     private IEnumerator WaitForServerUpdate(ulong fromWho)
     {
-        while(!waitingComplete)
+        Debug.Log("Player " + fromWho + " won, now confirming on server");
+        while (!waitingComplete)
         {
             yield return new WaitForSeconds(1);
         }
         waitingComplete = false;
+        Debug.Log("Player " + fromWho + " win confirmed");
         ReceivePlayerStatusUpdate_ServerRpc(new ServerRpcParams { Receive = { SenderClientId = fromWho } });
+        GameManagerSc.instance.EndAndCalculateWins();
+    }
+
+    public void FinishWaitingForServerUpdate(ulong idOfPlayer)
+    {
+        FinishWaiting_ClientRpc(new ClientRpcParams { Send = { TargetClientIds = new ulong[] { idOfPlayer } } });
+    }
+
+    [ClientRpc]
+    private void FinishWaiting_ClientRpc(ClientRpcParams rpcParams)
+    {
+        waitingComplete = true;
     }
 
     [ServerRpc(RequireOwnership = false)]

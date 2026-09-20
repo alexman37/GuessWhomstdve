@@ -11,9 +11,10 @@ using System;
 public class Roster
 {
     public static Roster instance;
+    public static bool greenlight;
 
-    const int TOTAL_ROSTER_PERMUTATIONS = 999999; // How many different rosters can there be?
-    private int rosterSeedOffset;                 // offset every random seed by this amount. It makes each new game unique.
+    const ulong TOTAL_ROSTER_PERMUTATIONS = 999999; // How many different rosters can there be?
+    public ulong rosterSeedOffset;                 // offset every random seed by this amount. It makes each new game unique.
 
     // Making certain characteristics appear with probabilities requires a prime number
     // Only rule: No CPD should have that amount of categories, nor any multiple of it
@@ -117,9 +118,17 @@ public class Roster
 
     }
 
-    private void getRosterCPDs()
+    // When starting a new round, reset certain things but keep what you can
+    public void resetRound()
     {
+        commonConstraints.clearAllConstraints(true);
 
+        simulatedCurrentRosterSize = simulatedTotalRosterSize;
+
+        currentRosterIDs.Clear();
+        charactersGuessedAsTarget.Clear();
+
+        createRoster((ushort)Mathf.Min(UI_Roster.MAX_CHARACTERS_TO_SHOW, simulatedTotalRosterSize));
     }
 
     /// <summary>
@@ -127,7 +136,7 @@ public class Roster
     /// </summary>
     public void createRoster(uint howMany)
     {
-        rosterSeedOffset = UnityEngine.Random.Range(0, TOTAL_ROSTER_PERMUTATIONS);
+        rosterSeedOffset = (ulong)UnityEngine.Random.Range(0, TOTAL_ROSTER_PERMUTATIONS);
         if (shownRoster != null)
         {
             shownRoster.Clear();
@@ -155,6 +164,7 @@ public class Roster
         savedMod = 0;
 
         rosterReady.Invoke();
+        greenlight = true;
     }
 
     public void setCommonConstraints(bool withCommon)
@@ -462,7 +472,6 @@ public class Roster
             }
 
             // Worst case scenario: Resort to iteration through all possible IDs. Return the first success.
-            Debug.Log("Trying to find characters thru EXHAUSTIVE SEARCH");
             for (int cpdIndex = savedCPD; cpdIndex < cpdConstrainables.Count; cpdIndex++)
             {
                 CPD currCpd = cpdConstrainables[cpdIndex];

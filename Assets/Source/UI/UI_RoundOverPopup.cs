@@ -13,6 +13,8 @@ public class UI_RoundOverPopup : MonoBehaviour
     [SerializeField] private TextMeshProUGUI winners;
     [SerializeField] private TextMeshProUGUI nextRoundTxt;
 
+    private bool gameOver = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -65,10 +67,27 @@ public class UI_RoundOverPopup : MonoBehaviour
         title.text = titleStr;
         winners.text = winnerStr;
         nextRoundTxt.text = nextRoundStr;
+
+        gameOver = true;
     }
 
     public void closeAndHide()
     {
         mainframe.SetActive(false);
+    }
+
+    public void moveToNextRoundOrEnd()
+    {
+        closeAndHide();
+
+        if(gameOver)
+        {
+            GameManagerSc.instance.ExitGame();
+        }
+
+        else
+        {
+            GameManagerSc.instance.ResetRound();
+        }
     }
 }

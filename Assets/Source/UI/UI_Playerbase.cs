@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class UI_Playerbase : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class UI_Playerbase : MonoBehaviour
 
     [SerializeField] GameObject playerbaseContainer;
     [SerializeField] GameObject playerbaseEntry;
+
+    private Dictionary<int, UI_PlayerbaseEntry> entriesById;
 
     // Start is called before the first frame update
     void Start()
@@ -19,8 +22,10 @@ public class UI_Playerbase : MonoBehaviour
     /// <summary>
     /// Return the number of (human or bot players, human players) in-game
     /// </summary>
-    public (int, int) redrawPlayerbase(PlayerSetupInfo[] psi)
+    public (int, int) setupPlayerbase(PlayerSetupInfo[] psi)
     {
+        entriesById = new Dictionary<int, UI_PlayerbaseEntry>();
+
         for (int i = playerbaseContainer.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(playerbaseContainer.transform.GetChild(i));
@@ -35,8 +40,16 @@ public class UI_Playerbase : MonoBehaviour
             else if (psi[i].type == PlayerSetupType.Human)
                 humanCount++;
             GameObject go = GameObject.Instantiate(playerbaseEntry, playerbaseContainer.transform);
-            go.GetComponent<UI_PlayerbaseEntry>().SetParams(psi[i]);
+
+            UI_PlayerbaseEntry ent = go.GetComponent<UI_PlayerbaseEntry>();
+            ent.SetParams(psi[i]);
+            entriesById.Add(psi[i].orderedId, ent);
         }
         return (psi.Length, humanCount);
+    }
+
+    public void AddHumanWinToTotal(int forOrderedId)
+    {
+        entriesById[forOrderedId].AddWinToTotal();
     }
 }

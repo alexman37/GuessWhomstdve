@@ -8,7 +8,9 @@ public class Character
     //Demographics: CPDs, values that exist on every character and may be part of the game as well.
     public int rosterId; // Where in the roster list of known characters (and sprites) this person is.
     public ulong simulatedId; // The unique ID from (0 - rosterSize - 1) that contains all this character's constrainable CPD values
-                     // All other (cosmetic) random values generated using this simulatedId as a seed
+    public ulong drawId;      // simulatedID modified by the current rosterOffset. Used so the finer details
+                              // of each character are distinct across rounds.
+    // All other (cosmetic) random values generated using this simulatedId as a seed
     Dictionary<CPD_Type, CPD_Variant> createdCharacteristics; // Once we create a character we can assign them data in here
 
 
@@ -27,6 +29,7 @@ public class Character
     {
         this.rosterId = rosterId;
         this.simulatedId = simulatedId;
+        this.drawId = simulatedId + Roster.instance.rosterSeedOffset;
 
         randomizeDemographics();
     }
@@ -48,7 +51,7 @@ public class Character
         // There are some other traits we want to give our characters here
         // We can still get away with using "random" traits, since the randomSeed was set to a predictable value in unpackSimulationID
         // and will not be reset until we call it again.
-        (ulong workingSeed, float _) = CharRandomValue.Random(simulatedId);
+        (ulong workingSeed, float _) = CharRandomValue.Random(drawId);
 
         bool isMale = true;
         bool eligibleForFacialHair = true;
@@ -131,7 +134,7 @@ public class Character
     /// </summary>
     public (ulong, Color) getColorField(ulong seed, CPD_Type cpdType)
     {
-        return (createdCharacteristics[cpdType].critVal as CPD_CritVal_Color).col.getColor(simulatedId);
+        return (createdCharacteristics[cpdType].critVal as CPD_CritVal_Color).col.getColor(drawId);
     }
 
     /// <summary>

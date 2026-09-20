@@ -29,7 +29,16 @@ public class CharCard32 : CharacterCard
     {
         drawMat = portrait.material;
 
-        ulong startingSeed = c.simulatedId;
+        ulong startingSeed = c.drawId;
+
+        // Non-critical - doing these first better randomizes the seed for important values.
+        (ulong s, int v) crv1 = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 3);
+        drawMat.SetInt("_BodyIdx", crv1.v);
+        (ulong s, int v) crv2 = CharRandomValue.RangedSeedRandomizer(crv1.s, 0, 8);
+        drawMat.SetInt("_HeadIdx", crv2.v);
+        (ulong s, int v) crv3 = CharRandomValue.RangedSeedRandomizer(crv2.s, 0, 14);
+        drawMat.SetInt("_FaceIdx", crv3.v);
+        startingSeed = crv3.s;
 
         // Main portrait
         int w = SetIntFieldAndAdvance(c, CPD_Type.Weight, "_Weight");
@@ -42,15 +51,6 @@ public class CharCard32 : CharacterCard
         startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.SkinTone, "_SkinColor");
         startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.EyeColor, "_EyeColor");
         startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.FavoriteColor, "_BodyColor");
-
-        // Non-critical
-        (ulong s, int v) crv1 = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 3);
-        drawMat.SetInt("_BodyIdx", crv1.v);
-        (ulong s, int v) crv2 = CharRandomValue.RangedSeedRandomizer(crv1.s, 0, 8);
-        drawMat.SetInt("_HeadIdx", crv2.v);
-        (ulong s, int v) crv3 = CharRandomValue.RangedSeedRandomizer(crv2.s, 0, 14);
-        drawMat.SetInt("_FaceIdx", crv3.v);
-        startingSeed = crv3.s;
 
         // Optionals
         if (c.optionalTraits.hasMoustache)

@@ -57,7 +57,8 @@ public static class CharRandomValue
                 else if (HairLen == 2) start = 1;
                 break;
         }
-        return RangedSeedRandomizer(seed, start, stop);
+        var r = RangedSeedRandomizer(seed, start, stop);
+        return r;
     }
 
     private static List<string> getNames(string path)

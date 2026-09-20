@@ -6,6 +6,8 @@ using Unity.Netcode;
 
 public class HumanPlayer : GD_Player
 {
+    public ulong connectionId;
+
     // Each connected client differs on this
     public static HumanPlayer self;
 
@@ -13,12 +15,13 @@ public class HumanPlayer : GD_Player
 
     public bool investigationReceived = false;
 
-    public HumanPlayer(string playerName)
+    public HumanPlayer(string playerName, int uid, ulong cid)
     {
         // TODO player's name
         agentName = playerName;
 
-        id = 0;
+        uniqueId = uid;
+        connectionId = cid;
 
         rosterConstraints = new RosterConstraints();
         rosterConstraints.clearAllConstraints(true);

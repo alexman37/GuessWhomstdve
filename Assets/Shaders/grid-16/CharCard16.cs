@@ -26,7 +26,11 @@ public class CharCard16 : CharacterCard
     {
         drawMat = portrait.material;
 
-        ulong startingSeed = c.simulatedId;
+        ulong startingSeed = c.drawId;
+
+        // Non-critical - doing these first better randomizes the seed for important values.
+        (ulong s, int v) crv1 = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 3);
+        drawMat.SetInt("_BodyIdx", crv1.v);
 
         // Main portrait
         int w = SetIntFieldAndAdvance(c, CPD_Type.Weight, "_Weight");
@@ -38,10 +42,6 @@ public class CharCard16 : CharacterCard
         startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.SkinTone,  "_SkinColor");
         startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.EyeColor,  "_EyeColor");
         startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.FavoriteColor, "_BodyColor");
-
-        // Non-critical
-        (ulong s, int v) crv1 = CharRandomValue.RangedSeedRandomizer(startingSeed, 0, 3);
-        drawMat.SetInt("_BodyIdx", crv1.v);
 
         // Optionals
         if (c.optionalTraits.hasMoustache)
