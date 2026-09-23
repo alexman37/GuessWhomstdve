@@ -29,7 +29,7 @@ public class Character
     {
         this.rosterId = rosterId;
         this.simulatedId = simulatedId;
-        this.drawId = simulatedId + Roster.instance.rosterSeedOffset;
+        this.drawId = simulatedId + RosterGen.instance.rosterOffset.Value;
 
         randomizeDemographics();
     }

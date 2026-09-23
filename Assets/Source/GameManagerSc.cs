@@ -9,6 +9,8 @@ using Unity.Netcode;
 // And manager of the highest-level problems in the game
 public class GameManagerSc : NetworkBehaviour
 {
+    private ulong localClientId;
+
     public const int MAX_PLAYER_CT = 8;
 
     public static GameManagerSc instance;
@@ -42,10 +44,13 @@ public class GameManagerSc : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        Debug.Log("GameManagerSC has been spawned on the network.");
-        for(int i = 0; i < 8; i++)
+        if(NetworkManager.Singleton.LocalClientId == 0)
         {
-            winsPerPlayer.Add(0);
+            Debug.Log("GameManagerSC has been spawned on the network.");
+            for (int i = 0; i < 8; i++)
+            {
+                winsPerPlayer.Add(0);
+            }
         }
     }
 
@@ -57,6 +62,12 @@ public class GameManagerSc : NetworkBehaviour
     private void OnDisable()
     {
         Roster.rosterReady -= SetRosterReady;
+    }
+
+    // When the player first joins a lobby, save their localClientId for future use.
+    public void setLocalClientId(ulong id)
+    {
+        localClientId = id;
     }
 
     private void SetRosterReady()
@@ -104,8 +115,11 @@ public class GameManagerSc : NetworkBehaviour
         while (RosterGen.instance == null)
             yield return null;
         RosterGen.instance.createRoster(gameParameters.Value.rosterSizeZeroes);
+        Debug.Log("[Y] Used RosterGen");
+
         while (!rosterReady)
             yield return null;
+        Debug.Log("[Y] Roster ready to go");
 
         while (UI_Playerbase.instance == null)
             yield return null;
@@ -140,6 +154,7 @@ public class GameManagerSc : NetworkBehaviour
         int playerbaseIndex = -1;
         for(int i = 0; i < gameParameters.Value.playerSetupInfo.Length; i++)
         {
+            Debug.Log("Player in order " + i + " w connection ID " + gameParameters.Value.playerSetupInfo[i].playerConnectionId + "(you are " + NetworkManager.Singleton.LocalClientId + ")");
             if(gameParameters.Value.playerSetupInfo[i].playerConnectionId == NetworkManager.Singleton.LocalClientId)
             {
                 playerbaseIndex = i;
@@ -152,7 +167,7 @@ public class GameManagerSc : NetworkBehaviour
         } else
         {
             var playerInfo = gameParameters.Value.playerSetupInfo[playerbaseIndex];
-            HumanPlayer.self = new HumanPlayer(playerInfo.name.ToString(), playerInfo.orderedId, playerInfo.playerConnectionId);
+            HumanPlayer.self = new HumanPlayer(playerInfo.name.ToString(), playerInfo.orderedId, localClientId);
         }
 
         while (UI_Roster.instance == null)

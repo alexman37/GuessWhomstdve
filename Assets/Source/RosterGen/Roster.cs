@@ -13,9 +13,6 @@ public class Roster
     public static Roster instance;
     public static bool greenlight;
 
-    const ulong TOTAL_ROSTER_PERMUTATIONS = 999999; // How many different rosters can there be?
-    public ulong rosterSeedOffset;                 // offset every random seed by this amount. It makes each new game unique.
-
     // Making certain characteristics appear with probabilities requires a prime number
     // Only rule: No CPD should have that amount of categories, nor any multiple of it
     // Good candidates are 7, 11, 13 and 17
@@ -136,7 +133,6 @@ public class Roster
     /// </summary>
     public void createRoster(uint howMany)
     {
-        rosterSeedOffset = (ulong)UnityEngine.Random.Range(0, TOTAL_ROSTER_PERMUTATIONS);
         if (shownRoster != null)
         {
             shownRoster.Clear();
@@ -300,7 +296,10 @@ public class Roster
     {
         simulatedCurrentRosterSize = getNewRosterSizeFromConstraints(constraints);
 
-        UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize, regenShownSprites);
+        if(UI_Roster.instance != null)
+        {
+            UI_Roster.instance.updateRosterCount(simulatedCurrentRosterSize, regenShownSprites);
+        }
     }
 
     /// <summary>

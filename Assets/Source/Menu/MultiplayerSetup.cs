@@ -26,6 +26,9 @@ namespace GW.MainMenu
         Player me;
         PlayerSetupInfo[] playerbase = new PlayerSetupInfo[8];
 
+        // server-only dictionary mapping lobby player IDs to network IDs
+        Dictionary<string, ulong> playerIDtoNetworkID = new Dictionary<string, ulong>();
+
         private object playerbaseLock = new object();
         private ushort humanPlayerCt = 0;
 
@@ -61,6 +64,7 @@ namespace GW.MainMenu
             me = new Player(id: AuthenticationService.Instance.PlayerId, data: new Dictionary<string, PlayerDataObject> {
                 { "Name", pdoName }, { "LocalClientId", pdoClientId }
             });
+            Debug.Log("Created Player: " + pdoName.Value + ", " + pdoClientId.Value);
 
             NetworkManager.Singleton.OnClientConnectedCallback += onClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += onClientDisconnected;
@@ -92,7 +96,7 @@ namespace GW.MainMenu
         public void onClientConnected(ulong newPlayerId)
         {
             Debug.Log("Client connect: " + newPlayerId);
-            UpdateLobbyInfo();
+            MapPlayerNetId_ClientRpc(newPlayerId);
         }
 
         public void onClientDisconnected(ulong dcPlayerId)
@@ -130,10 +134,21 @@ namespace GW.MainMenu
                         {
                             lock(playerbaseLock)
                             {
-                                playerbase[i] = new PlayerSetupInfo {
+                                Debug.Log("Adding player " + i);
+                                ulong netPlayerId = 9999;
+                                if(!playerIDtoNetworkID.ContainsKey(p.Id))
+                                {
+                                    Debug.LogWarning("Couldn't find mapping for player id " + p.Id + " with order " + i);
+                                } else
+                                {
+                                    netPlayerId = playerIDtoNetworkID[p.Id];
+                                }
+                                playerbase[i] = new PlayerSetupInfo
+                                {
                                     type = PlayerSetupType.Human,
                                     name = p.Data["Name"].Value,
-                                    playerConnectionId = ulong.Parse(p.Data["LocalClientId"].Value),
+                                    id = p.Id,
+                                    playerConnectionId = netPlayerId,
                                     orderedId = i
                                 };
                                 humanPlayerCt++;
@@ -287,6 +302,7 @@ namespace GW.MainMenu
             panel1.SetActive(false);
             panel2.SetActive(true);
             roomCodeTxt.text = lob.LobbyCode;
+            GameManagerSc.instance.setLocalClientId(NetworkManager.Singleton.LocalClientId);
 
             UpdateLobbyInfo();
         }
@@ -305,6 +321,11 @@ namespace GW.MainMenu
         // - End the lobby (but keep relay)
         public void StartGame()
         {
+            Debug.Log("Print whole playerbase");
+            for(int i = 0; i < 8; i++)
+            {
+                Debug.Log("Player " + i + ": " + playerbase[i].playerConnectionId + ", " + playerbase[i].name + ", " + playerbase[i].orderedId + ", " + playerbase[i].id);
+            }
             GameManagerSc.instance.SetGameParameters(new MainGameParameters
             {
                 playerSetupInfo = playerbase,
@@ -316,10 +337,35 @@ namespace GW.MainMenu
             Lobbies.Instance.DeleteLobbyAsync(lobbyIdCache);
         }
 
+        [ClientRpc]
+        private void MapPlayerNetId_ClientRpc(ulong networkId)
+        {
+            Debug.Log("[Z] Check " + networkId + " == " + NetworkManager.Singleton.LocalClientId);
+            if(networkId == NetworkManager.Singleton.LocalClientId)
+            {
+                MapPlayerNetId2_ServerRpc(me.Id, networkId);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        void MapPlayerNetId2_ServerRpc(string playerId, ulong networkId)
+        {
+            MapPlayerNetId3_ClientRpc(playerId, networkId);
+        }
+
+        [ClientRpc]
+        void MapPlayerNetId3_ClientRpc(string playerId, ulong networkId)
+        {
+            Debug.Log("[Z] Player ID added " + playerId + "," + networkId);
+            playerIDtoNetworkID.Add(playerId, networkId);
+            Debug.Log("[Z] Updating lobby info on " + me.Id);
+            UpdateLobbyInfo();
+        }
+
         //[ClientRpc]
         //private void StartGame_ClientRpc(string joinCode, AllocationData alloc)
         //{
-            // Use for kicking later
+        // Use for kicking later
         //}
     }
 
@@ -343,17 +389,26 @@ public struct PlayerSetupInfo : INetworkSerializable
 {
     public PlayerSetupType type;
     public FixedString32Bytes name;
+    public FixedString64Bytes id;
     //public ulong img;
     public int orderedId;               // this player or bot's unique ID from 0-7
-    public ulong playerConnectionId;    // this player's network connection ID (for bot, -1)
+    public ulong playerConnectionId;    // this player's network connection ID (for bot, 9999)
     public int critNum; // for human: win total, for bot: difficulty level
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         Debug.Log("Serialize, for some reason or other");
-        serializer.SerializeValue(ref name);
-        serializer.SerializeValue(ref critNum);
-        serializer.SerializeValue(ref playerConnectionId);
         serializer.SerializeValue(ref type);
+        serializer.SerializeValue(ref name);
+        serializer.SerializeValue(ref id);
+        serializer.SerializeValue(ref orderedId);
+        serializer.SerializeValue(ref playerConnectionId);
+        serializer.SerializeValue(ref critNum);
+    }
+
+    public override string ToString()
+    {
+        string playerType = type == PlayerSetupType.Human ? "Human" : "Bot";
+        return $"{name} : {playerType} player with IDs {orderedId}, {playerConnectionId}";
     }
 }

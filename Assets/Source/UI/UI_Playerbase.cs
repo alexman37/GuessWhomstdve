@@ -34,6 +34,7 @@ public class UI_Playerbase : MonoBehaviour
         int humanCount = 0;
         for (int i = 0; i < psi.Length; i++)
         {
+            Debug.Log("[PB] " + psi[i].ToString());
             // Assumes the list will be ordered...a safe assumption?
             if (psi[i].type == PlayerSetupType.None)
                 return (i, humanCount);
