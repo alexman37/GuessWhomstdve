@@ -28,11 +28,14 @@ public class UI_PassiveInfoPopup : MonoBehaviour
         {
             if(!matches.ContainsKey(guesses[i].cpdType))
             {
-                matches.Add(guesses[i].cpdType, "\n" + guesses[i].catIndex + "\n");
+                string catName = CPD.registry[guesses[i].cpdType].categories[guesses[i].catIndex];
+                string cpdName = guesses[i].cpdType.ToString();
+                matches.Add(guesses[i].cpdType, $"{cpdName}\n -  {catName}\n");
             }
             else
             {
-                matches[guesses[i].cpdType] += (guesses[i].catIndex + "\n");
+                string catName = CPD.registry[guesses[i].cpdType].categories[guesses[i].catIndex];
+                matches[guesses[i].cpdType] += $" -  {catName}\n";
             }
         }
         foreach(CPD_Type key in matches.Keys) {

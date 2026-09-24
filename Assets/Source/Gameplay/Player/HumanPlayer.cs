@@ -70,7 +70,7 @@ public class HumanPlayer : GD_Player
     {
         Debug.Log("[PI] Found " + numHits + " hits.");
         UI_PassiveInfoPopup.instance.showAndUpdateText(
-            fromPlayerIndex.ToString(),
+            GameManagerSc.instance.FromNetId_GetPlayerName(fromPlayerIndex),
             questions,
             numHits
         );

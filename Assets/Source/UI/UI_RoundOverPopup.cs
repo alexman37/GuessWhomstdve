@@ -12,6 +12,8 @@ public class UI_RoundOverPopup : MonoBehaviour
     [SerializeField] private TextMeshProUGUI title;
     [SerializeField] private TextMeshProUGUI winners;
     [SerializeField] private TextMeshProUGUI nextRoundTxt;
+    [SerializeField] private GameObject nextRoundButton;
+    [SerializeField] private GameObject nextRoundWait;
 
     private bool gameOver = false;
 
@@ -36,10 +38,19 @@ public class UI_RoundOverPopup : MonoBehaviour
             else
             {
                 // TODO - convert ID to a name
-                winnerStr = winnerStr + idsOfRoundWinners[i].ToString() + ",";
+                winnerStr = winnerStr + GameManagerSc.instance.FromNetId_GetPlayerName(idsOfRoundWinners[i]) + ",";
             }
         }
         string nextRoundStr = "Next Round";
+        if(NetworkManager.Singleton.IsHost)
+        {
+            nextRoundButton.SetActive(true);
+            nextRoundWait.SetActive(false);
+        } else
+        {
+            nextRoundButton.SetActive(true);
+            nextRoundWait.SetActive(false);
+        }
 
         title.text = titleStr;
         winners.text = winnerStr;
@@ -59,10 +70,12 @@ public class UI_RoundOverPopup : MonoBehaviour
             } else
             {
                 // TODO - convert ID to a name
-                winnerStr = winnerStr + idsOfGameWinners[i].ToString() + ",";
+                winnerStr = winnerStr + GameManagerSc.instance.FromNetId_GetPlayerName(idsOfGameWinners[i]) + ", ";
             }
         }
         string nextRoundStr = "Exit Game";
+        nextRoundButton.SetActive(true);
+        nextRoundWait.SetActive(false);
 
         title.text = titleStr;
         winners.text = winnerStr;

@@ -32,6 +32,8 @@ namespace GW.MainMenu
         private object playerbaseLock = new object();
         private ushort humanPlayerCt = 0;
 
+        [SerializeField] private GameObject gameManagerScPrefab;
+
         [SerializeField] private GameObject panel1;
         [SerializeField] private GameObject panel2;
 
@@ -285,6 +287,9 @@ namespace GW.MainMenu
                     );
 
                     NetworkManager.Singleton.StartHost();
+
+                    var gameMan = NetworkObject.Instantiate(gameManagerScPrefab);
+                    gameMan.GetComponent<NetworkObject>().Spawn();
                 }
             }
             catch (RelayServiceException e)
@@ -302,7 +307,6 @@ namespace GW.MainMenu
             panel1.SetActive(false);
             panel2.SetActive(true);
             roomCodeTxt.text = lob.LobbyCode;
-            GameManagerSc.instance.setLocalClientId(NetworkManager.Singleton.LocalClientId);
 
             UpdateLobbyInfo();
         }

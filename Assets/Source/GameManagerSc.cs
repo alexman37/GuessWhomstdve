@@ -9,42 +9,50 @@ using Unity.Netcode;
 // And manager of the highest-level problems in the game
 public class GameManagerSc : NetworkBehaviour
 {
-    private ulong localClientId;
-
     public const int MAX_PLAYER_CT = 8;
 
     public static GameManagerSc instance;
-    NetworkVariable<MainGameParameters> gameParameters = new NetworkVariable<MainGameParameters>(value: new MainGameParameters {
+    public NetworkVariable<MainGameParameters> gameParameters = new NetworkVariable<MainGameParameters>(value: new MainGameParameters {
         playerSetupInfo = new PlayerSetupInfo[8],
         humanPlayerCount = 0,
         rosterSizeZeroes = 3,
         roundsToWin = 1
     });
+    Dictionary<ulong, int> networkIDtoPlayerIndex;
 
-    NetworkList<int> winsPerPlayer;
+    public NetworkList<int> winsPerPlayer;
 
     public NetworkList<ulong> winnersThisRound;
 
-    NetworkVariable<ushort> connectedHumanPlayersCt = new NetworkVariable<ushort>(0);
+    public NetworkVariable<ushort> connectedHumanPlayersCt = new NetworkVariable<ushort>(0);
 
     private bool rosterReady = false;
+
+    private void Awake()
+    {
+        winsPerPlayer = new NetworkList<int>(new List<int>(), NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        winnersThisRound = new NetworkList<ulong>(new List<ulong>(), NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log("GameManagerSC started.");
         if (instance == null) instance = this;
         else Destroy(this);
 
         DontDestroyOnLoad(this.gameObject);
 
-        winsPerPlayer = new NetworkList<int>();
-        winnersThisRound = new NetworkList<ulong>();
+        //winsPerPlayer = new NetworkList<int>();
+        //winnersThisRound = new NetworkList<ulong>();
     }
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        if(NetworkManager.Singleton.LocalClientId == 0)
+        Debug.Log("On network spawn for GameManagerSc");
+
+        if (NetworkManager.Singleton.LocalClientId == 0)
         {
             Debug.Log("GameManagerSC has been spawned on the network.");
             for (int i = 0; i < 8; i++)
@@ -64,12 +72,6 @@ public class GameManagerSc : NetworkBehaviour
         Roster.rosterReady -= SetRosterReady;
     }
 
-    // When the player first joins a lobby, save their localClientId for future use.
-    public void setLocalClientId(ulong id)
-    {
-        localClientId = id;
-    }
-
     private void SetRosterReady()
     {
         rosterReady = true;
@@ -77,6 +79,12 @@ public class GameManagerSc : NetworkBehaviour
 
     // Set up game parameters established in the main menu, and wait for all components to be set up
     public void SetGameParameters(MainGameParameters mgp)
+    {
+        SetGameParameters_ServerRpc(mgp);
+    }
+
+    [ServerRpc]
+    private void SetGameParameters_ServerRpc(MainGameParameters mgp)
     {
         gameParameters.Value = mgp;
         ShipAndSetup_ClientRpc();
@@ -86,6 +94,17 @@ public class GameManagerSc : NetworkBehaviour
     {
         connectedHumanPlayersCt.Value = 0;
         ResetSetup_ClientRpc();
+    }
+
+    /// GET PLAYER DATA
+    public string FromNetId_GetPlayerName(ulong id)
+    {
+        return gameParameters.Value.playerSetupInfo[networkIDtoPlayerIndex[id]].name.ToString();
+    }
+
+    public int FromNetId_GetPlayerOrder(ulong id)
+    {
+        return gameParameters.Value.playerSetupInfo[networkIDtoPlayerIndex[id]].orderedId;
     }
 
     // Ship all players off to the next scene and begin the game setup task for each player
@@ -112,14 +131,28 @@ public class GameManagerSc : NetworkBehaviour
             NetworkManager.SceneManager.LoadScene("GW_Main", LoadSceneMode.Single);
         }
 
+        while (gameParameters.Value.humanPlayerCount == 0)
+            yield return null;
+
+        networkIDtoPlayerIndex = new Dictionary<ulong, int>();
+        // Set up player ID mapping
+        for (int i = 0; i < gameParameters.Value.playerSetupInfo.Length; i++)
+        {
+            Debug.Log("[Q] Looking into player #" + i);
+            var p = gameParameters.Value.playerSetupInfo[i];
+            if(p.type == PlayerSetupType.Human)
+            {
+                Debug.Log("[Q] ADD #" + i + " had net id " + p.playerConnectionId);
+                networkIDtoPlayerIndex.Add(p.playerConnectionId, i);
+            }
+        }
+
         while (RosterGen.instance == null)
             yield return null;
         RosterGen.instance.createRoster(gameParameters.Value.rosterSizeZeroes);
-        Debug.Log("[Y] Used RosterGen");
 
         while (!rosterReady)
             yield return null;
-        Debug.Log("[Y] Roster ready to go");
 
         while (UI_Playerbase.instance == null)
             yield return null;
@@ -154,7 +187,6 @@ public class GameManagerSc : NetworkBehaviour
         int playerbaseIndex = -1;
         for(int i = 0; i < gameParameters.Value.playerSetupInfo.Length; i++)
         {
-            Debug.Log("Player in order " + i + " w connection ID " + gameParameters.Value.playerSetupInfo[i].playerConnectionId + "(you are " + NetworkManager.Singleton.LocalClientId + ")");
             if(gameParameters.Value.playerSetupInfo[i].playerConnectionId == NetworkManager.Singleton.LocalClientId)
             {
                 playerbaseIndex = i;
@@ -167,7 +199,7 @@ public class GameManagerSc : NetworkBehaviour
         } else
         {
             var playerInfo = gameParameters.Value.playerSetupInfo[playerbaseIndex];
-            HumanPlayer.self = new HumanPlayer(playerInfo.name.ToString(), playerInfo.orderedId, localClientId);
+            HumanPlayer.self = new HumanPlayer(playerInfo.name.ToString(), playerInfo.orderedId, NetworkManager.Singleton.LocalClientId);
         }
 
         while (UI_Roster.instance == null)
@@ -267,7 +299,7 @@ public class GameManagerSc : NetworkBehaviour
     /// <summary>
     /// Mark this player as a winner of the round (there may be others)
     /// </summary>
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void MarkWinner_ServerRpc(ulong idOfRoundWinner)
     {
         winnersThisRound.Add(idOfRoundWinner);
@@ -333,6 +365,7 @@ public class GameManagerSc : NetworkBehaviour
     public void ExitGame()
     {
         // TODO
+        Debug.Log("TODO: Exit game here");
     }
 }
 

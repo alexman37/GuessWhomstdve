@@ -114,6 +114,7 @@ public class TurnDriverServer : NetworkBehaviour
         // if anyone correctly guessed target, end cycle
         if (killSwitch)
         {
+            GameManagerSc.instance.EndAndCalculateWins();
             yield break;
         }
         Debug.Log("[P] Continuing");
@@ -163,7 +164,6 @@ public class TurnDriverServer : NetworkBehaviour
         waitingComplete = false;
         Debug.Log("Player " + fromWho + " win confirmed");
         ReceivePlayerStatusUpdate_ServerRpc(new ServerRpcParams { Receive = { SenderClientId = fromWho } });
-        GameManagerSc.instance.EndAndCalculateWins();
     }
 
     public void FinishWaitingForServerUpdate(ulong idOfPlayer)
