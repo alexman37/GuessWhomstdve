@@ -18,6 +18,7 @@ public class GameManagerSc : NetworkBehaviour
         rosterSizeZeroes = 3,
         roundsToWin = 1
     });
+    int totalPlayerCt = 0;
     Dictionary<ulong, int> networkIDtoPlayerIndex;
 
     public NetworkList<int> winsPerPlayer;
@@ -119,6 +120,7 @@ public class GameManagerSc : NetworkBehaviour
     private void ResetSetup_ClientRpc()
     {
         Debug.Log("Begin reset task for the player ");
+        UI_RoundOverPopup.instance.closeAndHide();
         StartCoroutine(ResetTask());
     }
 
@@ -138,11 +140,13 @@ public class GameManagerSc : NetworkBehaviour
         // Set up player ID mapping
         for (int i = 0; i < gameParameters.Value.playerSetupInfo.Length; i++)
         {
-            Debug.Log("[Q] Looking into player #" + i);
             var p = gameParameters.Value.playerSetupInfo[i];
+            if(p.type != PlayerSetupType.None)
+            {
+                totalPlayerCt++;
+            }
             if(p.type == PlayerSetupType.Human)
             {
-                Debug.Log("[Q] ADD #" + i + " had net id " + p.playerConnectionId);
                 networkIDtoPlayerIndex.Add(p.playerConnectionId, i);
             }
         }
@@ -335,13 +339,25 @@ public class GameManagerSc : NetworkBehaviour
                     idsOfGameWinners[numGameWinners] = (ulong)i;
                     numGameWinners++;
                 }
+                else idsOfGameWinners[numGameWinners] = 99999;
             }
 
             // If anyone won the game, end it
             if (numGameWinners > 0)
             {
-                EndGame_ClientRpc(idsOfGameWinners);
+                ulong[] shortenedGameWinners = new ulong[numGameWinners];
+                int n = 0;
+                for(int i = 0; i < winsPerPlayer.Count; i++)
+                {
+                    if(idsOfGameWinners[i] < 9999)
+                    {
+                        shortenedGameWinners[n] = idsOfGameWinners[i];
+                        n++;
+                    }
+                }
+                EndGame_ClientRpc(shortenedGameWinners);
             }
+            // Else, mark players who won a round, but keep going
             else
             {
                 EndRound_ClientRpc(temp);
@@ -351,9 +367,13 @@ public class GameManagerSc : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void EndRound_ClientRpc(ulong[] idsOfRoundWinners)
+    private void EndRound_ClientRpc(ulong[] connectionIdsOfRoundWinners)
     {
-        UI_RoundOverPopup.instance.ShowEndOfRound(idsOfRoundWinners);
+        for(int i = 0; i < totalPlayerCt; i++)
+        {
+            UI_Playerbase.instance.SetNewWinTotal(i, winsPerPlayer[i]);
+        }
+        UI_RoundOverPopup.instance.ShowEndOfRound(connectionIdsOfRoundWinners);
     }
 
     [ClientRpc]

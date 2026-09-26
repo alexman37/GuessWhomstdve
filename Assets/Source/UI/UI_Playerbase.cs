@@ -49,8 +49,14 @@ public class UI_Playerbase : MonoBehaviour
         return (psi.Length, humanCount);
     }
 
-    public void AddHumanWinToTotal(int forOrderedId)
+    public void SetNewWinTotal(int forOrderedId, int newTotal)
     {
-        entriesById[forOrderedId].AddWinToTotal();
+        if(entriesById.ContainsKey(forOrderedId))
+        {
+            entriesById[forOrderedId].SetWinsToTotal(newTotal);
+        } else
+        {
+            Debug.LogWarning("No player found with ordered ID " + forOrderedId + ". Ignoring win ct increase.");
+        }
     }
 }

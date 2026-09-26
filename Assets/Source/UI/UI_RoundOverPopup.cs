@@ -48,8 +48,8 @@ public class UI_RoundOverPopup : MonoBehaviour
             nextRoundWait.SetActive(false);
         } else
         {
-            nextRoundButton.SetActive(true);
-            nextRoundWait.SetActive(false);
+            nextRoundButton.SetActive(false);
+            nextRoundWait.SetActive(true);
         }
 
         title.text = titleStr;

@@ -11,8 +11,6 @@ public class UI_PlayerbaseEntry : MonoBehaviour
     private int orderedId;
     private ulong playerConnectionId;
 
-    private int winCountOfPlayer = 0;
-
     [SerializeField] TextMeshProUGUI winTotalTxt;
 
     // Start is called before the first frame update
@@ -28,9 +26,8 @@ public class UI_PlayerbaseEntry : MonoBehaviour
         orderedId = psi.orderedId;
     }
 
-    public void AddWinToTotal()
+    public void SetWinsToTotal(int newWinCount)
     {
-        winCountOfPlayer++;
-        winTotalTxt.text = winCountOfPlayer.ToString();
+        winTotalTxt.text = newWinCount.ToString();
     }
 }
