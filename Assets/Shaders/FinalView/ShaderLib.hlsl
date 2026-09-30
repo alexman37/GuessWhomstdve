@@ -19,8 +19,10 @@ static float4 C_BODY_OUTLINE = float4(0,0.6,0,1);
 static float4 C_EYE_BASE = float4(0,1,1,1);
 static float4 C_EYE_OUTLINE = float4(0,0.8,0.8,1);
 
-static float epsilon = 0.01;
+static float epsilon = 0.1;
 
+
+// APPROACH 1 - PIXEL PERFECT SHADING
 int AppxColor3(float3 Base, float3 Col) {
 	if(abs(Base.r - Col.r) <= epsilon && abs(Base.g - Col.g) <= epsilon && abs(Base.b - Col.b) <= epsilon) {
 		return 1;
@@ -97,6 +99,16 @@ float4 Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, floa
 		return Colored;
 	}
 	return Uncolored;
+}
+
+
+// APPROACH 2 - COLOR SHIFT
+float4 OverlayCS_float(float4 Base, float4 Top, float4 ColorShift) {
+    Top *= float4(0.1,0.1,0.1,1);
+
+	if(Top.a == 0) 
+		return Base;
+	else return Top + ColorShift;
 }
 
 #endif

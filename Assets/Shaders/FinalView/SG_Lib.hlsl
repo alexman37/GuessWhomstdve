@@ -20,6 +20,7 @@ static float4 C_EYE_BASE = float4(0,1,1,1);
 
 static float epsilon = 0.01;
 
+// APPROACH 1 - PIXEL PERFECT SHADING
 void SG_Overlay_float(float4 Base, float4 Top, out float4 Out) {
 	if(Top.a == 0) 
 		Out = Base;
@@ -53,6 +54,7 @@ void SG_OverlayJob_float(float4 Base, float4 Top, out float4 Out) {
 	}
 }
 
+// ColorSwap follows the Overlay process
 void SG_ColorSwap_float(float4 Base, float4 LookFor, float4 ReplaceWith, out float4 Res) {
 	Res = distance(Base, LookFor) < epsilon ? ReplaceWith : Base;
 }
@@ -80,5 +82,15 @@ void SG_Colorize_float(float4 Uncolored, float4 SkinColor, float4 HairColor, flo
 		}
 	}
 }
+
+// APPROACH 2 - COLOR SHIFT SHADING
+void SG_OverlayCS_float(float4 Base, float4 Top, float4 ColorShift, out float4 Out) {
+    Top *= float4(0.1,0.1,0.1,1);
+
+	if(Top.a == 0) 
+		Out = Base;
+	else Out = Top + ColorShift;
+}
+
 
 #endif

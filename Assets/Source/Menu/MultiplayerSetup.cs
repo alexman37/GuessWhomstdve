@@ -72,11 +72,6 @@ namespace GW.MainMenu
             NetworkManager.Singleton.OnClientDisconnectCallback += onClientDisconnected;
         }
 
-        public void UpdateName(string to)
-        {
-            me.Data["Name"].Value = to;
-        }
-
         public void StartNewLobby()
         {
             LobbyManager.instance.CreateLobby(me);
@@ -313,6 +308,9 @@ namespace GW.MainMenu
 
         private void OnLeftLobby()
         {
+            playerIDtoNetworkID.Clear();
+            LobbyManager.instance.LeaveLobby();
+
             panel1.SetActive(true);
             panel2.SetActive(false);
             LobbyManager.instance.GetAllActiveLobbies(true);
@@ -325,11 +323,6 @@ namespace GW.MainMenu
         // - End the lobby (but keep relay)
         public void StartGame()
         {
-            Debug.Log("Print whole playerbase");
-            for(int i = 0; i < 8; i++)
-            {
-                Debug.Log("Player " + i + ": " + playerbase[i].playerConnectionId + ", " + playerbase[i].name + ", " + playerbase[i].orderedId + ", " + playerbase[i].id);
-            }
             GameManagerSc.instance.SetGameParameters(new MainGameParameters
             {
                 playerSetupInfo = playerbase,

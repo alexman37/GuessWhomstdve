@@ -70,6 +70,11 @@ namespace GW.MainMenu
             partOfLobby = null;
         }
 
+        public void LeaveLobby()
+        {
+            partOfLobby = null;
+        }
+
         /// <summary>
         /// Not necessary to query this consistently. Call only on refreshes.
         /// </summary>

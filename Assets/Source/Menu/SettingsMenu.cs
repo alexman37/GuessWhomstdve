@@ -19,7 +19,7 @@ namespace GW.MainMenu
         // Start is called before the first frame update
         void Start()
         {
-
+            confData.name = GlobalStatMap.statMap.textMap[GlobalStatMap.KEY_USERNAME];
         }
 
         public void UpdateFields()
@@ -28,10 +28,10 @@ namespace GW.MainMenu
             tp = tp.Substring(0, Mathf.Min(tp.Length, 16));
 
             if (tp != "") confData.name = tp;
-            else confData.name = "Anonymous";
+            else confData.name = UsernameGenerator.getNewUsername();
+            GlobalStatMap.AddOrModifyText(GlobalStatMap.KEY_USERNAME, confData.name);
 
-            Debug.Log("PLayer name is now " + confData.name);
-            MultiplayerSetup.instance.UpdateName(confData.name);
+            Debug.Log("Player name is now " + confData.name);
         }
     }
 
