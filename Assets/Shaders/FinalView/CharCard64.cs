@@ -13,6 +13,7 @@ public class CharCard64 : CharacterCard
     [SerializeField] SpriteRenderer[] simpleIndexBadges;
     [SerializeField] CPD_Type[] simpleIndexOrder;
 
+    [SerializeField] GameObject cityAbbrGo;
     [SerializeField] TextMeshProUGUI cityAbbrText;
 
     // Start is called before the first frame update
@@ -33,7 +34,7 @@ public class CharCard64 : CharacterCard
     // You will need different versions of this for different LODs...
     public override void SetMaterialParams(Character c)
     {
-        cityAbbrText.enabled = false;
+        cityAbbrGo.SetActive(false);
         drawMat = portrait.material;
 
         ulong startingSeed = c.drawId;
@@ -60,6 +61,7 @@ public class CharCard64 : CharacterCard
         startingSeed = SetColorFieldAndAdvance_R(c, startingSeed, CPD_Type.FavoriteColor, "_BodyColor");
 
         // Locations
+        flag.enabled = false;
         switch (drawMat.GetInt("_LLOD"))
         {
             case 1:
@@ -75,10 +77,11 @@ public class CharCard64 : CharacterCard
                     string[] locName = c.getVariantNameofCharacteristic(CPD_Type.City_L2).Split('_');
 
                     string cityAbbr = locName[0].Substring(0, 3).ToUpper();
-                    cityAbbrText.enabled = true;
+                    cityAbbrGo.SetActive(true);
                     cityAbbrText.text = cityAbbr;
 
                     int flagCode = CountryMap.instance.getCode(locName[1]);
+                    flag.enabled = true;
                     flag.material.SetFloat("Ref_MatIndex", flagCode);
                 }
                 break;

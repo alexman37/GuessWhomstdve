@@ -10,11 +10,19 @@ public class UI_PassiveInfoPopup : MonoBehaviour
     [SerializeField] TextMeshProUGUI passiveInfoText_numCorrect;
     [SerializeField] TextMeshProUGUI passiveInfoText_guesses;
 
+    private RectTransform rc;
+    private Vector2 startPosition;
+    private Vector2 endPosition;
+
     // Start is called before the first frame update
     void Start()
     {
         if (instance == null) instance = this;
         else Destroy(this);
+
+        rc = GetComponent<RectTransform>();
+        startPosition = rc.anchoredPosition;
+        endPosition = new Vector2(0,0);
     }
 
     public void showAndUpdateText(string playerName, NetCpdCategory[] guesses, int numCorrect)
@@ -43,5 +51,22 @@ public class UI_PassiveInfoPopup : MonoBehaviour
         }
 
         passiveInfoText_guesses.text = guessString;
+        StartCoroutine(movePanel(endPosition));
+    }
+
+    public void closeAndHide()
+    {
+        StartCoroutine(movePanel(startPosition));
+    }
+
+    private IEnumerator movePanel(Vector2 toDest)
+    {
+        float maxTime = 1;
+        Vector2 startPos = rc.anchoredPosition;
+        for (float i = 0; i < maxTime; i += Time.deltaTime)
+        {
+            rc.anchoredPosition = Vector2.Lerp(startPos, toDest, i / maxTime);
+            yield return null;
+        }
     }
 }

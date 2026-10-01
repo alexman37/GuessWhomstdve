@@ -191,9 +191,10 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7, y: 0.3, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 2514982226376946630}
   m_Father: {fileID: 5904885760587388926}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -487,15 +488,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   coloredBorder: {fileID: 5904885760073724498}
+  drawMat: {fileID: 0}
   characterId: 0
   portraitFrame: {fileID: 5904885761272271270}
   portrait: {fileID: 5904885761049065201}
-  drawMat: {fileID: 0}
   flag: {fileID: 984301160490547238}
   simpleIndexBadges:
   - {fileID: 5793767788003645080}
   - {fileID: 8464378057291298401}
   simpleIndexOrder: 0800000009000000
+  cityAbbrGo: {fileID: 5073603184000195122}
   cityAbbrText: {fileID: 1634072323824104782}
 --- !u!61 &396050910890469715
 BoxCollider2D:
@@ -554,7 +556,6 @@ RectTransform:
   m_LocalScale: {x: 0.41666666, y: 0.33333334, z: 1}
   m_Children:
   - {fileID: 5904885759326926504}
-  - {fileID: 2514982226376946630}
   - {fileID: 5599141042597589818}
   m_Father: {fileID: 5904885760073724499}
   m_RootOrder: 1
@@ -820,14 +821,14 @@ RectTransform:
   m_GameObject: {fileID: 6460851338329110479}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4285715, y: 3.3333333, z: 1}
   m_Children: []
-  m_Father: {fileID: 5904885760587388926}
-  m_RootOrder: 1
+  m_Father: {fileID: 5599141042597589818}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.836, y: 1.287}
+  m_AnchoredPosition: {x: 0, y: -0.003333807}
   m_SizeDelta: {x: 0.7, y: 0.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2220922555274398102

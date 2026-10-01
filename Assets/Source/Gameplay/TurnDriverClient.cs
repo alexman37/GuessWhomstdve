@@ -61,6 +61,7 @@ public class TurnDriverClient : MonoBehaviour
                 break;
             // Shown what other players learned: REPEAT
             case TurnDriverPhase.PlayerTurns:
+                UI_PassiveInfoPopup.instance.closeAndHide();
                 unlockActions();
                 InfoBar.instance.setReadout("Turn phase");
                 InfoBar.instance.setTimer(15);
