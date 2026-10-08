@@ -57,6 +57,7 @@ public abstract class GD_Player
     public virtual void resetInvestigation()
     {
         currentInvestigation.Clear();
+        currentTargetSelections.Clear();
     }
 
     public abstract void investigation_Send();

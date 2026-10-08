@@ -21,11 +21,13 @@ public class FormButtonInvestigation : MonoBehaviour
     private void OnEnable()
     {
         PlayerTurnProcessor.switchedAction += OnActionSwitch;
+        TurnDriverClient.resetInvestigations += ResetInvestigation;
     }
 
     private void OnDisable()
     {
         PlayerTurnProcessor.switchedAction -= OnActionSwitch;
+        TurnDriverClient.resetInvestigations -= ResetInvestigation;
     }
 
     public void AddToInvestigation()
